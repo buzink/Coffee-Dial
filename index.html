@@ -809,33 +809,3 @@ const firebaseConfig = {
     </script>
 </body>
 </html>
-```
-
-### 2. Mandatory Setup Instructions (Since you started a new project)
-
-Because you deleted your old Firebase project, **you must complete these 3 steps** for the code above to work:
-
-**A. Get Your Config**
-1. Go to [Firebase Console](https://console.firebase.google.com/).
-2. Create Project -> Add App (Web `</>`) -> Copy the `const firebaseConfig = {...}` part.
-3. **Paste it into the code** where I wrote `// STEP 1: PASTE YOUR FIREBASE CONFIGURATION HERE`.
-
-**B. Enable Google Sign-In**
-1. Go to **Authentication** -> **Sign-in method**.
-2. Click **Google** -> **Enable** -> Save.
-3. Go to the **Settings** tab (still in Authentication).
-4. Scroll to **Authorized domains**.
-5. Click **Add domain** and enter your GitHub Pages URL (e.g., `yourname.github.io`). **Crucial!**
-
-**C. Set Database Rules**
-1. Go to **Firestore Database** -> **Rules**.
-2. Paste this rule to ensure private data works:
-```text
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
