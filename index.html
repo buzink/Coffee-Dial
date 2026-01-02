@@ -41,12 +41,25 @@
             <div class="flex items-center gap-3">
                 <i class="fa-solid fa-mug-hot text-coffee-700 dark:text-[#d6ccc2] text-2xl"></i>
                 <h1 class="text-2xl font-bold tracking-tight text-coffee-900 dark:text-white">Coffee Dial</h1>
-                <div id="syncStatus" class="hidden text-xs text-coffee-500 animate-pulse"><i class="fa-solid fa-cloud"></i></div>
+                <!-- Auth Status Indicator -->
+                <div id="authStatus" class="hidden text-xs px-2 py-1 rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 font-medium">Online</div>
             </div>
+            
             <div class="flex items-center gap-4">
-                <button onclick="openUserModal(event)" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-coffee-50 dark:bg-[#1c1917] hover:bg-coffee-100 dark:hover:bg-[#34302e] border border-coffee-200 dark:border-[#44403c] transition-colors text-sm font-medium text-coffee-700 dark:text-[#d6ccc2]">
-                    <i class="fa-solid fa-user-circle"></i><span id="currentUserDisplay">Connecting...</span>
-                </button>
+                <!-- User / Login Button -->
+                <div id="authContainer">
+                    <button id="loginBtn" onclick="googleLogin()" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors">
+                        <i class="fa-brands fa-google"></i> Sign In
+                    </button>
+                    
+                    <button id="userBtn" onclick="openUserModal(event)" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-lg bg-coffee-50 dark:bg-[#1c1917] hover:bg-coffee-100 dark:hover:bg-[#34302e] border border-coffee-200 dark:border-[#44403c] transition-colors text-sm font-medium text-coffee-700 dark:text-[#d6ccc2]">
+                        <img id="userPhoto" src="" alt="User" class="w-6 h-6 rounded-full hidden">
+                        <span id="currentUserDisplay">Profile</span>
+                        <i class="fa-solid fa-caret-down opacity-50"></i>
+                    </button>
+                </div>
+
+                <!-- Dark Mode Toggle -->
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-coffee-50 dark:hover:bg-[#44403c] transition-colors text-coffee-600 dark:text-[#a8a29e]" title="Toggle Theme">
                     <i class="fa-solid fa-moon dark:hidden"></i><i class="fa-solid fa-sun hidden dark:inline"></i>
                 </button>
@@ -156,8 +169,7 @@
             <div id="filterDropdown" class="hidden absolute bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] py-1 min-w-[150px]"></div>
             <div id="emptyState" class="hidden flex flex-col items-center justify-center py-16 text-coffee-400 dark:text-[#57534e] absolute top-16 left-0 right-0 pointer-events-none">
                 <i class="fa-solid fa-mug-saucer text-4xl mb-3 opacity-50"></i>
-                <p class="text-lg font-medium">No brews logged yet.</p>
-                <p class="text-sm">Add your first coffee recipe above!</p>
+                <p class="text-lg font-medium">Please sign in to view your logs.</p>
             </div>
         </div>
     </main>
@@ -166,10 +178,12 @@
     <div id="userModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         <div class="bg-white dark:bg-[#292524] rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-coffee-200 dark:border-[#44403c]">
             <div class="p-6">
-                <h3 class="text-lg font-bold text-coffee-900 dark:text-white mb-4">Select User Profile</h3>
+                <h3 class="text-lg font-bold text-coffee-900 dark:text-white mb-4">Switch Profile</h3>
                 <div class="flex gap-2 mb-6"><input type="text" id="newUserInput" placeholder="New profile name" class="flex-1 bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-coffee-500"><button onclick="createNewUser()" class="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">Add</button></div>
                 <div class="text-xs font-semibold text-coffee-500 dark:text-[#78716c] uppercase mb-2 tracking-wider">Your Profiles</div>
                 <div id="userList" class="space-y-2 max-h-48 overflow-y-auto pr-1"><div class="flex justify-center p-4"><div class="loader"></div></div></div>
+                <hr class="my-4 border-coffee-200 dark:border-[#44403c]">
+                <button onclick="googleLogout()" class="w-full bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-200 px-3 py-2 rounded-lg text-sm font-medium transition-colors">Sign Out of Google</button>
             </div>
             <div class="bg-coffee-50 dark:bg-[#1c1917] px-6 py-3 flex justify-end"><button onclick="closeUserModal()" class="text-sm text-coffee-600 dark:text-[#a8a29e] hover:text-coffee-900 dark:hover:text-white font-medium">Close</button></div>
         </div>
@@ -189,52 +203,60 @@
 
         // --- IMPORTS ---
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
 
         // State
         let globalUser = null;
-        let currentProfile = 'Guest';
-        let profiles = ['Guest'];
+        let currentProfile = 'Default';
+        let profiles = ['Default'];
         let allCoffees = [];
         let currentSort = { key: null, direction: 'asc' };
         let activeFilters = { method: null, temp: null, roastType: null };
 
         // Bindings
-        window.handleFormSubmit = handleFormSubmit; window.editCoffee = editCoffee; window.deleteCoffee = deleteCoffee; window.sortBy = sortBy; window.openUserModal = openUserModal; window.closeUserModal = closeUserModal; window.createNewUser = createNewUser; window.toggleTheme = toggleTheme; window.toggleForm = toggleForm; window.resetFormState = resetFormState; window.handleRecipeInput = handleRecipeInput; window.setTempMode = setTempMode; window.openFilterMenu = openFilterMenu; window.closeFilterMenu = closeFilterMenu; window.applyFilter = applyFilter; window.clearAllFilters = clearAllFilters; window.closeMenus = closeMenus; window.clearStorage = () => alert("Cloud storage is active.");
+        window.handleFormSubmit = handleFormSubmit; window.editCoffee = editCoffee; window.deleteCoffee = deleteCoffee; window.sortBy = sortBy; window.openUserModal = openUserModal; window.closeUserModal = closeUserModal; window.createNewUser = createNewUser; window.toggleTheme = toggleTheme; window.toggleForm = toggleForm; window.resetFormState = resetFormState; window.handleRecipeInput = handleRecipeInput; window.setTempMode = setTempMode; window.openFilterMenu = openFilterMenu; window.closeFilterMenu = closeFilterMenu; window.applyFilter = applyFilter; window.clearAllFilters = clearAllFilters; window.closeMenus = closeMenus;
+        window.googleLogin = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
+        window.googleLogout = () => signOut(auth).then(closeUserModal);
+        window.clearStorage = () => alert("Cloud storage is active.");
 
-        // Auth
-        signInAnonymously(auth).catch((error) => {
-            console.error("Auth Failed:", error);
-            // DEBUG ALERT
-            alert("Firebase Error: " + error.code + " - " + error.message + "\n\nCHECK: Did you enable Anonymous Auth in Firebase Console?");
-            document.getElementById('currentUserDisplay').textContent = "Auth Error";
-        });
-
+        // Auth Logic
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 globalUser = user;
-                document.getElementById('syncStatus').classList.remove('hidden');
-                document.getElementById('currentUserDisplay').textContent = "Guest";
-                // Load last profile
+                document.getElementById('loginBtn').classList.add('hidden');
+                document.getElementById('userBtn').classList.remove('hidden');
+                document.getElementById('userPhoto').src = user.photoURL || '';
+                document.getElementById('userPhoto').classList.remove('hidden');
+                document.getElementById('authStatus').classList.remove('hidden');
+                
+                // Load Profile
                 const p = new URLSearchParams(window.location.search).get('user');
                 if (p) currentProfile = p; else if (localStorage.getItem('last_profile')) currentProfile = localStorage.getItem('last_profile');
                 updateProfileUI();
                 startDataListener(user.uid);
+            } else {
+                globalUser = null;
+                document.getElementById('loginBtn').classList.remove('hidden');
+                document.getElementById('userBtn').classList.add('hidden');
+                document.getElementById('authStatus').classList.add('hidden');
+                document.getElementById('coffeeTableBody').innerHTML = '';
+                document.getElementById('emptyState').classList.remove('hidden');
             }
         });
         const savedTheme = localStorage.getItem('theme'); if (savedTheme === 'light') document.documentElement.classList.remove('dark'); else { document.documentElement.classList.add('dark'); localStorage.setItem('theme', 'dark'); }
 
-        // Logic
+        // Data Logic
         function startDataListener(uid) {
             const dataRef = collection(db, 'users', uid, 'data');
             onSnapshot(dataRef, (snapshot) => {
                 const fetchedCoffees = [];
-                const fetchedProfiles = new Set(['Guest']);
+                const fetchedProfiles = new Set(['Default']);
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     if (data.type === 'coffee') fetchedCoffees.push({ id: doc.id, ...data });
@@ -242,23 +264,19 @@
                 });
                 allCoffees = fetchedCoffees;
                 profiles = Array.from(fetchedProfiles).sort();
-                if(!profiles.includes(currentProfile) && currentProfile !== 'Guest') { currentProfile = 'Guest'; updateProfileUI(); }
+                if(!profiles.includes(currentProfile) && currentProfile !== 'Default') { currentProfile = 'Default'; updateProfileUI(); }
                 renderTable();
                 if(!document.getElementById('userModal').classList.contains('hidden')) renderUserList();
-            }, (error) => {
-               console.error("DB Listener Error:", error);
-               if(error.code === 'permission-denied') alert("Database Permission Denied. Check your Firestore Rules.");
-            });
+            }, (error) => console.error(error));
         }
 
         async function handleFormSubmit(e) {
-            e.preventDefault(); 
-            if (!globalUser) { alert("You are not connected to the database."); return; }
+            e.preventDefault(); if (!globalUser) return;
             const f = new FormData(e.target); const eid = f.get('editId');
             const tMode = f.get('tempMode'); const finalTemp = tMode === 'profile' ? f.get('tempProfile') : (f.get('tempNumeric') || "M");
             const d = { type: 'coffee', profile: currentProfile, name: f.get('name'), beanType: f.get('beanType'), roastType: f.get('roastType'), method: f.get('method'), grind: parseFloat(f.get('grind')), weight: parseFloat(f.get('weight')), ratio: parseFloat(f.get('ratio')), time: parseFloat(f.get('time')), temp: finalTemp, notes: f.get('notes'), updatedAt: new Date().toISOString() };
             const col = collection(db, 'users', globalUser.uid, 'data');
-            try { if (eid) await updateDoc(doc(col, eid), d); else await addDoc(col, { ...d, createdAt: new Date().toISOString() }); resetFormState(); } catch (err) { console.error(err); alert("Save Failed: " + err.message); }
+            try { if (eid) await updateDoc(doc(col, eid), d); else await addDoc(col, { ...d, createdAt: new Date().toISOString() }); resetFormState(); } catch (err) { alert(err.message); }
         }
 
         async function deleteCoffee(id, ev) {
@@ -269,16 +287,12 @@
 
         async function createNewUser() {
             const n = document.getElementById('newUserInput').value.trim();
-            if(!globalUser) { alert("Not connected."); return; }
-            if(!n) return;
-            if(profiles.includes(n)) return alert("Profile exists");
+            if(!n || !globalUser) return; if(profiles.includes(n)) return alert("Exists");
             profiles.push(n);
             try {
                 await setDoc(doc(db, 'users', globalUser.uid, 'data', 'metadata_profiles'), { type: 'metadata', id: 'profiles', list: profiles });
                 switchUser(n); document.getElementById('newUserInput').value = '';
-            } catch (err) {
-                console.error(err); alert("Failed to create user: " + err.message);
-            }
+            } catch (err) { alert(err.message); }
         }
 
         function switchUser(n) { currentProfile = n; localStorage.setItem('last_profile', n); updateProfileUI(); closeUserModal(); renderTable(); resetFormState(); }
@@ -301,7 +315,7 @@
         function resetFormState(e){ if(e)e.stopPropagation(); document.getElementById('coffeeForm').reset(); document.getElementById('editId').value=''; setTempMode('profile'); document.getElementById('formContainer').classList.remove('editing-mode'); document.getElementById('formTitle').innerHTML='<i class="fa-solid fa-plus-circle text-coffee-700 dark:text-[#d6ccc2]"></i> <span>Add New Brew</span>'; document.getElementById('submitBtn').innerHTML='<i class="fa-solid fa-check"></i> <span>Save Brew</span>'; document.getElementById('submitBtn').className="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.add('hidden'); }
         function editCoffee(id){ const c=allCoffees.find(x=>x.id===id); if(!c)return; document.getElementById('editId').value=c.id; document.getElementById('name').value=c.name; document.getElementById('beanType').value=c.beanType; document.getElementById('roastType').value=c.roastType; document.getElementById('method').value=c.method; document.getElementById('grind').value=c.grind; document.getElementById('inputWeight').value=c.weight; document.getElementById('inputRatio').value=c.ratio; document.getElementById('inputYield').value=(c.weight*c.ratio).toFixed(1); document.getElementById('time').value=c.time; document.getElementById('notes').value=c.notes; if(!isNaN(parseFloat(c.temp))&&isFinite(c.temp)){ setTempMode('numeric'); document.getElementById('tempNumeric').value=c.temp; } else { setTempMode('profile'); document.getElementById('tempProfile').value=c.temp; } document.getElementById('formContainer').classList.add('editing-mode'); toggleForm(true); document.getElementById('formTitle').innerHTML='<i class="fa-solid fa-pencil text-orange-500"></i> <span class="text-orange-500">Edit Brew</span>'; document.getElementById('submitBtn').innerHTML='<i class="fa-solid fa-rotate"></i> <span>Update Brew</span>'; document.getElementById('submitBtn').className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); }
         function sortBy(k){ if(currentSort.key===k) currentSort.direction=currentSort.direction==='asc'?'desc':'asc'; else { currentSort.key=k; currentSort.direction='asc'; } renderTable(); }
-        function renderTable(){ const t=document.getElementById('coffeeTableBody'), e=document.getElementById('emptyState'), f=getFilteredCoffees(); t.innerHTML=''; if(f.length===0) e.classList.remove('hidden'); else { e.classList.add('hidden'); f.forEach(c=>{ const w=(c.weight*c.ratio).toFixed(1); const tm=formatTime(c.time); const r=document.createElement('tr'); r.className='bg-white dark:bg-[#292524] hover:bg-coffee-50 dark:hover:bg-[#1c1917] border-b border-coffee-50 dark:border-[#44403c] last:border-b-0'; r.innerHTML=`<td class="px-4 py-4 text-center text-coffee-300 dark:text-[#57534e]"><i class="fa-solid fa-cloud text-xs opacity-50"></i></td><td class="px-4 py-4"><div class="font-semibold text-coffee-900 dark:text-[#e7e5e4]">${c.name}</div><div class="text-xs text-coffee-500 dark:text-[#a8a29e]">${c.beanType}</div></td><td class="px-4 py-4 pointer-events-auto" ondblclick="openFilterMenu(event,'roastType')">${getRoastBadge(c.roastType)}</td><td class="px-4 py-4 pointer-events-auto" ondblclick="openFilterMenu(event,'method')"><span class="bg-coffee-100 dark:bg-[#44403c] text-coffee-800 dark:text-[#d6ccc2] text-xs font-medium px-2.5 py-0.5 rounded border border-coffee-200 dark:border-[#57534e] pointer-events-none select-none">${c.method}</span></td><td class="px-4 py-4 text-right font-mono text-coffee-700 dark:text-[#d6ccc2]">${c.grind}</td><td class="px-4 py-4 text-center"><div class="flex flex-col items-center"><span class="text-xs text-coffee-500 dark:text-[#78716c] mb-1">1:${c.ratio}</span><div class="font-mono text-coffee-900 dark:text-[#e7e5e4] bg-coffee-50 dark:bg-[#1c1917] px-2 py-1 rounded border border-coffee-100 dark:border-[#44403c]"><span class="font-semibold text-coffee-700 dark:text-[#a8a29e]">${c.weight}g</span><i class="fa-solid fa-arrow-right text-[10px] text-coffee-400 dark:text-[#57534e] mx-1"></i><span class="font-bold text-coffee-900 dark:text-white">${w.endsWith('.0')?parseInt(w):w}g</span></div></div></td><td class="px-4 py-4 text-right font-mono text-coffee-600 dark:text-[#a8a29e]">${tm}</td><td class="px-4 py-4 text-center pointer-events-auto" ondblclick="openFilterMenu(event,'temp')">${getTempBadge(c.temp)}</td><td class="px-4 py-4 text-sm text-coffee-600 dark:text-[#a8a29e] max-w-xs truncate" title="${c.notes}">${c.notes}</td><td class="px-4 py-4 text-center w-24"><div class="flex items-center justify-center gap-2"><button onclick="editCoffee('${c.id}')" class="text-coffee-400 dark:text-[#57534e] hover:text-blue-500 dark:hover:text-blue-400 transition-colors p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Edit"><i class="fa-solid fa-pencil"></i></button><button onclick="deleteCoffee('${c.id}',event)" class="text-coffee-400 dark:text-[#57534e] hover:text-red-500 dark:hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20" title="Delete"><i class="fa-solid fa-trash-can"></i></button></div></td>`; t.appendChild(r); }); } }
+        function renderTable(){ const t=document.getElementById('coffeeTableBody'), e=document.getElementById('emptyState'), f=getFilteredCoffees(); t.innerHTML=''; if(f.length===0) e.classList.remove('hidden'); e.querySelector('p.text-lg').textContent = globalUser ? "No brews logged yet." : "Please sign in to view your logs."; if(f.length > 0) { e.classList.add('hidden'); f.forEach(c=>{ const w=(c.weight*c.ratio).toFixed(1); const tm=formatTime(c.time); const r=document.createElement('tr'); r.className='bg-white dark:bg-[#292524] hover:bg-coffee-50 dark:hover:bg-[#1c1917] border-b border-coffee-50 dark:border-[#44403c] last:border-b-0'; r.innerHTML=`<td class="px-4 py-4 text-center text-coffee-300 dark:text-[#57534e]"><i class="fa-solid fa-cloud text-xs opacity-50"></i></td><td class="px-4 py-4"><div class="font-semibold text-coffee-900 dark:text-[#e7e5e4]">${c.name}</div><div class="text-xs text-coffee-500 dark:text-[#a8a29e]">${c.beanType}</div></td><td class="px-4 py-4 pointer-events-auto" ondblclick="openFilterMenu(event,'roastType')">${getRoastBadge(c.roastType)}</td><td class="px-4 py-4 pointer-events-auto" ondblclick="openFilterMenu(event,'method')"><span class="bg-coffee-100 dark:bg-[#44403c] text-coffee-800 dark:text-[#d6ccc2] text-xs font-medium px-2.5 py-0.5 rounded border border-coffee-200 dark:border-[#57534e] pointer-events-none select-none">${c.method}</span></td><td class="px-4 py-4 text-right font-mono text-coffee-700 dark:text-[#d6ccc2]">${c.grind}</td><td class="px-4 py-4 text-center"><div class="flex flex-col items-center"><span class="text-xs text-coffee-500 dark:text-[#78716c] mb-1">1:${c.ratio}</span><div class="font-mono text-coffee-900 dark:text-[#e7e5e4] bg-coffee-50 dark:bg-[#1c1917] px-2 py-1 rounded border border-coffee-100 dark:border-[#44403c]"><span class="font-semibold text-coffee-700 dark:text-[#a8a29e]">${c.weight}g</span><i class="fa-solid fa-arrow-right text-[10px] text-coffee-400 dark:text-[#57534e] mx-1"></i><span class="font-bold text-coffee-900 dark:text-white">${w.endsWith('.0')?parseInt(w):w}g</span></div></div></td><td class="px-4 py-4 text-right font-mono text-coffee-600 dark:text-[#a8a29e]">${tm}</td><td class="px-4 py-4 text-center pointer-events-auto" ondblclick="openFilterMenu(event,'temp')">${getTempBadge(c.temp)}</td><td class="px-4 py-4 text-sm text-coffee-600 dark:text-[#a8a29e] max-w-xs truncate" title="${c.notes}">${c.notes}</td><td class="px-4 py-4 text-center w-24"><div class="flex items-center justify-center gap-2"><button onclick="editCoffee('${c.id}')" class="text-coffee-400 dark:text-[#57534e] hover:text-blue-500 dark:hover:text-blue-400 transition-colors p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Edit"><i class="fa-solid fa-pencil"></i></button><button onclick="deleteCoffee('${c.id}',event)" class="text-coffee-400 dark:text-[#57534e] hover:text-red-500 dark:hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20" title="Delete"><i class="fa-solid fa-trash-can"></i></button></div></td>`; t.appendChild(r); }); } }
         function getFilteredCoffees(){ let f=allCoffees.filter(c=>c.profile===currentProfile); f=f.filter(c=>{ const m=!activeFilters.method||c.method===activeFilters.method; const t=!activeFilters.temp||String(c.temp)===String(activeFilters.temp); const r=!activeFilters.roastType||c.roastType===activeFilters.roastType; return m&&t&&r; }); if(currentSort.key){ f.sort((a,b)=>{ let va=a[currentSort.key], vb=b[currentSort.key]; if(currentSort.key==='temp'){ const na=parseFloat(va), nb=parseFloat(vb); if(!isNaN(na)&&!isNaN(nb)){ va=na; vb=nb; } } if(typeof va==='string')va=va.toLowerCase(); if(typeof vb==='string')vb=vb.toLowerCase(); if(va<vb)return currentSort.direction==='asc'?-1:1; if(va>vb)return currentSort.direction==='asc'?1:-1; return 0; }); } else { f.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')); } return f; }
         function formatTime(s){ const m=Math.floor(s/60), sc=s%60; return m>0?`${m}m ${sc}s`:`${sc}s`; }
         function getRoastBadge(r){ if(!r)return ''; const m={'Light':'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-800','Medium':'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/40 dark:text-orange-200 dark:border-orange-800','Medium-Dark':'bg-[#d6ccc2] text-[#5e4b41] border-[#c0b4aa] dark:bg-[#57534e]/50 dark:text-[#d6ccc2] dark:border-[#57534e]','Dark':'bg-gray-800 text-gray-100 border-gray-700 dark:bg-black dark:text-gray-300 dark:border-gray-800'}; return `<span class="${m[r]||'bg-gray-100 dark:bg-gray-800'} text-xs font-medium px-2 py-0.5 rounded-full border pointer-events-none select-none">${r}</span>`; }
