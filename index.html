@@ -20,11 +20,10 @@
         input:focus, select:focus, textarea:focus { outline: none; ring: 2px; border-color: #b08968; box-shadow: 0 0 0 3px rgba(176, 137, 104, 0.2); }
         .editing-mode { border: 2px solid #ea580c !important; }
         
-        /* Updated Header Styles for better touch interaction */
         th.filterable { 
             position: relative; 
             cursor: context-menu; 
-            touch-action: manipulation; /* Prevents zoom on double tap */
+            touch-action: manipulation; 
         }
         th.filterable:hover::after { content: '\f0b0'; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 0.7em; margin-left: 6px; opacity: 0.5; }
         
@@ -99,31 +98,48 @@
                 <form id="coffeeForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                     <input type="hidden" id="editId" name="editId" value="">
 
-                    <!-- Row 1: Basic Info -->
-                    <div class="col-span-1 md:col-span-2">
-                        <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Coffee Name</label>
-                        <input type="text" id="name" name="name" required placeholder="e.g. Ethiopia Yirgacheffe" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
+                    <!-- Row 1: Bean Info -->
+                    <div>
+                        <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Roaster</label>
+                        <input type="text" id="roaster" name="roaster" placeholder="e.g. La Cabra" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Bean Type / Origin</label>
-                        <input type="text" id="beanType" name="beanType" placeholder="e.g. Washed" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
+                        <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Farmer</label>
+                        <input type="text" id="farmer" name="farmer" placeholder="e.g. Felipe Arcila" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Origin</label>
+                        <input type="text" id="origin" name="origin" placeholder="e.g. Ethiopia" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Variety</label>
+                        <input type="text" id="variety" name="variety" placeholder="e.g. Geisha" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
+                    </div>
+
+                    <!-- Row 2 -->
+                    <div>
+                        <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Processing</label>
+                        <input type="text" id="processing" name="processing" placeholder="e.g. Natural" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                     </div>
 
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Roast Type</label>
                         <select id="roastType" name="roastType" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] cursor-pointer">
+                            <option value="" disabled selected>Select Roast</option>
                             <option value="Light">Light</option>
-                            <option value="Medium" selected>Medium</option>
+                            <option value="Medium">Medium</option>
                             <option value="Medium-Dark">Medium-Dark</option>
                             <option value="Dark">Dark</option>
                         </select>
                     </div>
 
-                    <!-- Row 2: Method & Grind -->
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Brewing Method</label>
-                        <select id="method" name="method" required class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] cursor-pointer">
+                        <select id="method" name="method" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] cursor-pointer">
+                            <option value="" disabled selected>Select Method</option>
                             <option value="Espresso">Espresso</option>
                             <option value="V60">V60</option>
                             <option value="Clever Dripper">Clever Dripper</option>
@@ -136,18 +152,18 @@
                     
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Grind Size</label>
-                        <input type="number" step="any" id="grind" name="grind" required placeholder="e.g. 14" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09]">
+                        <input type="number" step="any" id="grind" name="grind" placeholder="e.g. 14" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09]">
                     </div>
 
-                    <!-- Recipe Block: Weight / Ratio / Yield -->
+                    <!-- Row 3: Recipe -->
                     <div class="col-span-1 md:col-span-2 lg:col-span-2 grid grid-cols-3 gap-2 bg-coffee-50/50 dark:bg-[#201d1b] p-2 rounded-lg border border-coffee-100 dark:border-[#44403c]">
                         <div>
                             <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">In (g)</label>
-                            <input type="number" step="any" id="inputWeight" name="weight" oninput="handleRecipeInput('weight')" required placeholder="18" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-1 focus:ring-coffee-500">
+                            <input type="number" step="any" id="inputWeight" name="weight" oninput="handleRecipeInput('weight')" placeholder="18" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-1 focus:ring-coffee-500">
                         </div>
                         <div class="relative">
                             <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Ratio 1:X</label>
-                            <input type="number" step="any" id="inputRatio" name="ratio" oninput="handleRecipeInput('ratio')" required placeholder="16" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-1 focus:ring-coffee-500">
+                            <input type="number" step="any" id="inputRatio" name="ratio" oninput="handleRecipeInput('ratio')" placeholder="16" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-1 focus:ring-coffee-500">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Out (g)</label>
@@ -155,10 +171,10 @@
                         </div>
                     </div>
 
-                    <!-- Row 3: Time & Temp -->
+                    <!-- Time & Temp -->
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Time (Sec)</label>
-                        <input type="number" step="any" id="time" name="time" required placeholder="e.g. 180" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09]">
+                        <input type="number" step="any" id="time" name="time" placeholder="e.g. 180" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09]">
                     </div>
 
                     <div class="relative">
@@ -173,11 +189,12 @@
                         <!-- Input Containers -->
                         <div id="tempProfileContainer">
                             <select id="tempProfile" name="tempProfile" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] cursor-pointer">
+                                <option value="" disabled selected>Select</option>
                                 <option value="L4">L4 (Very Low)</option>
                                 <option value="L3">L3 (Low)</option>
                                 <option value="L2">L2</option>
                                 <option value="L1">L1</option>
-                                <option value="M" selected>M (Medium)</option>
+                                <option value="M">M (Medium)</option>
                                 <option value="H1">H1</option>
                                 <option value="H2">H2</option>
                                 <option value="H3">H3 (High)</option>
@@ -207,18 +224,14 @@
 
         <!-- Active Filters Bar (Dynamic) -->
         <div id="activeFiltersContainer" class="hidden mb-4 p-3 bg-coffee-100 dark:bg-[#292524] rounded-lg border border-coffee-200 dark:border-[#44403c] flex items-center justify-between">
-            <div class="flex items-center gap-2 flex-wrap" id="activeFiltersList">
-                <!-- Chips injected here -->
-            </div>
-            <button onclick="clearAllFilters()" class="text-xs text-coffee-600 dark:text-[#a8a29e] hover:text-red-500 whitespace-nowrap ml-2">
-                Clear All
-            </button>
+            <div class="flex items-center gap-2 flex-wrap" id="activeFiltersList"></div>
+            <button onclick="clearAllFilters()" class="text-xs text-coffee-600 dark:text-[#a8a29e] hover:text-red-500 whitespace-nowrap ml-2">Clear All</button>
         </div>
 
         <!-- Info Hint -->
         <div class="mb-2 text-xs text-coffee-500 dark:text-[#78716c] italic flex flex-col gap-1">
-            <span><i class="fa-solid fa-hand-pointer mr-1"></i> Double tap Headers (Roast, Method, Temp) to filter.</span>
-            <span><i class="fa-solid fa-info-circle mr-1"></i> Drag rows to reorder (only when signed in).</span>
+            <span><i class="fa-solid fa-hand-pointer mr-1"></i> Double tap Headers to filter.</span>
+            <span><i class="fa-solid fa-info-circle mr-1"></i> Drag rows to reorder.</span>
         </div>
 
         <!-- Table Container -->
@@ -227,56 +240,28 @@
                 <table class="w-full text-sm text-left text-coffee-900 dark:text-[#e7e5e4]">
                     <thead class="text-xs text-coffee-700 dark:text-[#a8a29e] uppercase bg-coffee-100/50 dark:bg-[#1c1917] border-b border-coffee-200 dark:border-[#44403c]">
                         <tr>
-                            <th scope="col" class="px-4 py-4 w-10 text-center">
-                                <i class="fa-solid fa-grip-vertical"></i>
-                            </th>
-                            <th scope="col" class="px-4 py-4 cursor-pointer hover:bg-coffee-100 dark:hover:bg-[#44403c] transition-colors group" onclick="sortBy('name')">
-                                Coffee <i class="fa-solid fa-sort text-coffee-400 dark:text-[#57534e] group-hover:text-coffee-600 dark:group-hover:text-[#a8a29e] ml-1"></i>
-                            </th>
-                            <th scope="col" class="px-4 py-4 cursor-pointer hover:bg-coffee-100 dark:hover:bg-[#44403c] transition-colors group filterable" 
-                                onclick="sortBy('roastType')" 
-                                ondblclick="openFilterMenu(event, 'roastType')">
-                                Roast <i class="fa-solid fa-sort text-coffee-400 dark:text-[#57534e] group-hover:text-coffee-600 dark:group-hover:text-[#a8a29e] ml-1"></i>
-                            </th>
-                            <th scope="col" class="px-4 py-4 cursor-pointer hover:bg-coffee-100 dark:hover:bg-[#44403c] transition-colors group filterable" 
-                                onclick="sortBy('method')"
-                                ondblclick="openFilterMenu(event, 'method')">
-                                Method <i class="fa-solid fa-sort text-coffee-400 dark:text-[#57534e] group-hover:text-coffee-600 dark:group-hover:text-[#a8a29e] ml-1"></i>
-                            </th>
-                            <th scope="col" class="px-4 py-4 cursor-pointer hover:bg-coffee-100 dark:hover:bg-[#44403c] transition-colors group text-right" onclick="sortBy('grind')">
-                                Grind <i class="fa-solid fa-sort text-coffee-400 dark:text-[#57534e] group-hover:text-coffee-600 dark:group-hover:text-[#a8a29e] ml-1"></i>
-                            </th>
-                            <th scope="col" class="px-4 py-4 text-center">
-                                Recipe (In : Out)
-                            </th>
-                            <th scope="col" class="px-4 py-4 cursor-pointer hover:bg-coffee-100 dark:hover:bg-[#44403c] transition-colors group text-right" onclick="sortBy('time')">
-                                Time <i class="fa-solid fa-sort text-coffee-400 dark:text-[#57534e] group-hover:text-coffee-600 dark:group-hover:text-[#a8a29e] ml-1"></i>
-                            </th>
-                            <th scope="col" class="px-4 py-4 cursor-pointer hover:bg-coffee-100 dark:hover:bg-[#44403c] transition-colors group text-center filterable" 
-                                onclick="sortBy('temp')"
-                                ondblclick="openFilterMenu(event, 'temp')">
-                                Temp <i class="fa-solid fa-sort text-coffee-400 dark:text-[#57534e] group-hover:text-coffee-600 dark:group-hover:text-[#a8a29e] ml-1"></i>
-                            </th>
-                            <th scope="col" class="px-4 py-4">
-                                Notes
-                            </th>
-                            <th scope="col" class="px-4 py-4 text-center w-24">
-                                Action
-                            </th>
+                            <th scope="col" class="px-4 py-4 w-10 text-center"><i class="fa-solid fa-grip-vertical"></i></th>
+                            <th scope="col" class="px-4 py-4 text-center w-28">Actions</th>
+                            <th scope="col" class="px-4 py-4 cursor-pointer hover:bg-coffee-100 dark:hover:bg-[#44403c] transition-colors group" onclick="sortBy('roaster')">Roaster <i class="fa-solid fa-sort text-coffee-400 dark:text-[#57534e] ml-1"></i></th>
+                            <th scope="col" class="px-4 py-4 cursor-pointer hover:bg-coffee-100 dark:hover:bg-[#44403c] transition-colors group filterable" onclick="sortBy('origin')" ondblclick="openFilterMenu(event, 'origin')">Origin <i class="fa-solid fa-sort ml-1 opacity-50"></i></th>
+                            <th scope="col" class="px-4 py-4">Farmer</th>
+                            <th scope="col" class="px-4 py-4">Variety</th>
+                            <th scope="col" class="px-4 py-4">Process</th>
+                            <th scope="col" class="px-4 py-4 cursor-pointer hover:bg-coffee-100 dark:hover:bg-[#44403c] filterable" onclick="sortBy('roastType')" ondblclick="openFilterMenu(event, 'roastType')">Roast <i class="fa-solid fa-sort ml-1 opacity-50"></i></th>
+                            <th scope="col" class="px-4 py-4 cursor-pointer hover:bg-coffee-100 dark:hover:bg-[#44403c] filterable" onclick="sortBy('method')" ondblclick="openFilterMenu(event, 'method')">Method <i class="fa-solid fa-sort ml-1 opacity-50"></i></th>
+                            <th scope="col" class="px-4 py-4 text-right" onclick="sortBy('grind')">Grind <i class="fa-solid fa-sort ml-1 opacity-50"></i></th>
+                            <th scope="col" class="px-4 py-4 text-center">Recipe</th>
+                            <th scope="col" class="px-4 py-4 text-right" onclick="sortBy('time')">Time <i class="fa-solid fa-sort ml-1 opacity-50"></i></th>
+                            <th scope="col" class="px-4 py-4 text-center filterable" onclick="sortBy('temp')" ondblclick="openFilterMenu(event, 'temp')">Temp <i class="fa-solid fa-sort ml-1 opacity-50"></i></th>
+                            <th scope="col" class="px-4 py-4">Notes</th>
+                            <th scope="col" class="px-4 py-4" onclick="sortBy('createdAt')">Date <i class="fa-solid fa-sort ml-1 opacity-50"></i></th>
                         </tr>
                     </thead>
-                    <tbody id="coffeeTableBody" class="divide-y divide-coffee-50 dark:divide-[#1c1917]">
-                        <!-- Rows rendered here -->
-                    </tbody>
+                    <tbody id="coffeeTableBody" class="divide-y divide-coffee-50 dark:divide-[#1c1917]"></tbody>
                 </table>
             </div>
             
-            <!-- Filter Dropdown Menu (Absolute) -->
-            <div id="filterDropdown" class="hidden absolute bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] py-1 min-w-[150px]">
-                <!-- Options injected by JS -->
-            </div>
-
-            <!-- Empty State -->
+            <div id="filterDropdown" class="hidden absolute bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] py-1 min-w-[150px]"></div>
             <div id="emptyState" class="hidden flex flex-col items-center justify-center py-16 text-coffee-400 dark:text-[#57534e] absolute top-16 left-0 right-0 pointer-events-none">
                 <i class="fa-solid fa-mug-saucer text-4xl mb-3 opacity-50"></i>
                 <p class="text-lg font-medium">Please sign in to view your logs.</p>
@@ -289,13 +274,10 @@
     <!-- Friend Modal -->
     <div id="modalOverlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         <div class="bg-white dark:bg-[#292524] rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-coffee-200 dark:border-[#44403c]">
-            <!-- Modal Tabs -->
             <div class="flex border-b border-coffee-200 dark:border-[#44403c]">
                 <button onclick="switchModalTab('profile')" id="tabProfile" class="flex-1 py-3 text-sm font-semibold text-coffee-700 dark:text-[#d6ccc2] bg-coffee-50 dark:bg-[#1c1917]">My Profile</button>
                 <button onclick="switchModalTab('following')" id="tabFollowing" class="flex-1 py-3 text-sm font-semibold text-coffee-500 dark:text-[#78716c] hover:bg-coffee-50 dark:hover:bg-[#1c1917]">Following</button>
             </div>
-            
-            <!-- Tab: Profile -->
             <div id="contentProfile" class="p-6">
                 <div class="flex items-center justify-between mb-4">
                     <span class="text-sm font-medium text-coffee-900 dark:text-white">Public Profile</span>
@@ -312,19 +294,14 @@
                 <hr class="my-6 border-coffee-200 dark:border-[#44403c]">
                 <button onclick="googleLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-300 py-2 rounded-lg text-sm font-medium">Sign Out</button>
             </div>
-
-            <!-- Tab: Following -->
             <div id="contentFollowing" class="hidden p-6">
                 <div class="flex gap-2 mb-4">
                     <input type="text" id="friendIdInput" placeholder="Enter Friend's Share ID" class="flex-1 bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white">
                     <button onclick="followUser()" class="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] text-white px-3 py-2 rounded-lg text-sm font-medium">Follow</button>
                 </div>
                 <div class="text-xs font-semibold text-coffee-500 dark:text-[#78716c] uppercase mb-2">People you follow</div>
-                <div id="followingList" class="space-y-2 max-h-48 overflow-y-auto">
-                    <!-- Friends injected here -->
-                </div>
+                <div id="followingList" class="space-y-2 max-h-48 overflow-y-auto"></div>
             </div>
-
             <div class="bg-coffee-50 dark:bg-[#1c1917] px-6 py-3 flex justify-end">
                 <button onclick="closeModal()" class="text-sm font-medium text-coffee-600 dark:text-[#a8a29e] hover:text-coffee-900 dark:hover:text-white">Close</button>
             </div>
@@ -361,8 +338,6 @@
         let dragSrcEl = null;
 
         // --- Functions ---
-
-        // Define functions locally first
         const googleLogin = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
         const googleLogout = () => signOut(auth).then(() => window.location.reload());
 
@@ -382,140 +357,74 @@
         const changeView = (uid) => {
             currentView = uid;
             if(unsubscribeData) unsubscribeData(); 
-            
             const targetUid = uid === 'mine' ? currentUser.uid : uid;
             const isMine = uid === 'mine';
-            
             const formContainer = document.getElementById('formContainer');
             const formContent = document.getElementById('formContent');
-
-            if (isMine) {
-                formContainer.classList.remove('hidden');
-                toggleForm(false); 
-            } else {
-                formContainer.classList.add('hidden');
-                toggleForm(false); 
-            }
+            if (isMine) { formContainer.classList.remove('hidden'); toggleForm(false); } else { formContainer.classList.add('hidden'); toggleForm(false); }
 
             const q = collection(db, 'users', targetUid, 'coffees');
             unsubscribeData = onSnapshot(q, (snapshot) => {
                 coffees = [];
                 snapshot.forEach(doc => coffees.push({ id: doc.id, ...doc.data() }));
-                if (!currentSort.key) {
-                    coffees.sort((a,b) => (a.customOrder || 0) - (b.customOrder || 0));
-                }
+                if (!currentSort.key) coffees.sort((a,b) => (a.customOrder || 0) - (b.customOrder || 0));
                 renderTable();
             }, (error) => {
                 console.error(error);
-                if(error.code === 'permission-denied') {
-                    alert("⚠️ Access Denied: This user's profile is private.");
-                    document.getElementById('viewSelect').value = 'mine';
-                    changeView('mine');
-                }
+                if(error.code === 'permission-denied') { alert("⚠️ Access Denied: This user's profile is private."); document.getElementById('viewSelect').value = 'mine'; changeView('mine'); }
             });
         };
+
+        const parseNum = (v) => (v === '' || v === null || isNaN(v)) ? null : parseFloat(v);
 
         const handleFormSubmit = async (e) => {
             e.preventDefault();
             if(currentView !== 'mine') return;
             const f = new FormData(e.target); const eid = f.get('editId');
             const tMode = f.get('tempMode'); const finalTemp = tMode === 'profile' ? f.get('tempProfile') : (f.get('tempNumeric') || "M");
-            
-            let newOrder = 0;
-            if (coffees.length > 0) {
-                 const minOrder = Math.min(...coffees.map(c => c.customOrder || 0));
-                 newOrder = minOrder - 1;
-            }
+            let newOrder = 0; if (coffees.length > 0) { const minOrder = Math.min(...coffees.map(c => c.customOrder || 0)); newOrder = minOrder - 1; }
 
             const d = { 
-                name: f.get('name'), 
-                beanType: f.get('beanType'), 
-                roastType: f.get('roastType'), 
-                method: f.get('method'), 
-                grind: parseFloat(f.get('grind')), 
-                weight: parseFloat(f.get('weight')), 
-                ratio: parseFloat(f.get('ratio')), 
-                time: parseFloat(f.get('time')), 
-                temp: finalTemp, 
-                notes: f.get('notes'), 
-                updatedAt: new Date().toISOString() 
+                roaster: f.get('roaster'), farmer: f.get('farmer'), origin: f.get('origin'), variety: f.get('variety'), processing: f.get('processing'),
+                roastType: f.get('roastType'), method: f.get('method'), grind: parseNum(f.get('grind')), weight: parseNum(f.get('weight')), 
+                ratio: parseNum(f.get('ratio')), time: parseNum(f.get('time')), temp: finalTemp, notes: f.get('notes'), updatedAt: new Date().toISOString() 
             };
             
             try {
                 const col = collection(db, 'users', currentUser.uid, 'coffees');
-                if(eid) {
-                    await updateDoc(doc(col, eid), d);
-                } else {
-                    d.customOrder = newOrder;
-                    d.createdAt = new Date().toISOString();
-                    await addDoc(col, d);
-                }
+                if(eid) { await updateDoc(doc(col, eid), d); } else { d.customOrder = newOrder; d.createdAt = new Date().toISOString(); await addDoc(col, d); }
                 resetFormState();
             } catch(err){ alert(err.message); }
         };
 
-        const handleDragStart = (e) => {
-            dragSrcEl = e.target.closest('tr');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', dragSrcEl.innerHTML);
-            dragSrcEl.classList.add('opacity-50');
-        };
-
-        const handleDragOver = (e) => {
-            if (e.preventDefault) e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            return false;
-        };
-
+        const handleDragStart = (e) => { dragSrcEl = e.target.closest('tr'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/html', dragSrcEl.innerHTML); dragSrcEl.classList.add('opacity-50'); };
+        const handleDragOver = (e) => { if (e.preventDefault) e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false; };
         const handleDrop = async (e) => {
             if (e.stopPropagation) e.stopPropagation();
             const targetRow = e.target.closest('tr');
             if (dragSrcEl !== targetRow && targetRow) {
-                const oldIndex = parseInt(dragSrcEl.getAttribute('data-index'));
-                const newIndex = parseInt(targetRow.getAttribute('data-index'));
-                const movedItem = coffees.splice(oldIndex, 1)[0];
-                coffees.splice(newIndex, 0, movedItem);
+                const oldIndex = parseInt(dragSrcEl.getAttribute('data-index')); const newIndex = parseInt(targetRow.getAttribute('data-index'));
+                const movedItem = coffees.splice(oldIndex, 1)[0]; coffees.splice(newIndex, 0, movedItem);
                 coffees.forEach((c, idx) => c.customOrder = idx);
                 renderTable(); 
                 try {
                     const batch = writeBatch(db);
-                    coffees.forEach((c) => {
-                        const ref = doc(db, 'users', currentUser.uid, 'coffees', c.id);
-                        batch.update(ref, { customOrder: c.customOrder });
-                    });
+                    coffees.forEach((c) => { const ref = doc(db, 'users', currentUser.uid, 'coffees', c.id); batch.update(ref, { customOrder: c.customOrder }); });
                     await batch.commit();
                 } catch(err) { console.error("Reorder failed", err); }
-            }
-            return false;
+            } return false;
         };
-
-        const handleDragEnd = (e) => {
-            if(dragSrcEl) dragSrcEl.classList.remove('opacity-50');
-        };
+        const handleDragEnd = (e) => { if(dragSrcEl) dragSrcEl.classList.remove('opacity-50'); };
 
         const openFriendsModal = () => { document.getElementById('modalOverlay').classList.remove('hidden'); switchModalTab('profile'); };
         const closeModal = () => document.getElementById('modalOverlay').classList.add('hidden');
-        
         const switchModalTab = (tab) => {
             const tProf = document.getElementById('tabProfile'); const tFoll = document.getElementById('tabFollowing');
             const cProf = document.getElementById('contentProfile'); const cFoll = document.getElementById('contentFollowing');
-            if (tab === 'profile') {
-                tProf.classList.add('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]'); tProf.classList.remove('text-coffee-500','dark:text-[#78716c]');
-                tFoll.classList.remove('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]'); tFoll.classList.add('text-coffee-500','dark:text-[#78716c]');
-                cProf.classList.remove('hidden'); cFoll.classList.add('hidden');
-            } else {
-                tFoll.classList.add('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]'); tFoll.classList.remove('text-coffee-500','dark:text-[#78716c]');
-                tProf.classList.remove('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]'); tProf.classList.add('text-coffee-500','dark:text-[#78716c]');
-                cFoll.classList.remove('hidden'); cProf.classList.add('hidden');
-            }
+            if (tab === 'profile') { tProf.classList.add('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]'); tProf.classList.remove('text-coffee-500','dark:text-[#78716c]'); tFoll.classList.remove('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]'); tFoll.classList.add('text-coffee-500','dark:text-[#78716c]'); cProf.classList.remove('hidden'); cFoll.classList.add('hidden'); } else { tFoll.classList.add('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]'); tFoll.classList.remove('text-coffee-500','dark:text-[#78716c]'); tProf.classList.remove('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]'); tProf.classList.add('text-coffee-500','dark:text-[#78716c]'); cFoll.classList.remove('hidden'); cProf.classList.add('hidden'); }
         };
-
         const togglePublicProfile = async () => { if(!currentUser) return; isPublic = !isPublic; updatePublicToggleUI(); await updateDoc(doc(db, 'users', currentUser.uid), { isPublic: isPublic }); };
-        const updatePublicToggleUI = () => {
-            const btn = document.getElementById('togglePublicBtn'); const dot = btn.firstElementChild; const container = document.getElementById('shareIdContainer');
-            if (isPublic) { btn.className = "bg-green-500 w-12 h-6 rounded-full p-1 transition-colors relative"; dot.className = "bg-white w-4 h-4 rounded-full shadow-md transform translate-x-6 transition-transform"; container.classList.remove('hidden'); } 
-            else { btn.className = "bg-gray-300 dark:bg-[#44403c] w-12 h-6 rounded-full p-1 transition-colors relative"; dot.className = "bg-white w-4 h-4 rounded-full shadow-md transform translate-x-0 transition-transform"; container.classList.add('hidden'); }
-        };
+        const updatePublicToggleUI = () => { const btn = document.getElementById('togglePublicBtn'); const dot = btn.firstElementChild; const container = document.getElementById('shareIdContainer'); if (isPublic) { btn.className = "bg-green-500 w-12 h-6 rounded-full p-1 transition-colors relative"; dot.className = "bg-white w-4 h-4 rounded-full shadow-md transform translate-x-6 transition-transform"; container.classList.remove('hidden'); } else { btn.className = "bg-gray-300 dark:bg-[#44403c] w-12 h-6 rounded-full p-1 transition-colors relative"; dot.className = "bg-white w-4 h-4 rounded-full shadow-md transform translate-x-0 transition-transform"; container.classList.add('hidden'); } };
         const copyShareId = () => { document.getElementById('myShareId').select(); document.execCommand('copy'); alert("ID Copied!"); };
         const followUser = async () => {
             const input = document.getElementById('friendIdInput'); const uid = input.value.trim(); if(!uid || uid === currentUser.uid) return alert("Invalid ID");
@@ -527,7 +436,6 @@
             } catch(e) { console.error(e); alert("Could not follow user. Check ID."); }
         };
         const unfollowUser = async (uid) => { if(!confirm("Unfollow?")) return; await deleteDoc(doc(db, 'users', currentUser.uid, 'following', uid)); loadFollowingList(); if(currentView===uid){document.getElementById('viewSelect').value='mine';changeView('mine');} };
-        
         const loadFollowingList = async () => {
             if(!currentUser) return;
             const snap = await getDocs(collection(db, 'users', currentUser.uid, 'following'));
@@ -547,25 +455,78 @@
         const setTempMode = (m) => { document.getElementById('tempMode').value=m; if(m==='profile'){document.getElementById('tempProfileContainer').classList.remove('hidden');document.getElementById('tempNumericContainer').classList.add('hidden');}else{document.getElementById('tempNumericContainer').classList.remove('hidden');document.getElementById('tempProfileContainer').classList.add('hidden');} };
         const toggleForm = (f=null) => { const c=document.getElementById('formContainer'),o=document.getElementById('formContent'),e=c.getAttribute('aria-expanded')==='true',s=f!==null?f:!e; c.setAttribute('aria-expanded',s?'true':'false'); if(s)o.classList.remove('hidden'); else o.classList.add('hidden'); };
         
-        const editCoffee = (id) => { const c=coffees.find(x=>x.id===id); if(!c)return; document.getElementById('editId').value=c.id; document.getElementById('name').value=c.name; document.getElementById('beanType').value=c.beanType; document.getElementById('roastType').value=c.roastType; document.getElementById('method').value=c.method; document.getElementById('grind').value=c.grind; document.getElementById('inputWeight').value=c.weight; document.getElementById('inputRatio').value=c.ratio; document.getElementById('inputYield').value=(c.weight*c.ratio).toFixed(1); document.getElementById('time').value=c.time; document.getElementById('notes').value=c.notes; if(!isNaN(parseFloat(c.temp))&&isFinite(c.temp)){ setTempMode('numeric'); document.getElementById('tempNumeric').value=c.temp; } else { setTempMode('profile'); document.getElementById('tempProfile').value=c.temp; } document.getElementById('formContainer').classList.add('editing-mode'); toggleForm(true); document.getElementById('formTitle').innerHTML='<span class="text-orange-500">Edit Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Update</span>'; document.getElementById('submitBtn').className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); };
+        // Populate form helper
+        const populateForm = (c) => {
+             document.getElementById('roaster').value = c.roaster || c.name || ''; // Migration logic
+             document.getElementById('farmer').value = c.farmer || '';
+             document.getElementById('origin').value = c.origin || c.beanType || ''; // Migration logic
+             document.getElementById('variety').value = c.variety || '';
+             document.getElementById('processing').value = c.processing || '';
+             document.getElementById('roastType').value = c.roastType || '';
+             document.getElementById('method').value = c.method || '';
+             document.getElementById('grind').value = c.grind || '';
+             document.getElementById('inputWeight').value = c.weight || '';
+             document.getElementById('inputRatio').value = c.ratio || '';
+             document.getElementById('inputYield').value = (c.weight && c.ratio) ? (c.weight * c.ratio).toFixed(1) : '';
+             document.getElementById('time').value = c.time || '';
+             document.getElementById('notes').value = c.notes || '';
+             if(!isNaN(parseFloat(c.temp))&&isFinite(c.temp)){ setTempMode('numeric'); document.getElementById('tempNumeric').value=c.temp; } else { setTempMode('profile'); document.getElementById('tempProfile').value=c.temp || ''; }
+        }
+
+        const editCoffee = (id) => { const c=coffees.find(x=>x.id===id); if(!c)return; document.getElementById('editId').value=c.id; populateForm(c); document.getElementById('formContainer').classList.add('editing-mode'); toggleForm(true); document.getElementById('formTitle').innerHTML='<span class="text-orange-500">Edit Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Update</span>'; document.getElementById('submitBtn').className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); };
+        
+        // Duplicate Logic
+        const duplicateCoffee = (id) => { const c=coffees.find(x=>x.id===id); if(!c)return; document.getElementById('editId').value=''; populateForm(c); toggleForm(true); document.getElementById('formContainer').classList.remove('editing-mode'); document.getElementById('formTitle').innerHTML='<span>Duplicate Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Save Copy</span>'; window.scrollTo({top:0,behavior:'smooth'}); };
+
         const deleteCoffee = async (id, ev) => { if(ev)ev.stopPropagation(); if(currentView!=='mine')return; if(!confirm('Delete?'))return; await deleteDoc(doc(db,'users',currentUser.uid,'coffees',id)); if(document.getElementById('editId').value==id)resetFormState(); };
         const resetFormState = (e) => { if(e)e.stopPropagation(); document.getElementById('coffeeForm').reset(); document.getElementById('editId').value=''; setTempMode('profile'); document.getElementById('formContainer').classList.remove('editing-mode'); document.getElementById('formTitle').innerHTML='<span>Add New Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Save Brew</span>'; document.getElementById('submitBtn').className="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.add('hidden'); };
         
-        // Sorting / Filters
         let currentSort = { key: null, direction: 'asc' };
-        let activeFilters = { method: null, temp: null, roastType: null };
+        let activeFilters = { method: null, temp: null, roastType: null, roaster: null, origin: null }; // Added new filters
         const sortBy = (k) => { if(currentSort.key===k)currentSort.direction=currentSort.direction==='asc'?'desc':'asc'; else {currentSort.key=k;currentSort.direction='asc';} renderTable(); };
-        const openFilterMenu = (e,k) => { e.stopPropagation(); const m=document.getElementById('filterDropdown'); const v=[...new Set(coffees.map(c=>c[k]))].sort(); if(!v.length)return; let h=`<div class="px-3 py-2 text-xs font-bold text-coffee-400 dark:text-[#78716c] uppercase border-b border-coffee-100 dark:border-[#44403c] mb-1">Filter ${k}</div><button onclick="applyFilter('${k}',null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] font-bold text-coffee-700 dark:text-[#d6ccc2]">All</button>`; v.forEach(val=>{h+=`<button onclick="applyFilter('${k}','${val}')" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-600 dark:text-[#a8a29e]">${val}</button>`}); m.innerHTML=h; const r=e.currentTarget.getBoundingClientRect(); const c=e.currentTarget.closest('.relative').getBoundingClientRect(); m.style.top=(r.bottom-c.top+5)+'px'; m.style.left=(r.left-c.left)+'px'; m.classList.remove('hidden'); }
+        const openFilterMenu = (e,k) => { e.stopPropagation(); const m=document.getElementById('filterDropdown'); 
+            // Handle migration for filtering: map name->roaster, beanType->origin
+            const vals = coffees.map(c => k==='roaster' ? (c.roaster||c.name) : (k==='origin' ? (c.origin||c.beanType) : c[k]));
+            const v=[...new Set(vals)].sort(); 
+            if(!v.length)return; 
+            let h=`<div class="px-3 py-2 text-xs font-bold text-coffee-400 dark:text-[#78716c] uppercase border-b border-coffee-100 dark:border-[#44403c] mb-1">Filter ${k}</div><button onclick="applyFilter('${k}',null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] font-bold text-coffee-700 dark:text-[#d6ccc2]">All</button>`; 
+            v.forEach(val=>{h+=`<button onclick="applyFilter('${k}','${val}')" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-600 dark:text-[#a8a29e]">${val}</button>`}); m.innerHTML=h; const r=e.currentTarget.getBoundingClientRect(); const c=e.currentTarget.closest('.relative').getBoundingClientRect(); m.style.top=(r.bottom-c.top+5)+'px'; m.style.left=(r.left-c.left)+'px'; m.classList.remove('hidden'); 
+        }
         const closeFilterMenu = (e) => { const m=document.getElementById('filterDropdown'); if(!m.contains(e.target))m.classList.add('hidden'); }
         const applyFilter = (k,v) => { activeFilters[k]=v; document.getElementById('filterDropdown').classList.add('hidden'); renderTable(); renderActiveFilters(); };
-        const clearAllFilters = () => { activeFilters={method:null,temp:null,roastType:null}; renderTable(); renderActiveFilters(); }
+        const clearAllFilters = () => { activeFilters={method:null,temp:null,roastType:null,roaster:null,origin:null}; renderTable(); renderActiveFilters(); }
         const renderActiveFilters = () => { const c=document.getElementById('activeFiltersContainer'), l=document.getElementById('activeFiltersList'); l.innerHTML=''; let h=false; Object.entries(activeFilters).forEach(([k,v])=>{ if(v){ h=true; l.innerHTML+=`<div class="flex items-center gap-2 bg-coffee-700 dark:bg-[#57534e] text-white text-xs px-3 py-1 rounded-full shadow-sm"><span>${k}:</span><b>${v}</b><button onclick="applyFilter('${k}',null)" class="ml-1 hover:text-red-200">x</button></div>`; } }); c.classList.toggle('hidden',!h); }
-        const getFilteredCoffees = () => { let f=coffees.filter(c=>{ const m=!activeFilters.method||c.method===activeFilters.method, t=!activeFilters.temp||String(c.temp)===String(activeFilters.temp), r=!activeFilters.roastType||c.roastType===activeFilters.roastType; return m&&t&&r; }); if(currentSort.key){ f.sort((a,b)=>{ let va=a[currentSort.key], vb=b[currentSort.key]; if(currentSort.key==='temp'){ const na=parseFloat(va), nb=parseFloat(vb); if(!isNaN(na)&&!isNaN(nb)){va=na;vb=nb;} } if(typeof va==='string')va=va.toLowerCase(); if(typeof vb==='string')vb=vb.toLowerCase(); if(va<vb)return currentSort.direction==='asc'?-1:1; if(va>vb)return currentSort.direction==='asc'?1:-1; return 0; }); } return f; };
         
-        // Badges
-        const formatTime = (s) => { const m=Math.floor(s/60), sc=s%60; return m>0?`${m}m ${sc}s`:`${sc}s`; };
+        const getFilteredCoffees = () => { 
+            let f=coffees.filter(c=>{ 
+                // Migration Logic in Filter
+                const cRoaster = c.roaster || c.name;
+                const cOrigin = c.origin || c.beanType;
+                
+                const m=!activeFilters.method||c.method===activeFilters.method;
+                const t=!activeFilters.temp||String(c.temp)===String(activeFilters.temp);
+                const r=!activeFilters.roastType||c.roastType===activeFilters.roastType;
+                const rost=!activeFilters.roaster||cRoaster===activeFilters.roaster;
+                const orig=!activeFilters.origin||cOrigin===activeFilters.origin;
+                
+                return m&&t&&r&&rost&&orig; 
+            }); 
+            if(currentSort.key){ f.sort((a,b)=>{ 
+                let va=a[currentSort.key], vb=b[currentSort.key]; 
+                // Migration Logic in Sort
+                if(currentSort.key==='roaster') { va=a.roaster||a.name; vb=b.roaster||b.name; }
+                if(currentSort.key==='origin') { va=a.origin||a.beanType; vb=b.origin||b.beanType; }
+                
+                if(currentSort.key==='temp'){ const na=parseFloat(va), nb=parseFloat(vb); if(!isNaN(na)&&!isNaN(nb)){va=na;vb=nb;} } 
+                if(typeof va==='string')va=va.toLowerCase(); if(typeof vb==='string')vb=vb.toLowerCase(); 
+                if(va<vb)return currentSort.direction==='asc'?-1:1; if(va>vb)return currentSort.direction==='asc'?1:-1; return 0; 
+            }); } 
+            return f; 
+        };
+        
+        const formatTime = (s) => { if(!s && s !== 0) return '-'; const m=Math.floor(s/60), sc=s%60; return m>0?`${m}m ${sc}s`:`${sc}s`; };
         const getRoastBadge = (r) => { if(!r)return''; const m={'Light':'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-800','Medium':'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/40 dark:text-orange-200 dark:border-orange-800','Medium-Dark':'bg-[#d6ccc2] text-[#5e4b41] border-[#c0b4aa] dark:bg-[#57534e]/50 dark:text-[#d6ccc2] dark:border-[#57534e]','Dark':'bg-gray-800 text-gray-100 border-gray-700 dark:bg-black dark:text-gray-300 dark:border-gray-800'}; return `<span class="${m[r]||'bg-gray-100 dark:bg-gray-800'} text-xs font-medium px-2 py-0.5 rounded-full border pointer-events-none select-none">${r}</span>`; };
-        const getTempBadge = (t) => { if(!isNaN(parseFloat(t))&&isFinite(t)){ let c='bg-gray-100 dark:bg-gray-800';if(t<90)c='bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300';else if(t<94)c='bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300';else c='bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300';return `<span class="inline-flex items-center justify-center px-2 py-1 rounded-md ${c} text-xs font-bold shadow-sm pointer-events-none select-none font-mono">${t}°C</span>`;} const m={'L4':'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300','L3':'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300','L2':'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-200','L1':'bg-cyan-50 text-cyan-600 border-cyan-100 dark:bg-cyan-900/20 dark:text-cyan-200','M':'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-200','H1':'bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-900/20 dark:text-orange-200','H2':'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/40 dark:text-orange-200','H3':'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-300','H4':'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-300'}; return `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full ${m[t]||'bg-gray-100'} text-xs font-bold shadow-sm pointer-events-none select-none">${t}</span>`; };
+        const getTempBadge = (t) => { if(!t) return '-'; if(!isNaN(parseFloat(t))&&isFinite(t)){ let c='bg-gray-100 dark:bg-gray-800';if(t<90)c='bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300';else if(t<94)c='bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300';else c='bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300';return `<span class="inline-flex items-center justify-center px-2 py-1 rounded-md ${c} text-xs font-bold shadow-sm pointer-events-none select-none font-mono">${t}°C</span>`;} const m={'L4':'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300','L3':'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300','L2':'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:text-blue-200','L1':'bg-cyan-50 text-cyan-600 border-cyan-100 dark:bg-cyan-900/20 dark:text-cyan-200','M':'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-200','H1':'bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-900/20 dark:text-orange-200','H2':'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/40 dark:text-orange-200','H3':'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-300','H4':'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-300'}; return `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full ${m[t]||'bg-gray-100'} text-xs font-bold shadow-sm pointer-events-none select-none">${t}</span>`; };
         const closeMenus = (e) => { if(!document.getElementById('modalOverlay').contains(e.target) && !document.getElementById('modalOverlay').classList.contains('hidden') && e.target.id==='modalOverlay') closeModal(); if(!document.getElementById('filterDropdown').contains(e.target)) document.getElementById('filterDropdown').classList.add('hidden'); };
         
         // Theme
@@ -574,16 +535,14 @@
 
         const renderTable = () => { 
             const t=document.getElementById('coffeeTableBody'); const e=document.getElementById('emptyState'); t.innerHTML=''; 
-            
-            // USE THE FILTERED LIST HERE
             const filteredCoffees = getFilteredCoffees();
             
             if(coffees.length===0){e.classList.remove('hidden'); return;} e.classList.add('hidden');
             
-            const isDraggable = currentView === 'mine' && currentSort.key === null && !activeFilters.method && !activeFilters.temp && !activeFilters.roastType;
+            const isDraggable = currentView === 'mine' && currentSort.key === null && !activeFilters.method && !activeFilters.temp && !activeFilters.roastType && !activeFilters.roaster && !activeFilters.origin;
 
             filteredCoffees.forEach((c, index) => {
-                const w=(c.weight*c.ratio).toFixed(1);
+                const w = (c.weight && c.ratio) ? (c.weight * c.ratio).toFixed(1) : '-';
                 const r=document.createElement('tr'); 
                 r.className='bg-white dark:bg-[#292524] hover:bg-coffee-50 dark:hover:bg-[#1c1917] border-b border-coffee-50 dark:border-[#44403c] last:border-b-0';
                 
@@ -597,11 +556,38 @@
                     r.addEventListener('dragend', handleDragEnd);
                 }
 
-                const actions = currentView==='mine' ? `<button onclick="editCoffee('${c.id}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded"><i class="fa-solid fa-pencil"></i></button><button onclick="deleteCoffee('${c.id}',event)" class="text-red-500 hover:bg-red-50 p-2 rounded"><i class="fa-solid fa-trash"></i></button>` : `<span class="text-xs text-gray-400">Read Only</span>`;
-                const recipeCol = `<div class="flex flex-col items-center"><span class="text-xs text-coffee-500 dark:text-[#78716c] mb-1">1:${c.ratio}</span><div class="font-mono text-coffee-900 dark:text-[#e7e5e4] bg-coffee-50 dark:bg-[#1c1917] px-2 py-1 rounded border border-coffee-100 dark:border-[#44403c]"><span class="font-semibold text-coffee-700 dark:text-[#a8a29e]">${c.weight}g</span><i class="fa-solid fa-arrow-right text-[10px] text-coffee-400 dark:text-[#57534e] mx-1"></i><span class="font-bold text-coffee-900 dark:text-white">${w.endsWith('.0')?parseInt(w):w}g</span></div></div>`;
+                // Actions: Edit, Duplicate, Delete
+                const actions = currentView==='mine' ? `
+                    <button onclick="editCoffee('${c.id}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded" title="Edit"><i class="fa-solid fa-pencil"></i></button>
+                    <button onclick="duplicateCoffee('${c.id}')" class="text-green-500 hover:bg-green-50 p-2 rounded" title="Duplicate"><i class="fa-regular fa-copy"></i></button>
+                    <button onclick="deleteCoffee('${c.id}',event)" class="text-red-500 hover:bg-red-50 p-2 rounded" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                ` : `<span class="text-xs text-gray-400">Read Only</span>`;
+                
+                const recipeCol = `<div class="flex flex-col items-center"><span class="text-xs text-coffee-500 dark:text-[#78716c] mb-1">1:${c.ratio || '-'}</span><div class="font-mono text-coffee-900 dark:text-[#e7e5e4] bg-coffee-50 dark:bg-[#1c1917] px-2 py-1 rounded border border-coffee-100 dark:border-[#44403c]"><span class="font-semibold text-coffee-700 dark:text-[#a8a29e]">${c.weight || '-'}g</span><i class="fa-solid fa-arrow-right text-[10px] text-coffee-400 dark:text-[#57534e] mx-1"></i><span class="font-bold text-coffee-900 dark:text-white">${w === '-' ? '-' : (w.endsWith('.0')?parseInt(w):w) + 'g'}</span></div></div>`;
                 const gripIcon = isDraggable ? 'fa-grip-vertical cursor-grab' : 'fa-lock opacity-30';
+                
+                // Mapped Variables
+                const displayRoaster = c.roaster || c.name || '-';
+                const displayOrigin = c.origin || c.beanType || '-';
+                const displayDate = c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-';
 
-                r.innerHTML=`<td class="px-4 py-4 text-center"><i class="fa-solid ${gripIcon} text-coffee-300 dark:text-[#57534e]"></i></td><td class="px-4 py-4 font-semibold text-coffee-900 dark:text-[#e7e5e4]">${c.name}<div class="text-xs font-normal text-coffee-500">${c.beanType}</div></td><td class="px-4 py-4 pointer-events-auto" ondblclick="openFilterMenu(event,'roastType')">${getRoastBadge(c.roastType)}</td><td class="px-4 py-4 pointer-events-auto" ondblclick="openFilterMenu(event,'method')"><span class="bg-coffee-100 dark:bg-[#44403c] text-coffee-800 dark:text-[#d6ccc2] text-xs font-medium px-2.5 py-0.5 rounded border border-coffee-200 dark:border-[#57534e] pointer-events-none select-none">${c.method}</span></td><td class="px-4 py-4 text-right font-mono text-coffee-700 dark:text-[#d6ccc2]">${c.grind}</td><td class="px-4 py-4 text-center">${recipeCol}</td><td class="px-4 py-4 text-right">${Math.floor(c.time/60)}m ${c.time%60}s</td><td class="px-4 py-4 text-center pointer-events-auto" ondblclick="openFilterMenu(event,'temp')">${getTempBadge(c.temp)}</td><td class="px-4 py-4 text-sm max-w-xs truncate" title="${c.notes}">${c.notes}</td><td class="px-4 py-4 text-center flex justify-center gap-2">${actions}</td>`;
+                r.innerHTML=`
+                    <td class="px-4 py-4 text-center"><i class="fa-solid ${gripIcon} text-coffee-300 dark:text-[#57534e]"></i></td>
+                    <td class="px-4 py-4 text-center flex justify-center gap-2">${actions}</td>
+                    <td class="px-4 py-4 font-semibold text-coffee-900 dark:text-[#e7e5e4] filterable pointer-events-auto" ondblclick="openFilterMenu(event,'roaster')">${displayRoaster}</td>
+                    <td class="px-4 py-4 text-sm filterable pointer-events-auto" ondblclick="openFilterMenu(event,'origin')">${displayOrigin}</td>
+                    <td class="px-4 py-4 text-sm">${c.farmer || '-'}</td>
+                    <td class="px-4 py-4 text-sm">${c.variety || '-'}</td>
+                    <td class="px-4 py-4 text-sm">${c.processing || '-'}</td>
+                    <td class="px-4 py-4 pointer-events-auto" ondblclick="openFilterMenu(event,'roastType')">${getRoastBadge(c.roastType)}</td>
+                    <td class="px-4 py-4 pointer-events-auto" ondblclick="openFilterMenu(event,'method')"><span class="bg-coffee-100 dark:bg-[#44403c] text-coffee-800 dark:text-[#d6ccc2] text-xs font-medium px-2.5 py-0.5 rounded border border-coffee-200 dark:border-[#57534e] pointer-events-none select-none">${c.method || '-'}</span></td>
+                    <td class="px-4 py-4 text-right font-mono text-coffee-700 dark:text-[#d6ccc2]">${c.grind || '-'}</td>
+                    <td class="px-4 py-4 text-center">${recipeCol}</td>
+                    <td class="px-4 py-4 text-right">${formatTime(c.time)}</td>
+                    <td class="px-4 py-4 text-center pointer-events-auto" ondblclick="openFilterMenu(event,'temp')">${getTempBadge(c.temp)}</td>
+                    <td class="px-4 py-4 text-sm max-w-xs truncate" title="${c.notes}">${c.notes || '-'}</td>
+                    <td class="px-4 py-4 text-xs font-mono text-coffee-500">${displayDate}</td>
+                `;
                 t.appendChild(r);
             });
         };
@@ -645,6 +631,7 @@
         window.handleRecipeInput = handleRecipeInput;
         window.setTempMode = setTempMode;
         window.editCoffee = editCoffee;
+        window.duplicateCoffee = duplicateCoffee;
         window.deleteCoffee = deleteCoffee;
         window.sortBy = sortBy;
         window.openFilterMenu = openFilterMenu;
@@ -658,7 +645,6 @@
         window.handleDragOver = handleDragOver;
         window.handleDrop = handleDrop;
         window.handleDragEnd = handleDragEnd;
-        // Also expose getFilteredCoffees if needed for debugging
         window.getFilteredCoffees = getFilteredCoffees;
 
         // Init
