@@ -47,6 +47,10 @@
         .star-rating i { cursor: pointer; transition: color 0.2s; }
         .star-rating i:hover, .star-rating i.active { color: #fbbf24; } /* Amber-400 */
         .dark .star-rating i:hover, .dark .star-rating i.active { color: #f59e0b; } /* Amber-500 */
+
+        /* SCA Wheel Styles */
+        .sca-btn { transition: all 0.2s; }
+        .sca-btn:active { transform: scale(0.95); }
     </style>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { coffee: { 50: '#fdf8f6', 100: '#f2e8e5', 200: '#eaddd7', 300: '#e0ccbb', 400: '#d2bab0', 500: '#a18e84', 600: '#8c7365', 700: '#7f5539', 800: '#9c6644', 900: '#4a3b32', } } } } }
@@ -239,7 +243,7 @@
                     </div>
                     
                     <!-- Rating (Stars) -->
-                    <div class="col-span-1 md:col-span-2 lg:col-span-4 flex flex-col items-start gap-1">
+                    <div class="col-span-1 md:col-span-2 lg:col-span-2 flex flex-col items-start gap-1">
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] uppercase tracking-wide">Rating</label>
                         <div class="star-rating flex text-2xl text-gray-300 dark:text-gray-600" id="starContainer">
                             <i class="fa-solid fa-star" onclick="setRating(1)"></i>
@@ -251,9 +255,30 @@
                         <input type="hidden" id="ratingInput" name="rating" value="0">
                     </div>
 
+                    <!-- Tasting Notes with Toggle -->
                     <div class="col-span-1 md:col-span-2 lg:col-span-4">
-                        <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Tasting Notes</label>
-                        <input type="text" id="notes" name="notes" placeholder="e.g. Floral, fruity acidity, clean finish" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09]">
+                        <div class="flex justify-between items-end mb-1">
+                            <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] uppercase tracking-wide">Tasting Notes</label>
+                            <div class="flex bg-coffee-100 dark:bg-[#44403c] rounded p-0.5">
+                                <button type="button" onclick="setNotesMode('manual')" id="btnNotesManual" class="px-2 py-0.5 text-[10px] rounded font-bold transition-all bg-white dark:bg-[#1c1917] shadow-sm text-coffee-800 dark:text-white">Text</button>
+                                <button type="button" onclick="setNotesMode('sca')" id="btnNotesSCA" class="px-2 py-0.5 text-[10px] rounded font-bold transition-all text-coffee-500 dark:text-[#a8a29e] hover:text-coffee-700">SCA Wheel</button>
+                            </div>
+                        </div>
+
+                        <!-- Manual Text Input -->
+                        <div id="notesManualContainer">
+                            <input type="text" id="notes" name="notes" placeholder="e.g. Floral, fruity acidity, clean finish" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09]">
+                        </div>
+
+                        <!-- SCA Wheel Picker -->
+                        <div id="notesSCAContainer" class="hidden bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg p-3">
+                            <div id="scaSelectionDisplay" class="text-sm font-bold text-coffee-800 dark:text-white mb-2 min-h-[1.25rem]"></div>
+                            <div id="scaButtonsContainer" class="flex flex-wrap gap-2">
+                                <!-- JS Injected Buttons -->
+                            </div>
+                            <input type="hidden" id="scaValue" name="scaValue" value="">
+                        </div>
+                        <input type="hidden" id="notesMode" name="notesMode" value="manual">
                     </div>
 
                     <!-- Submit -->
@@ -382,6 +407,55 @@
         let isPublic = false;
         let dragSrcEl = null;
 
+        // --- SCA Wheel Data ---
+        const scaData = {
+          "Fruity": { c: "bg-red-400 text-white", s: {
+              "Berry": ["Blackberry", "Raspberry", "Blueberry", "Strawberry"],
+              "Dried Fruit": ["Raisin", "Prune"],
+              "Other Fruit": ["Coconut", "Cherry", "Pomegranate", "Pineapple", "Grape", "Apple", "Peach", "Pear"],
+              "Citrus Fruit": ["Grapefruit", "Orange", "Lemon", "Lime"]
+          }},
+          "Sour/Fermented": { c: "bg-yellow-400 text-black", s: {
+              "Sour": ["Sour Aromatics", "Acetic Acid", "Butyric Acid", "Isovaleric Acid", "Citric Acid", "Malic Acid"],
+              "Alcohol/Fermented": ["Winey", "Whiskey", "Fermented", "Overripe"]
+          }},
+          "Green/Vegetative": { c: "bg-green-500 text-white", s: {
+              "Olive Oil": [],
+              "Raw": [],
+              "Green/Vegetative": ["Under-ripe", "Peapod", "Fresh", "Dark Green", "Vegetative", "Hay-like", "Herb-like"]
+          }},
+          "Floral": { c: "bg-pink-400 text-white", s: {
+              "Floral": ["Chamomile", "Rose", "Jasmine"]
+          }},
+          "Sweet": { c: "bg-orange-300 text-black", s: {
+              "Overall Sweet": ["Sweet Aromatics"],
+              "Vanilla": [],
+              "Vanillin": [],
+              "Brown Sugar": ["Molasses", "Maple Syrup", "Caramel", "Honey"]
+          }},
+          "Nutty/Cocoa": { c: "bg-amber-600 text-white", s: {
+              "Nutty": ["Peanuts", "Hazelnut", "Almond"],
+              "Cocoa": ["Chocolate", "Dark Chocolate"]
+          }},
+          "Spices": { c: "bg-red-700 text-white", s: {
+              "Brown Spice": ["Nutmeg", "Clove", "Cinnamon", "Anise"],
+              "Pepper": [],
+              "Pungent": []
+          }},
+          "Roasted": { c: "bg-orange-800 text-white", s: {
+              "Tobacco": ["Pipe Tobacco"],
+              "Burnt": ["Acrid", "Ashy", "Smoky", "Brown Roast"],
+              "Cereal": ["Grain", "Malt", "Toast"]
+          }},
+          "Other": { c: "bg-gray-400 text-black", s: {
+              "Chemical": ["Rubber", "Skunky", "Petroleum", "Medicinal", "Salty", "Bitter"],
+              "Papery/Musty": ["Phenolic", "Meaty", "Brothy", "Animalic", "Musty/Earthy", "Musty/Dusty", "Moldy/Damp", "Woody", "Papery/Stale", "Cardboard", "Stale"]
+          }}
+        };
+
+        // --- SCA Logic Variables ---
+        let scaState = { level: 0, path: [], currentNode: null };
+
         // --- Functions ---
         const googleLogin = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
         const googleLogout = () => signOut(auth).then(() => window.location.reload());
@@ -427,12 +501,18 @@
             if(currentView !== 'mine') return;
             const f = new FormData(e.target); const eid = f.get('editId');
             const tMode = f.get('tempMode'); const finalTemp = tMode === 'profile' ? f.get('tempProfile') : (f.get('tempNumeric') || "M");
+            
+            // Notes logic
+            const nMode = f.get('notesMode');
+            const finalNotes = nMode === 'sca' ? (f.get('scaValue') || '') : (f.get('notes') || '');
+
             let newOrder = 0; if (coffees.length > 0) { const minOrder = Math.min(...coffees.map(c => c.customOrder || 0)); newOrder = minOrder - 1; }
 
             const d = { 
                 roaster: f.get('roaster'), farmer: f.get('farmer'), origin: f.get('origin'), variety: f.get('variety'), processing: f.get('processing'),
                 roastType: f.get('roastType'), method: f.get('method'), grind: parseNum(f.get('grind')), weight: parseNum(f.get('weight')), 
-                ratio: parseNum(f.get('ratio')), time: parseNum(f.get('time')), temp: finalTemp, notes: f.get('notes'), 
+                ratio: parseNum(f.get('ratio')), time: parseNum(f.get('time')), temp: finalTemp, 
+                notes: finalNotes, 
                 rating: parseInt(f.get('rating')) || 0,
                 updatedAt: new Date().toISOString() 
             };
@@ -444,6 +524,7 @@
             } catch(err){ alert(err.message); }
         };
 
+        // --- Drag/Drop (unchanged) ---
         const handleDragStart = (e) => { dragSrcEl = e.target.closest('tr'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/html', dragSrcEl.innerHTML); dragSrcEl.classList.add('opacity-50'); };
         const handleDragOver = (e) => { if (e.preventDefault) e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false; };
         const handleDrop = async (e) => {
@@ -463,6 +544,136 @@
         };
         const handleDragEnd = (e) => { if(dragSrcEl) dragSrcEl.classList.remove('opacity-50'); };
 
+        // --- SCA Logic ---
+        const setNotesMode = (mode) => {
+            const btnMan = document.getElementById('btnNotesManual');
+            const btnSca = document.getElementById('btnNotesSCA');
+            const conMan = document.getElementById('notesManualContainer');
+            const conSca = document.getElementById('notesSCAContainer');
+            const hidden = document.getElementById('notesMode');
+
+            hidden.value = mode;
+
+            if (mode === 'manual') {
+                conMan.classList.remove('hidden'); conSca.classList.add('hidden');
+                btnMan.className="px-2 py-0.5 text-[10px] rounded font-bold transition-all bg-white dark:bg-[#1c1917] shadow-sm text-coffee-800 dark:text-white";
+                btnSca.className="px-2 py-0.5 text-[10px] rounded font-bold transition-all text-coffee-500 dark:text-[#a8a29e] hover:text-coffee-700";
+            } else {
+                conSca.classList.remove('hidden'); conMan.classList.add('hidden');
+                btnSca.className="px-2 py-0.5 text-[10px] rounded font-bold transition-all bg-white dark:bg-[#1c1917] shadow-sm text-coffee-800 dark:text-white";
+                btnMan.className="px-2 py-0.5 text-[10px] rounded font-bold transition-all text-coffee-500 dark:text-[#a8a29e] hover:text-coffee-700";
+                
+                // Initialize Wheel if empty
+                if (scaState.level === 0 && scaState.path.length === 0) renderScaWheel();
+            }
+        };
+
+        const renderScaWheel = () => {
+            const container = document.getElementById('scaButtonsContainer');
+            const display = document.getElementById('scaSelectionDisplay');
+            const hiddenVal = document.getElementById('scaValue');
+            container.innerHTML = '';
+            
+            // Show current path
+            const pathString = scaState.path.join(' > ');
+            display.innerHTML = pathString ? 
+                `<div class="flex justify-between items-center"><span>${pathString}</span> <button onclick="resetSca()" class="text-xs text-red-500 bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded">Reset</button></div>` 
+                : '<span class="text-coffee-400 font-normal italic">Select a flavor...</span>';
+            hiddenVal.value = pathString;
+
+            // Render based on level
+            if (scaState.level === 0) {
+                // Root Categories
+                Object.keys(scaData).forEach(key => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `sca-btn px-3 py-2 rounded text-xs font-bold shadow-sm ${scaData[key].c}`;
+                    btn.textContent = key;
+                    btn.onclick = () => {
+                        scaState.path = [key];
+                        scaState.level = 1;
+                        scaState.currentNode = scaData[key];
+                        renderScaWheel();
+                    };
+                    container.appendChild(btn);
+                });
+            } else if (scaState.level === 1) {
+                // Sub Categories
+                const subs = scaState.currentNode.s;
+                const parentColor = scaState.currentNode.c;
+                
+                // Back Button
+                const backBtn = document.createElement('button');
+                backBtn.type = 'button';
+                backBtn.className = "sca-btn px-3 py-2 rounded text-xs font-bold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200";
+                backBtn.innerHTML = "<i class='fa-solid fa-arrow-left'></i> Back";
+                backBtn.onclick = () => { scaState.level = 0; scaState.path = []; scaState.currentNode = null; renderScaWheel(); };
+                container.appendChild(backBtn);
+
+                // Option to stop here is implicit by the hidden value being set.
+                // But we display children:
+                Object.keys(subs).forEach(key => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    // Use parent color but maybe slightly lighter/dimmer or same? Same is fine for wheel consistency.
+                    btn.className = `sca-btn px-3 py-2 rounded text-xs font-bold shadow-sm opacity-90 hover:opacity-100 ${parentColor}`;
+                    btn.textContent = key;
+                    btn.onclick = () => {
+                        scaState.path.push(key);
+                        scaState.level = 2;
+                        // currentNode stays parent for color reference, but we need sub data.
+                        // Actually let's just pass the array down.
+                        renderScaWheel();
+                    };
+                    container.appendChild(btn);
+                });
+            } else if (scaState.level === 2) {
+                // Specific Notes
+                const parentKey = scaState.path[0];
+                const subKey = scaState.path[1];
+                const notes = scaData[parentKey].s[subKey];
+                const parentColor = scaData[parentKey].c;
+
+                // Back Button
+                const backBtn = document.createElement('button');
+                backBtn.type = 'button';
+                backBtn.className = "sca-btn px-3 py-2 rounded text-xs font-bold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200";
+                backBtn.innerHTML = "<i class='fa-solid fa-arrow-left'></i> Back";
+                backBtn.onclick = () => { scaState.path.pop(); scaState.level = 1; renderScaWheel(); };
+                container.appendChild(backBtn);
+                
+                if (notes.length === 0) {
+                     // Leaf node reached previously (empty array), just stay here
+                     container.innerHTML += `<span class="text-xs text-coffee-500 italic ml-2">No further details.</span>`;
+                } else {
+                    notes.forEach(note => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = `sca-btn px-3 py-2 rounded text-xs font-bold shadow-sm opacity-80 hover:opacity-100 ${parentColor}`;
+                        btn.textContent = note;
+                        btn.onclick = () => {
+                            // Replace last if already 3? No, logic is lvl 2 means we have 2 items.
+                            // But if user clicks another sibling, we want to add the 3rd item.
+                            // If we already have 3 items, pop the last one first.
+                            if (scaState.path.length === 3) scaState.path.pop();
+                            
+                            scaState.path.push(note);
+                            // Stay at level 2 visually but update path? Or consider "Done"?
+                            // Let's update path and re-render. 
+                            renderScaWheel();
+                        };
+                        container.appendChild(btn);
+                    });
+                }
+            }
+        };
+
+        const resetSca = () => {
+            scaState = { level: 0, path: [], currentNode: null };
+            renderScaWheel();
+        };
+
+        // --- Standard UI ---
         const openFriendsModal = () => { document.getElementById('modalOverlay').classList.remove('hidden'); switchModalTab('profile'); };
         const closeModal = () => document.getElementById('modalOverlay').classList.add('hidden');
         const switchModalTab = (tab) => {
@@ -498,136 +709,27 @@
             select.value = currentView;
         };
 
-        // --- Rating Logic ---
-        const setRating = (r) => {
-            const container = document.getElementById('starContainer');
-            const input = document.getElementById('ratingInput');
-            input.value = r;
-            const stars = container.children;
-            for(let i=0; i<stars.length; i++) {
-                if(i < r) stars[i].classList.add('active');
-                else stars[i].classList.remove('active');
-            }
-        };
-
-        const getStarDisplay = (r) => {
-            if(!r) return '-';
-            let html = '';
-            for(let i=0; i<r; i++) html += '<i class="fa-solid fa-star text-xs text-yellow-400"></i>';
-            return html;
-        };
-
-        // --- Export CSV ---
-        const exportCSV = () => {
-            const data = getFilteredCoffees();
-            if(!data.length) return alert("No data to export");
-            
-            const headers = ["Date", "Roaster", "Origin", "Farmer", "Variety", "Process", "Roast", "Method", "Grind", "In (g)", "Out (g)", "Time (s)", "Temp", "Rating", "Notes"];
-            const rows = data.map(c => [
-                c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '',
-                c.roaster || c.name || '',
-                c.origin || c.beanType || '',
-                c.farmer || '',
-                c.variety || '',
-                c.processing || '',
-                c.roastType || '',
-                c.method || '',
-                c.grind || '',
-                c.weight || '',
-                (c.weight && c.ratio) ? (c.weight * c.ratio).toFixed(1) : '',
-                c.time || '',
-                c.temp || '',
-                c.rating || '',
-                `"${(c.notes || '').replace(/"/g, '""')}"` // Escape quotes in notes
-            ]);
-
-            const csvContent = "data:text/csv;charset=utf-8," 
-                + headers.join(",") + "\n" 
-                + rows.map(e => e.join(",")).join("\n");
-                
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "coffee_log.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-
+        const setRating = (r) => { const c=document.getElementById('starContainer'); document.getElementById('ratingInput').value=r; for(let i=0;i<c.children.length;i++){ if(i<r)c.children[i].classList.add('active'); else c.children[i].classList.remove('active'); } };
+        const getStarDisplay = (r) => { if(!r)return'-'; let h=''; for(let i=0;i<r;i++)h+='<i class="fa-solid fa-star text-xs text-yellow-400"></i>'; return h; };
+        const exportCSV = () => { const d=getFilteredCoffees(); if(!d.length)return alert("No data"); const h=["Date","Roaster","Origin","Farmer","Variety","Process","Roast","Method","Grind","In(g)","Out(g)","Time(s)","Temp","Rating","Notes"]; const r=d.map(c=>[c.createdAt?new Date(c.createdAt).toLocaleDateString():'',c.roaster||c.name||'',c.origin||c.beanType||'',c.farmer||'',c.variety||'',c.processing||'',c.roastType||'',c.method||'',c.grind||'',c.weight||'',(c.weight&&c.ratio)?(c.weight*c.ratio).toFixed(1):'',c.time||'',c.temp||'',c.rating||'',`"${(c.notes||'').replace(/"/g,'""')}"`]); const c="data:text/csv;charset=utf-8,"+h.join(",")+"\n"+r.map(e=>e.join(",")).join("\n"); const e=encodeURI(c); const l=document.createElement("a"); l.setAttribute("href",e); l.setAttribute("download","coffee_log.csv"); document.body.appendChild(l); l.click(); document.body.removeChild(l); };
 
         const handleRecipeInput = (s) => { const w=document.getElementById('inputWeight'),r=document.getElementById('inputRatio'),y=document.getElementById('inputYield'); const wv=parseFloat(w.value)||0,rv=parseFloat(r.value)||0,yv=parseFloat(y.value)||0; if(!wv)return; if(s==='weight'){ if(rv>0)y.value=(wv*rv).toFixed(1); else if(yv>0)r.value=(yv/wv).toFixed(1); } else if(s==='ratio')y.value=(wv*rv).toFixed(1); else if(s==='yield'){ if(wv>0)r.value=(yv/wv).toFixed(2); } };
         const setTempMode = (m) => { document.getElementById('tempMode').value=m; if(m==='profile'){document.getElementById('tempProfileContainer').classList.remove('hidden');document.getElementById('tempNumericContainer').classList.add('hidden');}else{document.getElementById('tempNumericContainer').classList.remove('hidden');document.getElementById('tempProfileContainer').classList.add('hidden');} };
         const toggleForm = (f=null) => { const c=document.getElementById('formContainer'),o=document.getElementById('formContent'),e=c.getAttribute('aria-expanded')==='true',s=f!==null?f:!e; c.setAttribute('aria-expanded',s?'true':'false'); if(s)o.classList.remove('hidden'); else o.classList.add('hidden'); };
         
-        // Populate form helper
-        const populateForm = (c) => {
-             document.getElementById('roaster').value = c.roaster || c.name || ''; // Migration logic
-             document.getElementById('farmer').value = c.farmer || '';
-             document.getElementById('origin').value = c.origin || c.beanType || ''; // Migration logic
-             document.getElementById('variety').value = c.variety || '';
-             document.getElementById('processing').value = c.processing || '';
-             document.getElementById('roastType').value = c.roastType || '';
-             document.getElementById('method').value = c.method || '';
-             document.getElementById('grind').value = c.grind || '';
-             document.getElementById('inputWeight').value = c.weight || '';
-             document.getElementById('inputRatio').value = c.ratio || '';
-             document.getElementById('inputYield').value = (c.weight && c.ratio) ? (c.weight * c.ratio).toFixed(1) : '';
-             document.getElementById('time').value = c.time || '';
-             document.getElementById('notes').value = c.notes || '';
-             if(!isNaN(parseFloat(c.temp))&&isFinite(c.temp)){ setTempMode('numeric'); document.getElementById('tempNumeric').value=c.temp; } else { setTempMode('profile'); document.getElementById('tempProfile').value=c.temp || ''; }
-             setRating(c.rating || 0);
-        }
+        const populateForm = (c) => { document.getElementById('roaster').value=c.roaster||c.name||''; document.getElementById('farmer').value=c.farmer||''; document.getElementById('origin').value=c.origin||c.beanType||''; document.getElementById('variety').value=c.variety||''; document.getElementById('processing').value=c.processing||''; document.getElementById('roastType').value=c.roastType||''; document.getElementById('method').value=c.method||''; document.getElementById('grind').value=c.grind||''; document.getElementById('inputWeight').value=c.weight||''; document.getElementById('inputRatio').value=c.ratio||''; document.getElementById('inputYield').value=(c.weight&&c.ratio)?(c.weight*c.ratio).toFixed(1):''; document.getElementById('time').value=c.time||''; document.getElementById('notes').value=c.notes||''; if(!isNaN(parseFloat(c.temp))&&isFinite(c.temp)){setTempMode('numeric');document.getElementById('tempNumeric').value=c.temp;}else{setTempMode('profile');document.getElementById('tempProfile').value=c.temp||'';} setRating(c.rating||0); setNotesMode('manual'); } // Default to manual on edit
 
         const editCoffee = (id) => { const c=coffees.find(x=>x.id===id); if(!c)return; document.getElementById('editId').value=c.id; populateForm(c); document.getElementById('formContainer').classList.add('editing-mode'); toggleForm(true); document.getElementById('formTitle').innerHTML='<span class="text-orange-500">Edit Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Update</span>'; document.getElementById('submitBtn').className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); };
-        
-        // Duplicate Logic - Refined to use populateForm
-        const duplicateCoffee = (id) => { 
-             // If cloning friend's brew, coffees contains their list
-             const c=coffees.find(x=>x.id===id); if(!c)return; 
-             
-             // If viewing friend, switch view first then open form
-             if (currentView !== 'mine') {
-                 // We need to capture data before switching view clears 'coffees'
-                 const brewData = {...c}; 
-                 document.getElementById('viewSelect').value = 'mine';
-                 changeView('mine');
-                 
-                 // Small delay to allow view switch then populate
-                 setTimeout(() => {
-                     document.getElementById('editId').value=''; 
-                     populateForm(brewData); 
-                     toggleForm(true); 
-                     document.getElementById('formContainer').classList.remove('editing-mode'); 
-                     document.getElementById('formTitle').innerHTML='<span>Duplicate Brew</span>'; 
-                     document.getElementById('submitBtn').innerHTML='<span>Save Copy</span>'; 
-                     window.scrollTo({top:0,behavior:'smooth'});
-                 }, 500); // 500ms delay to ensure UI reset
-             } else {
-                 document.getElementById('editId').value=''; 
-                 populateForm(c); 
-                 toggleForm(true); 
-                 document.getElementById('formContainer').classList.remove('editing-mode'); 
-                 document.getElementById('formTitle').innerHTML='<span>Duplicate Brew</span>'; 
-                 document.getElementById('submitBtn').innerHTML='<span>Save Copy</span>'; 
-                 window.scrollTo({top:0,behavior:'smooth'}); 
-             }
-        };
-        const cloneBrew = (id) => duplicateCoffee(id); // Alias for clarity
+        const duplicateCoffee = (id) => { const c=coffees.find(x=>x.id===id); if(!c)return; if(currentView!=='mine'){const d={...c};document.getElementById('viewSelect').value='mine';changeView('mine');setTimeout(()=>{document.getElementById('editId').value='';populateForm(d);toggleForm(true);document.getElementById('formContainer').classList.remove('editing-mode');document.getElementById('formTitle').innerHTML='<span>Duplicate Brew</span>';document.getElementById('submitBtn').innerHTML='<span>Save Copy</span>';window.scrollTo({top:0,behavior:'smooth'});},500);}else{document.getElementById('editId').value='';populateForm(c);toggleForm(true);document.getElementById('formContainer').classList.remove('editing-mode');document.getElementById('formTitle').innerHTML='<span>Duplicate Brew</span>';document.getElementById('submitBtn').innerHTML='<span>Save Copy</span>';window.scrollTo({top:0,behavior:'smooth'});} };
+        const cloneBrew = (id) => duplicateCoffee(id);
 
         const deleteCoffee = async (id, ev) => { if(ev)ev.stopPropagation(); if(currentView!=='mine')return; if(!confirm('Delete?'))return; await deleteDoc(doc(db,'users',currentUser.uid,'coffees',id)); if(document.getElementById('editId').value==id)resetFormState(); };
-        const resetFormState = (e) => { if(e)e.stopPropagation(); document.getElementById('coffeeForm').reset(); document.getElementById('editId').value=''; setTempMode('profile'); setRating(0); document.getElementById('formContainer').classList.remove('editing-mode'); document.getElementById('formTitle').innerHTML='<span>Add New Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Save Brew</span>'; document.getElementById('submitBtn').className="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.add('hidden'); };
+        const resetFormState = (e) => { if(e)e.stopPropagation(); document.getElementById('coffeeForm').reset(); document.getElementById('editId').value=''; setTempMode('profile'); setNotesMode('manual'); resetSca(); setRating(0); document.getElementById('formContainer').classList.remove('editing-mode'); document.getElementById('formTitle').innerHTML='<span>Add New Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Save Brew</span>'; document.getElementById('submitBtn').className="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.add('hidden'); };
         
         let currentSort = { key: null, direction: 'asc' };
-        let activeFilters = { method: null, temp: null, roastType: null, roaster: null, origin: null, farmer: null, variety: null, processing: null }; // Updated filters
+        let activeFilters = { method: null, temp: null, roastType: null, roaster: null, origin: null, farmer: null, variety: null, processing: null };
         const sortBy = (k) => { if(currentSort.key===k)currentSort.direction=currentSort.direction==='asc'?'desc':'asc'; else {currentSort.key=k;currentSort.direction='asc';} renderTable(); };
-        const openFilterMenu = (e,k) => { e.stopPropagation(); const m=document.getElementById('filterDropdown'); 
-            // Handle migration for filtering: map name->roaster, beanType->origin
-            const vals = coffees.map(c => k==='roaster' ? (c.roaster||c.name) : (k==='origin' ? (c.origin||c.beanType) : c[k]));
-            const v=[...new Set(vals)].sort(); 
-            if(!v.length)return; 
-            let h=`<div class="px-3 py-2 text-xs font-bold text-coffee-400 dark:text-[#78716c] uppercase border-b border-coffee-100 dark:border-[#44403c] mb-1">Filter ${k}</div><button onclick="applyFilter('${k}',null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] font-bold text-coffee-700 dark:text-[#d6ccc2]">All</button>`; 
-            v.forEach(val=>{h+=`<button onclick="applyFilter('${k}','${val}')" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-600 dark:text-[#a8a29e]">${val}</button>`}); m.innerHTML=h; const r=e.currentTarget.getBoundingClientRect(); const c=e.currentTarget.closest('.relative').getBoundingClientRect(); m.style.top=(r.bottom-c.top+5)+'px'; m.style.left=(r.left-c.left)+'px'; m.classList.remove('hidden'); 
-        }
+        const openFilterMenu = (e,k) => { e.stopPropagation(); const m=document.getElementById('filterDropdown'); const vals = coffees.map(c => k==='roaster' ? (c.roaster||c.name) : (k==='origin' ? (c.origin||c.beanType) : c[k])); const v=[...new Set(vals)].sort(); if(!v.length)return; let h=`<div class="px-3 py-2 text-xs font-bold text-coffee-400 dark:text-[#78716c] uppercase border-b border-coffee-100 dark:border-[#44403c] mb-1">Filter ${k}</div><button onclick="applyFilter('${k}',null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] font-bold text-coffee-700 dark:text-[#d6ccc2]">All</button>`; v.forEach(val=>{h+=`<button onclick="applyFilter('${k}','${val}')" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-600 dark:text-[#a8a29e]">${val}</button>`}); m.innerHTML=h; const r=e.currentTarget.getBoundingClientRect(); const c=e.currentTarget.closest('.relative').getBoundingClientRect(); m.style.top=(r.bottom-c.top+5)+'px'; m.style.left=(r.left-c.left)+'px'; m.classList.remove('hidden'); }
         const closeFilterMenu = (e) => { const m=document.getElementById('filterDropdown'); if(!m.contains(e.target))m.classList.add('hidden'); }
         const applyFilter = (k,v) => { activeFilters[k]=v; document.getElementById('filterDropdown').classList.add('hidden'); renderTable(); renderActiveFilters(); };
         const clearAllFilters = () => { activeFilters={method:null,temp:null,roastType:null,roaster:null,origin:null,farmer:null,variety:null,processing:null}; renderTable(); renderActiveFilters(); }
@@ -635,47 +737,23 @@
         
         const getFilteredCoffees = () => { 
             let f=coffees;
-            
-            // Global Search Filter
             const searchInput = document.getElementById('globalSearch');
             if (searchInput && searchInput.value) {
                 const term = searchInput.value.toLowerCase();
                 f = f.filter(c => {
-                    const searchable = [
-                        c.roaster || c.name || '', 
-                        c.origin || c.beanType || '',
-                        c.farmer || '', 
-                        c.variety || '', 
-                        c.processing || '', 
-                        c.method || '', 
-                        c.notes || ''
-                    ].join(' ').toLowerCase();
+                    const searchable = [c.roaster||c.name||'', c.origin||c.beanType||'', c.farmer||'', c.variety||'', c.processing||'', c.method||'', c.notes||''].join(' ').toLowerCase();
                     return searchable.includes(term);
                 });
             }
-
             f=f.filter(c=>{ 
-                // Migration Logic in Filter
-                const cRoaster = c.roaster || c.name;
-                const cOrigin = c.origin || c.beanType;
-                
-                const m=!activeFilters.method||c.method===activeFilters.method;
-                const t=!activeFilters.temp||String(c.temp)===String(activeFilters.temp);
-                const r=!activeFilters.roastType||c.roastType===activeFilters.roastType;
-                const rost=!activeFilters.roaster||cRoaster===activeFilters.roaster;
-                const orig=!activeFilters.origin||cOrigin===activeFilters.origin;
-                const farm=!activeFilters.farmer||c.farmer===activeFilters.farmer;
-                const varr=!activeFilters.variety||c.variety===activeFilters.variety;
-                const proc=!activeFilters.processing||c.processing===activeFilters.processing;
-                
+                const cRoaster = c.roaster || c.name; const cOrigin = c.origin || c.beanType;
+                const m=!activeFilters.method||c.method===activeFilters.method; const t=!activeFilters.temp||String(c.temp)===String(activeFilters.temp); const r=!activeFilters.roastType||c.roastType===activeFilters.roastType; const rost=!activeFilters.roaster||cRoaster===activeFilters.roaster; const orig=!activeFilters.origin||cOrigin===activeFilters.origin; const farm=!activeFilters.farmer||c.farmer===activeFilters.farmer; const varr=!activeFilters.variety||c.variety===activeFilters.variety; const proc=!activeFilters.processing||c.processing===activeFilters.processing;
                 return m&&t&&r&&rost&&orig&&farm&&varr&&proc; 
             }); 
             if(currentSort.key){ f.sort((a,b)=>{ 
                 let va=a[currentSort.key], vb=b[currentSort.key]; 
-                // Migration Logic in Sort
                 if(currentSort.key==='roaster') { va=a.roaster||a.name; vb=b.roaster||b.name; }
                 if(currentSort.key==='origin') { va=a.origin||a.beanType; vb=b.origin||b.beanType; }
-                
                 if(currentSort.key==='temp'){ const na=parseFloat(va), nb=parseFloat(vb); if(!isNaN(na)&&!isNaN(nb)){va=na;vb=nb;} } 
                 if(typeof va==='string')va=va.toLowerCase(); if(typeof vb==='string')vb=vb.toLowerCase(); 
                 if(va<vb)return currentSort.direction==='asc'?-1:1; if(va>vb)return currentSort.direction==='asc'?1:-1; return 0; 
@@ -694,12 +772,8 @@
 
         const renderTable = () => { 
             const t=document.getElementById('coffeeTableBody'); const e=document.getElementById('emptyState'); t.innerHTML=''; 
-            
-            // USE THE FILTERED LIST HERE
             const filteredCoffees = getFilteredCoffees();
-            
             if(coffees.length===0){e.classList.remove('hidden'); return;} e.classList.add('hidden');
-            
             const isDraggable = currentView === 'mine' && currentSort.key === null && !activeFilters.method && !activeFilters.temp && !activeFilters.roastType && !activeFilters.roaster && !activeFilters.origin && !activeFilters.farmer && !activeFilters.variety && !activeFilters.processing;
 
             filteredCoffees.forEach((c, index) => {
@@ -794,9 +868,11 @@
         window.handleFormSubmit = handleFormSubmit;
         window.handleRecipeInput = handleRecipeInput;
         window.setTempMode = setTempMode;
+        window.setNotesMode = setNotesMode; // New
+        window.resetSca = resetSca; // New
         window.editCoffee = editCoffee;
         window.duplicateCoffee = duplicateCoffee;
-        window.cloneBrew = cloneBrew; // Expose clone function
+        window.cloneBrew = cloneBrew; 
         window.deleteCoffee = deleteCoffee;
         window.sortBy = sortBy;
         window.openFilterMenu = openFilterMenu;
@@ -817,7 +893,6 @@
         // Init
         initTheme();
         
-        // Search Fix: Add robust listener here
         const searchInput = document.getElementById('globalSearch');
         if(searchInput) {
             searchInput.addEventListener('input', () => {
