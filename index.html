@@ -58,7 +58,6 @@
 </head>
 <body class="bg-[#fcfbf9] text-coffee-900 dark:bg-[#1c1917] dark:text-[#e7e5e4] min-h-screen pb-20" onclick="closeMenus(event)">
 
-    <!-- Header -->
     <header class="bg-white dark:bg-[#292524] shadow-sm border-b border-coffee-200 dark:border-[#44403c] sticky top-0 z-20 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -87,17 +86,14 @@
 
     <main class="max-w-[95%] mx-auto px-2 sm:px-6 lg:px-8 py-8 relative">
         
-        <!-- View Selector & Toolbar -->
         <div id="viewSelectorContainer" class="hidden mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-4 w-full sm:w-auto">
                 <div class="flex items-center gap-2">
                     <span class="text-sm text-coffee-500 dark:text-[#a8a29e]">Viewing:</span>
                     <select id="viewSelect" onchange="changeView(this.value)" class="bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] text-coffee-900 dark:text-white text-sm rounded-lg block p-2.5 shadow-sm font-bold min-w-[150px]">
                         <option value="mine">My Brews</option>
-                        <!-- Friends injected here -->
-                    </select>
+                        </select>
                 </div>
-                <!-- Global Search -->
                 <div class="relative flex-1 sm:flex-initial">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <i class="fa-solid fa-search text-coffee-400"></i>
@@ -116,7 +112,6 @@
             </div>
         </div>
 
-        <!-- Add/Edit Form (Only visible on My Brews) -->
         <div id="formContainer" class="hidden bg-white dark:bg-[#292524] rounded-xl shadow-lg border border-coffee-100 dark:border-[#44403c] mb-8 transition-all duration-300 overflow-hidden group" aria-expanded="false">
             <div onclick="toggleForm()" class="p-6 cursor-pointer flex justify-between items-center bg-coffee-50/50 dark:bg-[#292524] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors">
                 <h2 id="formTitle" class="text-lg font-semibold flex items-center gap-2 text-coffee-900 dark:text-white select-none">
@@ -133,7 +128,6 @@
                 <form id="coffeeForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                     <input type="hidden" id="editId" name="editId" value="">
 
-                    <!-- Row 1: Bean Info -->
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Roaster</label>
                         <input type="text" id="roaster" name="roaster" placeholder="e.g. La Cabra" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
@@ -154,7 +148,6 @@
                         <input type="text" id="variety" name="variety" placeholder="e.g. Geisha" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                     </div>
 
-                    <!-- Row 2 -->
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Processing</label>
                         <input type="text" id="processing" name="processing" placeholder="e.g. Natural" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
@@ -190,7 +183,6 @@
                         <input type="number" step="any" id="grind" name="grind" placeholder="e.g. 14" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09]">
                     </div>
 
-                    <!-- Row 3: Recipe -->
                     <div class="col-span-1 md:col-span-2 lg:col-span-2 grid grid-cols-3 gap-2 bg-coffee-50/50 dark:bg-[#201d1b] p-2 rounded-lg border border-coffee-100 dark:border-[#44403c]">
                         <div>
                             <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">In (g)</label>
@@ -206,7 +198,6 @@
                         </div>
                     </div>
 
-                    <!-- Time & Temp -->
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Time (Sec)</label>
                         <input type="number" step="any" id="time" name="time" placeholder="e.g. 180" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09]">
@@ -221,7 +212,6 @@
                             </div>
                         </div>
                         
-                        <!-- Input Containers -->
                         <div id="tempProfileContainer">
                             <select id="tempProfile" name="tempProfile" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] cursor-pointer">
                                 <option value="" disabled selected>Select</option>
@@ -242,7 +232,6 @@
                         <input type="hidden" id="tempMode" name="tempMode" value="profile">
                     </div>
                     
-                    <!-- Rating (Stars) -->
                     <div class="col-span-1 md:col-span-2 lg:col-span-2 flex flex-col items-start gap-1">
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] uppercase tracking-wide">Rating</label>
                         <div class="star-rating flex text-2xl text-gray-300 dark:text-gray-600" id="starContainer">
@@ -255,7 +244,6 @@
                         <input type="hidden" id="ratingInput" name="rating" value="0">
                     </div>
 
-                    <!-- Tasting Notes with Toggle -->
                     <div class="col-span-1 md:col-span-2 lg:col-span-4">
                         <div class="flex justify-between items-end mb-1">
                             <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] uppercase tracking-wide">Tasting Notes</label>
@@ -265,23 +253,18 @@
                             </div>
                         </div>
 
-                        <!-- Manual Text Input -->
                         <div id="notesManualContainer">
                             <input type="text" id="notes" name="notes" placeholder="e.g. Floral, fruity acidity, clean finish" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09]">
                         </div>
 
-                        <!-- SCA Wheel Picker -->
-                        <div id="notesSCAContainer" class="hidden bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg p-3">
+                        <div id="notesSCAContainer" class="hidden mt-2 bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg p-3">
                             <div id="scaSelectionDisplay" class="text-sm font-bold text-coffee-800 dark:text-white mb-2 min-h-[1.25rem]"></div>
                             <div id="scaButtonsContainer" class="flex flex-wrap gap-2">
-                                <!-- JS Injected Buttons -->
-                            </div>
-                            <input type="hidden" id="scaValue" name="scaValue" value="">
+                                </div>
                         </div>
                         <input type="hidden" id="notesMode" name="notesMode" value="manual">
                     </div>
 
-                    <!-- Submit -->
                     <div class="col-span-1 md:col-span-2 lg:col-span-4 flex justify-end mt-2">
                         <button type="submit" id="submitBtn" class="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2">
                             <i class="fa-solid fa-check"></i> <span>Save Brew</span>
@@ -291,19 +274,16 @@
             </div>
         </div>
 
-        <!-- Active Filters Bar (Dynamic) -->
         <div id="activeFiltersContainer" class="hidden mb-4 p-3 bg-coffee-100 dark:bg-[#292524] rounded-lg border border-coffee-200 dark:border-[#44403c] flex items-center justify-between">
             <div class="flex items-center gap-2 flex-wrap" id="activeFiltersList"></div>
             <button onclick="clearAllFilters()" class="text-xs text-coffee-600 dark:text-[#a8a29e] hover:text-red-500 whitespace-nowrap ml-2">Clear All</button>
         </div>
 
-        <!-- Info Hint -->
         <div class="mb-2 text-xs text-coffee-500 dark:text-[#78716c] italic flex flex-col gap-1">
             <span><i class="fa-solid fa-hand-pointer mr-1"></i> Double tap Headers to filter.</span>
             <span><i class="fa-solid fa-info-circle mr-1"></i> Drag rows to reorder.</span>
         </div>
 
-        <!-- Table Container -->
         <div class="bg-white dark:bg-[#292524] rounded-xl shadow-lg border border-coffee-100 dark:border-[#44403c] overflow-hidden transition-colors duration-300 relative">
             <div class="overflow-x-auto min-h-[300px]">
                 <table class="w-full text-sm text-left text-coffee-900 dark:text-[#e7e5e4]">
@@ -341,7 +321,6 @@
 
     </main>
 
-    <!-- Friend Modal -->
     <div id="modalOverlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         <div class="bg-white dark:bg-[#292524] rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-coffee-200 dark:border-[#44403c]">
             <div class="flex border-b border-coffee-200 dark:border-[#44403c]">
@@ -378,7 +357,6 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script type="module">
         // --- CONFIG ---
         const firebaseConfig = {
@@ -502,9 +480,8 @@
             const f = new FormData(e.target); const eid = f.get('editId');
             const tMode = f.get('tempMode'); const finalTemp = tMode === 'profile' ? f.get('tempProfile') : (f.get('tempNumeric') || "M");
             
-            // Notes logic
-            const nMode = f.get('notesMode');
-            const finalNotes = nMode === 'sca' ? (f.get('scaValue') || '') : (f.get('notes') || '');
+            // Notes logic: Always take the text input value, as SCA now appends to it
+            const finalNotes = f.get('notes') || '';
 
             let newOrder = 0; if (coffees.length > 0) { const minOrder = Math.min(...coffees.map(c => c.customOrder || 0)); newOrder = minOrder - 1; }
 
@@ -555,15 +532,18 @@
             hidden.value = mode;
 
             if (mode === 'manual') {
-                conMan.classList.remove('hidden'); conSca.classList.add('hidden');
+                conMan.classList.remove('hidden'); 
+                conSca.classList.add('hidden');
                 btnMan.className="px-2 py-0.5 text-[10px] rounded font-bold transition-all bg-white dark:bg-[#1c1917] shadow-sm text-coffee-800 dark:text-white";
                 btnSca.className="px-2 py-0.5 text-[10px] rounded font-bold transition-all text-coffee-500 dark:text-[#a8a29e] hover:text-coffee-700";
             } else {
-                conSca.classList.remove('hidden'); conMan.classList.add('hidden');
+                // Show BOTH inputs so user can see what they are building
+                conSca.classList.remove('hidden'); 
+                conMan.classList.remove('hidden');
+                
                 btnSca.className="px-2 py-0.5 text-[10px] rounded font-bold transition-all bg-white dark:bg-[#1c1917] shadow-sm text-coffee-800 dark:text-white";
                 btnMan.className="px-2 py-0.5 text-[10px] rounded font-bold transition-all text-coffee-500 dark:text-[#a8a29e] hover:text-coffee-700";
                 
-                // Initialize Wheel if empty
                 if (scaState.level === 0 && scaState.path.length === 0) renderScaWheel();
             }
         };
@@ -571,19 +551,29 @@
         const renderScaWheel = () => {
             const container = document.getElementById('scaButtonsContainer');
             const display = document.getElementById('scaSelectionDisplay');
-            const hiddenVal = document.getElementById('scaValue');
             container.innerHTML = '';
             
-            // Show current path
+            // --- HEADER WITH ADD BUTTON ---
             const pathString = scaState.path.join(' > ');
-            display.innerHTML = pathString ? 
-                `<div class="flex justify-between items-center"><span>${pathString}</span> <button onclick="resetSca()" class="text-xs text-red-500 bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded">Reset</button></div>` 
-                : '<span class="text-coffee-400 font-normal italic">Select a flavor...</span>';
-            hiddenVal.value = pathString;
+            const leafNode = scaState.path.length > 0 ? scaState.path[scaState.path.length - 1] : null;
 
-            // Render based on level
+            if (leafNode) {
+                display.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-2 bg-coffee-100 dark:bg-[#292524] p-2 rounded">
+                        <span class="text-xs text-coffee-500 italic">${pathString}</span>
+                        <div class="flex gap-2">
+                             <button onclick="resetSca()" class="text-xs text-coffee-600 dark:text-[#a8a29e] hover:text-red-500 underline">Reset</button>
+                             <button type="button" onclick="addScaToNotes()" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-3 py-1 rounded shadow-sm transition-colors">
+                                <i class="fa-solid fa-plus mr-1"></i> Add "${leafNode}"
+                             </button>
+                        </div>
+                    </div>`;
+            } else {
+                display.innerHTML = '<span class="text-coffee-400 font-normal italic text-xs">Tap categories below to build a flavor...</span>';
+            }
+
+            // --- WHEEL RENDERING ---
             if (scaState.level === 0) {
-                // Root Categories
                 Object.keys(scaData).forEach(key => {
                     const btn = document.createElement('button');
                     btn.type = 'button';
@@ -598,53 +588,43 @@
                     container.appendChild(btn);
                 });
             } else if (scaState.level === 1) {
-                // Sub Categories
                 const subs = scaState.currentNode.s;
                 const parentColor = scaState.currentNode.c;
                 
-                // Back Button
                 const backBtn = document.createElement('button');
                 backBtn.type = 'button';
                 backBtn.className = "sca-btn px-3 py-2 rounded text-xs font-bold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200";
-                backBtn.innerHTML = "<i class='fa-solid fa-arrow-left'></i> Back";
+                backBtn.innerHTML = "<i class='fa-solid fa-arrow-left'></i>";
                 backBtn.onclick = () => { scaState.level = 0; scaState.path = []; scaState.currentNode = null; renderScaWheel(); };
                 container.appendChild(backBtn);
 
-                // Option to stop here is implicit by the hidden value being set.
-                // But we display children:
                 Object.keys(subs).forEach(key => {
                     const btn = document.createElement('button');
                     btn.type = 'button';
-                    // Use parent color but maybe slightly lighter/dimmer or same? Same is fine for wheel consistency.
                     btn.className = `sca-btn px-3 py-2 rounded text-xs font-bold shadow-sm opacity-90 hover:opacity-100 ${parentColor}`;
                     btn.textContent = key;
                     btn.onclick = () => {
                         scaState.path.push(key);
                         scaState.level = 2;
-                        // currentNode stays parent for color reference, but we need sub data.
-                        // Actually let's just pass the array down.
                         renderScaWheel();
                     };
                     container.appendChild(btn);
                 });
             } else if (scaState.level === 2) {
-                // Specific Notes
                 const parentKey = scaState.path[0];
                 const subKey = scaState.path[1];
                 const notes = scaData[parentKey].s[subKey];
                 const parentColor = scaData[parentKey].c;
 
-                // Back Button
                 const backBtn = document.createElement('button');
                 backBtn.type = 'button';
                 backBtn.className = "sca-btn px-3 py-2 rounded text-xs font-bold bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200";
-                backBtn.innerHTML = "<i class='fa-solid fa-arrow-left'></i> Back";
+                backBtn.innerHTML = "<i class='fa-solid fa-arrow-left'></i>";
                 backBtn.onclick = () => { scaState.path.pop(); scaState.level = 1; renderScaWheel(); };
                 container.appendChild(backBtn);
                 
                 if (notes.length === 0) {
-                     // Leaf node reached previously (empty array), just stay here
-                     container.innerHTML += `<span class="text-xs text-coffee-500 italic ml-2">No further details.</span>`;
+                     container.innerHTML += `<div class="flex-1 text-xs text-coffee-500 italic ml-2 flex items-center">Use 'Add' above to confirm selection.</div>`;
                 } else {
                     notes.forEach(note => {
                         const btn = document.createElement('button');
@@ -652,20 +632,30 @@
                         btn.className = `sca-btn px-3 py-2 rounded text-xs font-bold shadow-sm opacity-80 hover:opacity-100 ${parentColor}`;
                         btn.textContent = note;
                         btn.onclick = () => {
-                            // Replace last if already 3? No, logic is lvl 2 means we have 2 items.
-                            // But if user clicks another sibling, we want to add the 3rd item.
-                            // If we already have 3 items, pop the last one first.
                             if (scaState.path.length === 3) scaState.path.pop();
-                            
                             scaState.path.push(note);
-                            // Stay at level 2 visually but update path? Or consider "Done"?
-                            // Let's update path and re-render. 
                             renderScaWheel();
                         };
                         container.appendChild(btn);
                     });
                 }
             }
+        };
+
+        const addScaToNotes = () => {
+            if (scaState.path.length === 0) return;
+            const flavorToAdd = scaState.path[scaState.path.length - 1];
+            
+            const input = document.getElementById('notes');
+            let currentText = input.value.trim();
+
+            if (currentText.length > 0) {
+                if(currentText.endsWith(',')) currentText = currentText.slice(0, -1);
+                input.value = `${currentText}, ${flavorToAdd}`;
+            } else {
+                input.value = flavorToAdd;
+            }
+            resetSca();
         };
 
         const resetSca = () => {
@@ -803,7 +793,6 @@
                 const recipeCol = `<div class="flex flex-col items-center"><span class="text-xs text-coffee-500 dark:text-[#78716c] mb-1">1:${c.ratio || '-'}</span><div class="font-mono text-coffee-900 dark:text-[#e7e5e4] bg-coffee-50 dark:bg-[#1c1917] px-2 py-1 rounded border border-coffee-100 dark:border-[#44403c]"><span class="font-semibold text-coffee-700 dark:text-[#a8a29e]">${c.weight || '-'}g</span><i class="fa-solid fa-arrow-right text-[10px] text-coffee-400 dark:text-[#57534e] mx-1"></i><span class="font-bold text-coffee-900 dark:text-white">${w === '-' ? '-' : (w.endsWith('.0')?parseInt(w):w) + 'g'}</span></div></div>`;
                 const gripIcon = isDraggable ? 'fa-grip-vertical cursor-grab' : 'fa-lock opacity-30';
                 
-                // Mapped Variables
                 const displayRoaster = c.roaster || c.name || '-';
                 const displayOrigin = c.origin || c.beanType || '-';
                 const displayDate = c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-';
@@ -868,8 +857,9 @@
         window.handleFormSubmit = handleFormSubmit;
         window.handleRecipeInput = handleRecipeInput;
         window.setTempMode = setTempMode;
-        window.setNotesMode = setNotesMode; // New
-        window.resetSca = resetSca; // New
+        window.setNotesMode = setNotesMode;
+        window.resetSca = resetSca;
+        window.addScaToNotes = addScaToNotes;
         window.editCoffee = editCoffee;
         window.duplicateCoffee = duplicateCoffee;
         window.cloneBrew = cloneBrew; 
