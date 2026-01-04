@@ -25,7 +25,6 @@
             cursor: context-menu; 
             touch-action: manipulation; 
         }
-        /* Adjusted filter icon positioning */
         th.filterable:hover::after { 
             content: '\f0b0'; 
             font-family: "Font Awesome 6 Free"; 
@@ -43,6 +42,11 @@
         .group[aria-expanded="true"] .chevron-rotate { transform: rotate(180deg); }
         .cursor-grab { cursor: grab; }
         .cursor-grabbing { cursor: grabbing; }
+        
+        /* Star Rating Styles */
+        .star-rating i { cursor: pointer; transition: color 0.2s; }
+        .star-rating i:hover, .star-rating i.active { color: #fbbf24; } /* Amber-400 */
+        .dark .star-rating i:hover, .dark .star-rating i.active { color: #f59e0b; } /* Amber-500 */
     </style>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { coffee: { 50: '#fdf8f6', 100: '#f2e8e5', 200: '#eaddd7', 300: '#e0ccbb', 400: '#d2bab0', 500: '#a18e84', 600: '#8c7365', 700: '#7f5539', 800: '#9c6644', 900: '#4a3b32', } } } } }
@@ -79,14 +83,32 @@
 
     <main class="max-w-[95%] mx-auto px-2 sm:px-6 lg:px-8 py-8 relative">
         
-        <!-- View Selector -->
-        <div id="viewSelectorContainer" class="hidden mb-6 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <span class="text-sm text-coffee-500 dark:text-[#a8a29e]">Viewing:</span>
-                <select id="viewSelect" onchange="changeView(this.value)" class="bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] text-coffee-900 dark:text-white text-sm rounded-lg block p-2.5 shadow-sm font-bold min-w-[200px]">
-                    <option value="mine">My Brews</option>
-                    <!-- Friends injected here -->
-                </select>
+        <!-- View Selector & Toolbar -->
+        <div id="viewSelectorContainer" class="hidden mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4 w-full sm:w-auto">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-coffee-500 dark:text-[#a8a29e]">Viewing:</span>
+                    <select id="viewSelect" onchange="changeView(this.value)" class="bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] text-coffee-900 dark:text-white text-sm rounded-lg block p-2.5 shadow-sm font-bold min-w-[150px]">
+                        <option value="mine">My Brews</option>
+                        <!-- Friends injected here -->
+                    </select>
+                </div>
+                <!-- Global Search -->
+                <div class="relative flex-1 sm:flex-initial">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="fa-solid fa-search text-coffee-400"></i>
+                    </div>
+                    <input type="text" id="globalSearch" oninput="renderTable()" class="block w-full sm:w-64 p-2.5 pl-10 text-sm text-coffee-900 border border-coffee-200 rounded-lg bg-white dark:bg-[#292524] dark:border-[#44403c] dark:placeholder-[#57534e] dark:text-white focus:ring-coffee-500 focus:border-coffee-500" placeholder="Search brews...">
+                </div>
+            </div>
+            
+            <div class="flex gap-2 w-full sm:w-auto justify-end">
+                <button onclick="exportCSV()" class="bg-coffee-100 hover:bg-coffee-200 dark:bg-[#34302e] dark:hover:bg-[#44403c] text-coffee-800 dark:text-[#d6ccc2] px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-file-csv"></i> Export
+                </button>
+                <button id="addBrewBtn" onclick="toggleForm(true); window.scrollTo({top:0,behavior:'smooth'})" class="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> New Brew
+                </button>
             </div>
         </div>
 
@@ -215,6 +237,19 @@
                         </div>
                         <input type="hidden" id="tempMode" name="tempMode" value="profile">
                     </div>
+                    
+                    <!-- Rating (Stars) -->
+                    <div class="col-span-1 md:col-span-2 lg:col-span-4 flex flex-col items-start gap-1">
+                        <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] uppercase tracking-wide">Rating</label>
+                        <div class="star-rating flex text-2xl text-gray-300 dark:text-gray-600" id="starContainer">
+                            <i class="fa-solid fa-star" onclick="setRating(1)"></i>
+                            <i class="fa-solid fa-star" onclick="setRating(2)"></i>
+                            <i class="fa-solid fa-star" onclick="setRating(3)"></i>
+                            <i class="fa-solid fa-star" onclick="setRating(4)"></i>
+                            <i class="fa-solid fa-star" onclick="setRating(5)"></i>
+                        </div>
+                        <input type="hidden" id="ratingInput" name="rating" value="0">
+                    </div>
 
                     <div class="col-span-1 md:col-span-2 lg:col-span-4">
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Tasting Notes</label>
@@ -262,6 +297,7 @@
                             <th scope="col" class="px-4 py-4 text-right whitespace-nowrap" onclick="sortBy('time')">Time <i class="fa-solid fa-sort ml-1 opacity-50"></i></th>
                             <th scope="col" class="px-4 py-4 text-center filterable whitespace-nowrap" onclick="sortBy('temp')" ondblclick="openFilterMenu(event, 'temp')">Temp <i class="fa-solid fa-sort ml-1 opacity-50"></i></th>
                             <th scope="col" class="px-4 py-4 whitespace-nowrap">Notes</th>
+                            <th scope="col" class="px-4 py-4 cursor-pointer hover:bg-coffee-100 dark:hover:bg-[#44403c] transition-colors group whitespace-nowrap" onclick="sortBy('rating')">Rating <i class="fa-solid fa-sort ml-1 opacity-50"></i></th>
                             <th scope="col" class="px-4 py-4 whitespace-nowrap" onclick="sortBy('createdAt')">Date <i class="fa-solid fa-sort ml-1 opacity-50"></i></th>
                             <th scope="col" class="px-4 py-4 text-center w-28 whitespace-nowrap">Actions</th>
                         </tr>
@@ -396,7 +432,9 @@
             const d = { 
                 roaster: f.get('roaster'), farmer: f.get('farmer'), origin: f.get('origin'), variety: f.get('variety'), processing: f.get('processing'),
                 roastType: f.get('roastType'), method: f.get('method'), grind: parseNum(f.get('grind')), weight: parseNum(f.get('weight')), 
-                ratio: parseNum(f.get('ratio')), time: parseNum(f.get('time')), temp: finalTemp, notes: f.get('notes'), updatedAt: new Date().toISOString() 
+                ratio: parseNum(f.get('ratio')), time: parseNum(f.get('time')), temp: finalTemp, notes: f.get('notes'), 
+                rating: parseInt(f.get('rating')) || 0,
+                updatedAt: new Date().toISOString() 
             };
             
             try {
@@ -460,6 +498,63 @@
             select.value = currentView;
         };
 
+        // --- Rating Logic ---
+        const setRating = (r) => {
+            const container = document.getElementById('starContainer');
+            const input = document.getElementById('ratingInput');
+            input.value = r;
+            const stars = container.children;
+            for(let i=0; i<stars.length; i++) {
+                if(i < r) stars[i].classList.add('active');
+                else stars[i].classList.remove('active');
+            }
+        };
+
+        const getStarDisplay = (r) => {
+            if(!r) return '-';
+            let html = '';
+            for(let i=0; i<r; i++) html += '<i class="fa-solid fa-star text-xs text-yellow-400"></i>';
+            return html;
+        };
+
+        // --- Export CSV ---
+        const exportCSV = () => {
+            const data = getFilteredCoffees();
+            if(!data.length) return alert("No data to export");
+            
+            const headers = ["Date", "Roaster", "Origin", "Farmer", "Variety", "Process", "Roast", "Method", "Grind", "In (g)", "Out (g)", "Time (s)", "Temp", "Rating", "Notes"];
+            const rows = data.map(c => [
+                c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '',
+                c.roaster || c.name || '',
+                c.origin || c.beanType || '',
+                c.farmer || '',
+                c.variety || '',
+                c.processing || '',
+                c.roastType || '',
+                c.method || '',
+                c.grind || '',
+                c.weight || '',
+                (c.weight && c.ratio) ? (c.weight * c.ratio).toFixed(1) : '',
+                c.time || '',
+                c.temp || '',
+                c.rating || '',
+                `"${(c.notes || '').replace(/"/g, '""')}"` // Escape quotes in notes
+            ]);
+
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + headers.join(",") + "\n" 
+                + rows.map(e => e.join(",")).join("\n");
+                
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "coffee_log.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+
         const handleRecipeInput = (s) => { const w=document.getElementById('inputWeight'),r=document.getElementById('inputRatio'),y=document.getElementById('inputYield'); const wv=parseFloat(w.value)||0,rv=parseFloat(r.value)||0,yv=parseFloat(y.value)||0; if(!wv)return; if(s==='weight'){ if(rv>0)y.value=(wv*rv).toFixed(1); else if(yv>0)r.value=(yv/wv).toFixed(1); } else if(s==='ratio')y.value=(wv*rv).toFixed(1); else if(s==='yield'){ if(wv>0)r.value=(yv/wv).toFixed(2); } };
         const setTempMode = (m) => { document.getElementById('tempMode').value=m; if(m==='profile'){document.getElementById('tempProfileContainer').classList.remove('hidden');document.getElementById('tempNumericContainer').classList.add('hidden');}else{document.getElementById('tempNumericContainer').classList.remove('hidden');document.getElementById('tempProfileContainer').classList.add('hidden');} };
         const toggleForm = (f=null) => { const c=document.getElementById('formContainer'),o=document.getElementById('formContent'),e=c.getAttribute('aria-expanded')==='true',s=f!==null?f:!e; c.setAttribute('aria-expanded',s?'true':'false'); if(s)o.classList.remove('hidden'); else o.classList.add('hidden'); };
@@ -480,15 +575,47 @@
              document.getElementById('time').value = c.time || '';
              document.getElementById('notes').value = c.notes || '';
              if(!isNaN(parseFloat(c.temp))&&isFinite(c.temp)){ setTempMode('numeric'); document.getElementById('tempNumeric').value=c.temp; } else { setTempMode('profile'); document.getElementById('tempProfile').value=c.temp || ''; }
+             setRating(c.rating || 0);
         }
 
         const editCoffee = (id) => { const c=coffees.find(x=>x.id===id); if(!c)return; document.getElementById('editId').value=c.id; populateForm(c); document.getElementById('formContainer').classList.add('editing-mode'); toggleForm(true); document.getElementById('formTitle').innerHTML='<span class="text-orange-500">Edit Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Update</span>'; document.getElementById('submitBtn').className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); };
         
-        // Duplicate Logic
-        const duplicateCoffee = (id) => { const c=coffees.find(x=>x.id===id); if(!c)return; document.getElementById('editId').value=''; populateForm(c); toggleForm(true); document.getElementById('formContainer').classList.remove('editing-mode'); document.getElementById('formTitle').innerHTML='<span>Duplicate Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Save Copy</span>'; window.scrollTo({top:0,behavior:'smooth'}); };
+        // Duplicate Logic - Refined to use populateForm
+        const duplicateCoffee = (id) => { 
+             // If cloning friend's brew, coffees contains their list
+             const c=coffees.find(x=>x.id===id); if(!c)return; 
+             
+             // If viewing friend, switch view first then open form
+             if (currentView !== 'mine') {
+                 // We need to capture data before switching view clears 'coffees'
+                 const brewData = {...c}; 
+                 document.getElementById('viewSelect').value = 'mine';
+                 changeView('mine');
+                 
+                 // Small delay to allow view switch then populate
+                 setTimeout(() => {
+                     document.getElementById('editId').value=''; 
+                     populateForm(brewData); 
+                     toggleForm(true); 
+                     document.getElementById('formContainer').classList.remove('editing-mode'); 
+                     document.getElementById('formTitle').innerHTML='<span>Duplicate Brew</span>'; 
+                     document.getElementById('submitBtn').innerHTML='<span>Save Copy</span>'; 
+                     window.scrollTo({top:0,behavior:'smooth'});
+                 }, 500); // 500ms delay to ensure UI reset
+             } else {
+                 document.getElementById('editId').value=''; 
+                 populateForm(c); 
+                 toggleForm(true); 
+                 document.getElementById('formContainer').classList.remove('editing-mode'); 
+                 document.getElementById('formTitle').innerHTML='<span>Duplicate Brew</span>'; 
+                 document.getElementById('submitBtn').innerHTML='<span>Save Copy</span>'; 
+                 window.scrollTo({top:0,behavior:'smooth'}); 
+             }
+        };
+        const cloneBrew = (id) => duplicateCoffee(id); // Alias for clarity
 
         const deleteCoffee = async (id, ev) => { if(ev)ev.stopPropagation(); if(currentView!=='mine')return; if(!confirm('Delete?'))return; await deleteDoc(doc(db,'users',currentUser.uid,'coffees',id)); if(document.getElementById('editId').value==id)resetFormState(); };
-        const resetFormState = (e) => { if(e)e.stopPropagation(); document.getElementById('coffeeForm').reset(); document.getElementById('editId').value=''; setTempMode('profile'); document.getElementById('formContainer').classList.remove('editing-mode'); document.getElementById('formTitle').innerHTML='<span>Add New Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Save Brew</span>'; document.getElementById('submitBtn').className="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.add('hidden'); };
+        const resetFormState = (e) => { if(e)e.stopPropagation(); document.getElementById('coffeeForm').reset(); document.getElementById('editId').value=''; setTempMode('profile'); setRating(0); document.getElementById('formContainer').classList.remove('editing-mode'); document.getElementById('formTitle').innerHTML='<span>Add New Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Save Brew</span>'; document.getElementById('submitBtn').className="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.add('hidden'); };
         
         let currentSort = { key: null, direction: 'asc' };
         let activeFilters = { method: null, temp: null, roastType: null, roaster: null, origin: null, farmer: null, variety: null, processing: null }; // Updated filters
@@ -507,7 +634,27 @@
         const renderActiveFilters = () => { const c=document.getElementById('activeFiltersContainer'), l=document.getElementById('activeFiltersList'); l.innerHTML=''; let h=false; Object.entries(activeFilters).forEach(([k,v])=>{ if(v){ h=true; l.innerHTML+=`<div class="flex items-center gap-2 bg-coffee-700 dark:bg-[#57534e] text-white text-xs px-3 py-1 rounded-full shadow-sm"><span>${k}:</span><b>${v}</b><button onclick="applyFilter('${k}',null)" class="ml-1 hover:text-red-200">x</button></div>`; } }); c.classList.toggle('hidden',!h); }
         
         const getFilteredCoffees = () => { 
-            let f=coffees.filter(c=>{ 
+            let f=coffees;
+            
+            // Global Search Filter
+            const searchInput = document.getElementById('globalSearch');
+            if (searchInput && searchInput.value) {
+                const term = searchInput.value.toLowerCase();
+                f = f.filter(c => {
+                    const searchable = [
+                        c.roaster || c.name || '', 
+                        c.origin || c.beanType || '',
+                        c.farmer || '', 
+                        c.variety || '', 
+                        c.processing || '', 
+                        c.method || '', 
+                        c.notes || ''
+                    ].join(' ').toLowerCase();
+                    return searchable.includes(term);
+                });
+            }
+
+            f=f.filter(c=>{ 
                 // Migration Logic in Filter
                 const cRoaster = c.roaster || c.name;
                 const cOrigin = c.origin || c.beanType;
@@ -575,7 +722,9 @@
                     <button onclick="editCoffee('${c.id}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded" title="Edit"><i class="fa-solid fa-pencil"></i></button>
                     <button onclick="duplicateCoffee('${c.id}')" class="text-green-500 hover:bg-green-50 p-2 rounded" title="Duplicate"><i class="fa-regular fa-copy"></i></button>
                     <button onclick="deleteCoffee('${c.id}',event)" class="text-red-500 hover:bg-red-50 p-2 rounded" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                ` : `<span class="text-xs text-gray-400">Read Only</span>`;
+                ` : `
+                    <button onclick="cloneBrew('${c.id}')" class="text-green-600 hover:bg-green-50 p-2 rounded" title="Clone to My Brews"><i class="fa-solid fa-file-import"></i></button>
+                `;
                 
                 const recipeCol = `<div class="flex flex-col items-center"><span class="text-xs text-coffee-500 dark:text-[#78716c] mb-1">1:${c.ratio || '-'}</span><div class="font-mono text-coffee-900 dark:text-[#e7e5e4] bg-coffee-50 dark:bg-[#1c1917] px-2 py-1 rounded border border-coffee-100 dark:border-[#44403c]"><span class="font-semibold text-coffee-700 dark:text-[#a8a29e]">${c.weight || '-'}g</span><i class="fa-solid fa-arrow-right text-[10px] text-coffee-400 dark:text-[#57534e] mx-1"></i><span class="font-bold text-coffee-900 dark:text-white">${w === '-' ? '-' : (w.endsWith('.0')?parseInt(w):w) + 'g'}</span></div></div>`;
                 const gripIcon = isDraggable ? 'fa-grip-vertical cursor-grab' : 'fa-lock opacity-30';
@@ -599,6 +748,7 @@
                     <td class="px-4 py-4 text-right">${formatTime(c.time)}</td>
                     <td class="px-4 py-4 text-center pointer-events-auto" ondblclick="openFilterMenu(event,'temp')">${getTempBadge(c.temp)}</td>
                     <td class="px-4 py-4 text-sm max-w-xs truncate" title="${c.notes}">${c.notes || '-'}</td>
+                    <td class="px-4 py-4 text-center">${getStarDisplay(c.rating)}</td>
                     <td class="px-4 py-4 text-xs font-mono text-coffee-500">${displayDate}</td>
                     <td class="px-4 py-4 text-center flex justify-center gap-2">${actions}</td>
                 `;
@@ -646,6 +796,7 @@
         window.setTempMode = setTempMode;
         window.editCoffee = editCoffee;
         window.duplicateCoffee = duplicateCoffee;
+        window.cloneBrew = cloneBrew; // Expose clone function
         window.deleteCoffee = deleteCoffee;
         window.sortBy = sortBy;
         window.openFilterMenu = openFilterMenu;
@@ -660,6 +811,8 @@
         window.handleDrop = handleDrop;
         window.handleDragEnd = handleDragEnd;
         window.getFilteredCoffees = getFilteredCoffees;
+        window.setRating = setRating;
+        window.exportCSV = exportCSV;
 
         // Init
         initTheme();
