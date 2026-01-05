@@ -51,6 +51,10 @@
         /* SCA Wheel Styles */
         .sca-btn { transition: all 0.2s; }
         .sca-btn:active { transform: scale(0.95); }
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: #68D391; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #68D391; }
     </style>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { coffee: { 50: '#fdf8f6', 100: '#f2e8e5', 200: '#eaddd7', 300: '#e0ccbb', 400: '#d2bab0', 500: '#a18e84', 600: '#8c7365', 700: '#7f5539', 800: '#9c6644', 900: '#4a3b32', } } } } }
@@ -257,11 +261,21 @@
                         <input type="hidden" id="notesMode" name="notesMode" value="sca">
                     </div>
 
-                    <div class="col-span-1 md:col-span-2 lg:col-span-4 flex justify-end mt-2 gap-3">
-                        <button type="button" onclick="discardForm()" class="text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#34302e] px-4 py-2.5 rounded-lg font-medium transition-colors">Discard</button>
-                        <button type="submit" id="submitBtn" class="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2">
-                            <i class="fa-solid fa-check"></i> <span>Save Brew</span>
-                        </button>
+                    <div class="col-span-1 md:col-span-2 lg:col-span-4 flex justify-between items-center mt-2 border-t border-coffee-100 dark:border-[#44403c] pt-4">
+                        <div class="flex items-center gap-2">
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="isActive" id="isActiveToggle" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 dark:border-gray-600"/>
+                                <label for="isActiveToggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 dark:bg-gray-700 cursor-pointer"></label>
+                            </div>
+                            <label for="isActiveToggle" class="text-xs font-bold text-coffee-600 dark:text-[#a8a29e] cursor-pointer">Add to Active Brews</label>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button type="button" onclick="discardForm()" class="text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#34302e] px-4 py-2.5 rounded-lg font-medium transition-colors">Discard</button>
+                            <button type="submit" id="submitBtn" class="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-check"></i> <span>Save Brew</span>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -480,6 +494,7 @@
             const f = new FormData(e.target); const eid = f.get('editId');
             const tMode = f.get('tempMode'); const finalTemp = tMode === 'profile' ? f.get('tempProfile') : (f.get('tempNumeric') || "M");
             const finalNotes = f.get('notes') || '';
+            const isActiveChecked = f.get('isActive') === 'on'; // Check toggle status
 
             let newOrder = 0; if (coffees.length > 0) { const minOrder = Math.min(...coffees.map(c => c.customOrder || 0)); newOrder = minOrder - 1; }
 
@@ -489,16 +504,13 @@
                 ratio: parseNum(f.get('ratio')), time: parseNum(f.get('time')), temp: finalTemp, 
                 notes: finalNotes, 
                 rating: parseInt(f.get('rating')) || 0,
-                isActive: false, // Default new to false, unless we want to option to add straight to active? Default false for now.
+                isActive: isActiveChecked, 
                 updatedAt: new Date().toISOString() 
             };
             
             try {
                 const col = collection(db, 'users', currentUser.uid, 'coffees');
                 if(eid) { 
-                    // Preserve isActive status on edit
-                    const existing = coffees.find(c => c.id === eid);
-                    if(existing) d.isActive = existing.isActive || false;
                     await updateDoc(doc(col, eid), d); 
                 } else { 
                     d.customOrder = newOrder; 
@@ -631,14 +643,46 @@
         const setTempMode = (m) => { document.getElementById('tempMode').value=m; if(m==='profile'){document.getElementById('tempProfileContainer').classList.remove('hidden');document.getElementById('tempNumericContainer').classList.add('hidden');}else{document.getElementById('tempNumericContainer').classList.remove('hidden');document.getElementById('tempProfileContainer').classList.add('hidden');} };
         
         const toggleForm = (f=null) => { const c=document.getElementById('formContainer'),o=document.getElementById('formContent'),e=c.getAttribute('aria-expanded')==='true',s=f!==null?f:!e; c.setAttribute('aria-expanded',s?'true':'false'); if(s){ o.classList.remove('hidden'); if(document.getElementById('notesMode').value === 'sca') renderScaWheel(); } else { o.classList.add('hidden'); } };
-        const populateForm = (c) => { document.getElementById('roaster').value=c.roaster||c.name||''; document.getElementById('farmer').value=c.farmer||''; document.getElementById('origin').value=c.origin||c.beanType||''; document.getElementById('variety').value=c.variety||''; document.getElementById('processing').value=c.processing||''; document.getElementById('roastType').value=c.roastType||''; document.getElementById('method').value=c.method||''; document.getElementById('grind').value=c.grind||''; document.getElementById('inputWeight').value=c.weight||''; document.getElementById('inputRatio').value=c.ratio||''; document.getElementById('inputYield').value=(c.weight&&c.ratio)?(c.weight*c.ratio).toFixed(1):''; document.getElementById('time').value=c.time||''; document.getElementById('notes').value=c.notes||''; if(!isNaN(parseFloat(c.temp))&&isFinite(c.temp)){setTempMode('numeric');document.getElementById('tempNumeric').value=c.temp;}else{setTempMode('profile');document.getElementById('tempProfile').value=c.temp||'';} setRating(c.rating||0); setNotesMode('manual'); }
+        const populateForm = (c) => { 
+            document.getElementById('roaster').value=c.roaster||c.name||''; 
+            document.getElementById('farmer').value=c.farmer||''; 
+            document.getElementById('origin').value=c.origin||c.beanType||''; 
+            document.getElementById('variety').value=c.variety||''; 
+            document.getElementById('processing').value=c.processing||''; 
+            document.getElementById('roastType').value=c.roastType||''; 
+            document.getElementById('method').value=c.method||''; 
+            document.getElementById('grind').value=c.grind||''; 
+            document.getElementById('inputWeight').value=c.weight||''; 
+            document.getElementById('inputRatio').value=c.ratio||''; 
+            document.getElementById('inputYield').value=(c.weight&&c.ratio)?(c.weight*c.ratio).toFixed(1):''; 
+            document.getElementById('time').value=c.time||''; 
+            document.getElementById('notes').value=c.notes||''; 
+            if(!isNaN(parseFloat(c.temp))&&isFinite(c.temp)){setTempMode('numeric');document.getElementById('tempNumeric').value=c.temp;}else{setTempMode('profile');document.getElementById('tempProfile').value=c.temp||'';} 
+            setRating(c.rating||0); 
+            setNotesMode('manual');
+            document.getElementById('isActiveToggle').checked = c.isActive || false; 
+        }
 
         const editCoffee = (id) => { const c=coffees.find(x=>x.id===id); if(!c)return; document.getElementById('editId').value=c.id; populateForm(c); document.getElementById('formContainer').classList.add('editing-mode'); toggleForm(true); document.getElementById('formTitle').innerHTML='<span class="text-orange-500">Edit Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Update</span>'; document.getElementById('submitBtn').className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); };
         const duplicateCoffee = (id) => { const c=coffees.find(x=>x.id===id); if(!c)return; if(currentView!=='mine'){const d={...c};document.getElementById('viewSelect').value='mine';changeView('mine');setTimeout(()=>{document.getElementById('editId').value='';populateForm(d);toggleForm(true);document.getElementById('formContainer').classList.remove('editing-mode');document.getElementById('formTitle').innerHTML='<span>Duplicate Brew</span>';document.getElementById('submitBtn').innerHTML='<span>Save Copy</span>';window.scrollTo({top:0,behavior:'smooth'});},500);}else{document.getElementById('editId').value='';populateForm(c);toggleForm(true);document.getElementById('formContainer').classList.remove('editing-mode');document.getElementById('formTitle').innerHTML='<span>Duplicate Brew</span>';document.getElementById('submitBtn').innerHTML='<span>Save Copy</span>';window.scrollTo({top:0,behavior:'smooth'});} };
         const cloneBrew = (id) => duplicateCoffee(id);
 
         const deleteCoffee = async (id, ev) => { if(ev)ev.stopPropagation(); if(currentView!=='mine')return; if(!confirm('Delete?'))return; await deleteDoc(doc(db,'users',currentUser.uid,'coffees',id)); if(document.getElementById('editId').value==id)resetFormState(); };
-        const resetFormState = (e) => { if(e)e.stopPropagation(); document.getElementById('coffeeForm').reset(); document.getElementById('editId').value=''; setTempMode('profile'); setNotesMode('sca'); resetSca(); setRating(0); document.getElementById('formContainer').classList.remove('editing-mode'); document.getElementById('formTitle').innerHTML='<span>Add New Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Save Brew</span>'; document.getElementById('submitBtn').className="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.add('hidden'); };
+        const resetFormState = (e) => { 
+            if(e)e.stopPropagation(); 
+            document.getElementById('coffeeForm').reset(); 
+            document.getElementById('editId').value=''; 
+            setTempMode('profile'); 
+            setNotesMode('sca'); 
+            resetSca(); 
+            setRating(0); 
+            document.getElementById('formContainer').classList.remove('editing-mode'); 
+            document.getElementById('formTitle').innerHTML='<span>Add New Brew</span>'; 
+            document.getElementById('submitBtn').innerHTML='<span>Save Brew</span>'; 
+            document.getElementById('submitBtn').className="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; 
+            document.getElementById('cancelEditBtn').classList.add('hidden'); 
+            document.getElementById('isActiveToggle').checked = false; // Reset toggle
+        };
         
         let currentSort = { key: null, direction: 'asc' };
         let activeFilters = { method: null, temp: null, roastType: null, roaster: null, origin: null, farmer: null, variety: null, processing: null };
