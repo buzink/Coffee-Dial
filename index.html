@@ -23,7 +23,7 @@
         th.filterable { position: relative; cursor: context-menu; touch-action: manipulation; }
         
         #filterDropdown, #mainMenuDropdown { z-index: 50; animation: fadeIn 0.1s ease-out; }
-        #modalOverlay, #imageModalOverlay, #coffeeCardOverlay, #uploadPhotoModal, #galleryModal { animation: fadeIn 0.2s ease-out; }
+        #modalOverlay, #imageModalOverlay, #coffeeCardOverlay, #uploadPhotoModal, #galleryModal, #easterEggModal { animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         .chevron-rotate { transition: transform 0.3s ease; }
         .group[aria-expanded="true"] .chevron-rotate { transform: rotate(180deg); }
@@ -51,11 +51,12 @@
 
     <header class="bg-white dark:bg-[#292524] shadow-sm border-b border-coffee-200 dark:border-[#44403c] sticky top-0 z-20 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-mug-hot text-coffee-700 dark:text-[#d6ccc2] text-2xl"></i>
+            <div class="flex items-center gap-3 cursor-pointer select-none group" ondblclick="openEasterEgg()" title="Double click for a surprise!">
+                <i class="fa-solid fa-mug-hot text-coffee-700 dark:text-[#d6ccc2] text-2xl group-hover:scale-110 transition-transform duration-300"></i>
                 <h1 class="text-2xl font-bold tracking-tight text-coffee-900 dark:text-white">Coffee Dial</h1>
                 <div id="syncStatus" class="hidden text-xs text-coffee-500 animate-pulse"><i class="fa-solid fa-cloud"></i></div>
             </div>
+            
             <div class="flex items-center gap-4">
                 <div id="authContainer">
                     <button id="loginBtn" onclick="googleLogin()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors">
@@ -307,6 +308,18 @@
                     <p>No photos found.</p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="easterEggModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 animate-in fade-in duration-300" onclick="closeEasterEgg(event)">
+        <div class="relative w-full max-w-4xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/20">
+            <button onclick="closeEasterEgg(null)" class="absolute top-4 right-4 text-white/70 hover:text-white z-10 transition-colors">
+                <i class="fa-solid fa-xmark text-2xl drop-shadow-md"></i>
+            </button>
+            <video id="easterEggVideo" class="w-full h-full object-contain" controls>
+                <source src="img/Cozy_and_Funky_Video_Generation.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
         </div>
     </div>
 
@@ -695,6 +708,23 @@
             });
         };
 
+        // --- Easter Egg Logic ---
+        const openEasterEgg = () => {
+            const m = document.getElementById('easterEggModal');
+            const v = document.getElementById('easterEggVideo');
+            m.classList.remove('hidden');
+            v.currentTime = 0;
+            v.play().catch(e => console.log("Autoplay failed", e));
+        };
+        const closeEasterEgg = (e) => {
+            if(!e || e.target.id === 'easterEggModal' || e.target.closest('button')) {
+                const m = document.getElementById('easterEggModal');
+                const v = document.getElementById('easterEggVideo');
+                m.classList.add('hidden');
+                v.pause();
+            }
+        };
+
         // --- Standard Logic ---
         const setRating = (r) => { const c=document.getElementById('starContainer'); document.getElementById('ratingInput').value=r; for(let i=0;i<c.children.length;i++){ if(i<r)c.children[i].classList.add('active'); else c.children[i].classList.remove('active'); } };
         const getStarDisplay = (r) => { if(!r)return'-'; let h=''; for(let i=0;i<r;i++)h+='<i class="fa-solid fa-star text-xs text-yellow-400"></i>'; return h; };
@@ -881,7 +911,7 @@
         });
 
         // Expose to window
-        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab });
+        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg });
 
         initTheme();
         const searchInput = document.getElementById('globalSearch'); if(searchInput) { searchInput.addEventListener('input', () => { renderTable(); }); }
