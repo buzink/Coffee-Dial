@@ -592,7 +592,31 @@
         // --- Standard UI ---
         const openFriendsModal = () => { document.getElementById('modalOverlay').classList.remove('hidden'); switchModalTab('profile'); };
         const closeModal = () => document.getElementById('modalOverlay').classList.add('hidden');
-        const switchModalTab = (tab) => { const tProf=document.getElementById('tabProfile'),tFoll=document.getElementById('tabFollowing'),cProf=document.getElementById('contentProfile'),cFoll=document.getElementById('contentFollowing');if(tab==='profile'){tProf.classList.add('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');tProf.classList.remove('text-coffee-500','dark:text-[#78716c]');tFoll.classList.remove('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');tFoll.classList.add('text-coffee-500','dark:text-[#78716c]');cProf.classList.remove('hidden');cFoll.classList.add('hidden');}else{tFoll.classList.add('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');tFoll.classList.remove('text-coffee-500','dark:text-[#78716c]');tProf.classList.remove('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');tProf.classList.add('text-coffee-500','dark:text-[#78716c]');cFoll.classList.remove('hidden');cFoll.classList.add('hidden');} };
+        
+        // FIXED switchModalTab Function
+        const switchModalTab = (tab) => { 
+            const tProf = document.getElementById('tabProfile');
+            const tFoll = document.getElementById('tabFollowing');
+            const cProf = document.getElementById('contentProfile');
+            const cFoll = document.getElementById('contentFollowing');
+
+            if(tab === 'profile') {
+                tProf.classList.add('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');
+                tProf.classList.remove('text-coffee-500','dark:text-[#78716c]');
+                tFoll.classList.remove('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');
+                tFoll.classList.add('text-coffee-500','dark:text-[#78716c]');
+                cProf.classList.remove('hidden');
+                cFoll.classList.add('hidden');
+            } else {
+                tFoll.classList.add('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');
+                tFoll.classList.remove('text-coffee-500','dark:text-[#78716c]');
+                tProf.classList.remove('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');
+                tProf.classList.add('text-coffee-500','dark:text-[#78716c]');
+                cFoll.classList.remove('hidden'); // Show Following
+                cProf.classList.add('hidden');    // Hide Profile
+            } 
+        };
+
         const togglePublicProfile = async () => { if(!currentUser) return; isPublic = !isPublic; updatePublicToggleUI(); await updateDoc(doc(db, 'users', currentUser.uid), { isPublic: isPublic }); };
         const updatePublicToggleUI = () => { const btn=document.getElementById('togglePublicBtn'),dot=btn.firstElementChild,con=document.getElementById('shareIdContainer');if(isPublic){btn.className="bg-green-500 w-12 h-6 rounded-full p-1 transition-colors relative";dot.className="bg-white w-4 h-4 rounded-full shadow-md transform translate-x-6 transition-transform";con.classList.remove('hidden');}else{btn.className="bg-gray-300 dark:bg-[#44403c] w-12 h-6 rounded-full p-1 transition-colors relative";dot.className="bg-white w-4 h-4 rounded-full shadow-md transform translate-x-0 transition-transform";con.classList.add('hidden');} };
         const copyShareId = () => { document.getElementById('myShareId').select(); document.execCommand('copy'); alert("ID Copied!"); };
