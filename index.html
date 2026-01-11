@@ -112,7 +112,11 @@
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <i class="fa-solid fa-search text-coffee-400"></i>
                     </div>
-                    <input type="text" id="globalSearch" class="block w-full sm:w-64 p-2.5 pl-10 text-sm text-coffee-900 border border-coffee-200 rounded-lg bg-white dark:bg-[#292524] dark:border-[#44403c] dark:placeholder-[#57534e] dark:text-white focus:ring-coffee-500 focus:border-coffee-500" placeholder="Search brews...">
+                    <input type="text" id="globalSearch" class="block w-full sm:w-64 p-2.5 pl-10 pr-10 text-sm text-coffee-900 border border-coffee-200 rounded-lg bg-white dark:bg-[#292524] dark:border-[#44403c] dark:placeholder-[#57534e] dark:text-white focus:ring-coffee-500 focus:border-coffee-500" placeholder="Search brews...">
+                    
+                    <button id="searchClearBtn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-coffee-400 hover:text-coffee-600 dark:hover:text-white transition-colors cursor-pointer">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -983,6 +987,15 @@
         const resetFormState = (e) => { 
             if(e)e.stopPropagation(); document.getElementById('coffeeForm').reset(); document.getElementById('editId').value=''; setTempMode('numeric'); setNotesMode('sca'); resetSca(); setRating(0); document.getElementById('formContainer').classList.remove('editing-mode'); document.getElementById('formTitle').innerHTML='<span>Add New Brew</span>'; document.getElementById('submitBtn').innerHTML='<span>Save Brew</span>'; document.getElementById('submitBtn').className="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2"; document.getElementById('cancelEditBtn').classList.add('hidden'); document.getElementById('isActiveToggle').checked = false; 
         };
+
+        // --- Clear Search Function ---
+        const clearSearch = () => {
+            const input = document.getElementById('globalSearch');
+            input.value = '';
+            renderTable(); // Update table to show all items
+            document.getElementById('searchClearBtn').classList.add('hidden'); // Hide the X button
+            input.focus(); // Keep focus on input for better UX
+        };
         
         let currentSort = { key: null, direction: 'asc' };
         let activeFilters = { method: null, temp: null, roastType: null, roaster: null, origin: null, farmer: null, variety: null, processing: null };
@@ -1174,10 +1187,18 @@
         });
 
         // Expose to window
-        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences });
+        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch });
 
         initTheme();
-        const searchInput = document.getElementById('globalSearch'); if(searchInput) { searchInput.addEventListener('input', () => { renderTable(); }); }
+        const searchInput = document.getElementById('globalSearch'); 
+        if(searchInput) { 
+            searchInput.addEventListener('input', (e) => { 
+                const clearBtn = document.getElementById('searchClearBtn');
+                if(e.target.value.length > 0) clearBtn.classList.remove('hidden');
+                else clearBtn.classList.add('hidden');
+                renderTable(); 
+            }); 
+        }
     </script>
 </body>
 </html>
