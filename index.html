@@ -23,7 +23,7 @@
         th.filterable { position: relative; cursor: context-menu; touch-action: manipulation; }
         
         #filterDropdown, #mainMenuDropdown { z-index: 50; animation: fadeIn 0.1s ease-out; }
-        #modalOverlay, #imageModalOverlay, #coffeeCardOverlay, #uploadPhotoModal, #galleryModal, #easterEggModal, #preferencesModal { animation: fadeIn 0.2s ease-out; }
+        #modalOverlay, #imageModalOverlay, #coffeeCardOverlay, #uploadPhotoModal, #galleryModal, #easterEggModal, #preferencesModal, #helpModal, #aboutModal { animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         .chevron-rotate { transition: transform 0.3s ease; }
         .group[aria-expanded="true"] .chevron-rotate { transform: rotate(180deg); }
@@ -76,6 +76,13 @@
                         <span id="menuBadge" class="hidden absolute top-1 right-1 block h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-[#292524] bg-red-500"></span>
                     </button>
                     <div id="mainMenuDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] py-2 z-50">
+                        <button onclick="openHelp(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
+                            <i class="fa-solid fa-circle-question"></i> <span>Help / Tutorial</span>
+                        </button>
+                         <button onclick="openAbout(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info"></i> <span>About</span>
+                        </button>
+                        <hr class="my-1 border-coffee-100 dark:border-[#44403c]">
                         <button onclick="openGallery(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-images"></i> <span>Photo Gallery</span>
@@ -411,6 +418,106 @@
                 <button onclick="savePreferences()" class="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] text-white px-4 py-2 rounded-lg text-sm font-medium">
                     Save Preferences
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="helpModal" class="hidden fixed inset-0 z-[95] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-[#292524] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col">
+            <div class="p-5 border-b border-coffee-200 dark:border-[#44403c] flex justify-between items-center">
+                <h3 class="font-bold text-xl text-coffee-900 dark:text-white"><i class="fa-solid fa-circle-question mr-2 text-coffee-600 dark:text-[#d6ccc2]"></i>How to Use Coffee Dial</h3>
+                <button onclick="closeHelp()" class="text-gray-500 hover:text-gray-700 dark:text-[#78716c] dark:hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-8 bg-coffee-50 dark:bg-[#1c1917]">
+                
+                <!-- Intro -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-coffee-800 dark:text-white flex items-center gap-2"><i class="fa-solid fa-hand-sparkles text-yellow-500"></i> Your Brew, Your Way</h4>
+                    <p class="text-sm text-coffee-600 dark:text-[#a8a29e]">Coffee Dial is flexible. You can use it to log <strong>every single shot</strong> you make to track consistency, OR you can just save your <strong>favourite recipes</strong> (Golden Cups) and update them as you dial in a new bean. It's your laboratory!</p>
+                </div>
+
+                <!-- Step 1: Add/Edit -->
+                <div class="bg-white dark:bg-[#292524] p-4 rounded-lg border border-coffee-100 dark:border-[#44403c] shadow-sm">
+                    <h4 class="font-bold text-coffee-800 dark:text-white mb-2">1. Adding & Editing Brews</h4>
+                    <div class="flex flex-col sm:flex-row gap-4 items-center">
+                        <div class="flex-shrink-0 text-coffee-500 text-4xl">
+                            <i class="fa-solid fa-plus-circle"></i>
+                        </div>
+                        <p class="text-sm text-coffee-600 dark:text-[#a8a29e]">Tap the <strong>"Add New Brew"</strong> bar at the top to open the form. Fill in your details (Roaster, Grind, Ratio, etc.). You can use the SCA Flavor Wheel for notes! To edit, simply tap the <i class="fa-solid fa-pencil text-blue-500 text-xs"></i> icon on any row.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2: The Card -->
+                <div class="bg-white dark:bg-[#292524] p-4 rounded-lg border border-coffee-100 dark:border-[#44403c] shadow-sm">
+                    <h4 class="font-bold text-coffee-800 dark:text-white mb-2">2. The Coffee Card (Double Tap!)</h4>
+                    <div class="flex flex-col sm:flex-row gap-4 items-center">
+                        <div class="flex-shrink-0 bg-coffee-100 dark:bg-[#44403c] p-3 rounded-lg border border-coffee-200 dark:border-[#57534e]">
+                            <i class="fa-solid fa-id-card text-2xl text-coffee-700 dark:text-[#d6ccc2]"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-coffee-600 dark:text-[#a8a29e]">This is the magic feature. <strong>Double tap any row</strong> in your table to open the "Coffee Card".</p>
+                            <p class="text-xs text-coffee-500 dark:text-[#78716c] mt-1">This presents a beautiful, summarized view of the recipe, perfect for quickly replicating a brew without scrolling through the table.</p>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- Step 3: Social -->
+                 <div class="bg-white dark:bg-[#292524] p-4 rounded-lg border border-coffee-100 dark:border-[#44403c] shadow-sm">
+                    <h4 class="font-bold text-coffee-800 dark:text-white mb-2">3. Social & Sharing</h4>
+                    <div class="flex flex-col sm:flex-row gap-4 items-center">
+                         <div class="flex-shrink-0 text-blue-500 text-3xl">
+                            <i class="fa-solid fa-user-group"></i>
+                        </div>
+                        <div class="flex-1">
+                             <p class="text-sm text-coffee-600 dark:text-[#a8a29e]">Want to see what your friends are brewing? Click the <strong>"Friends"</strong> button.</p>
+                             <ul class="list-disc list-inside text-xs text-coffee-500 dark:text-[#78716c] mt-1 space-y-1">
+                                <li>Enable "Public Profile" to get a Share ID.</li>
+                                <li>Send your ID to a friend so they can follow you.</li>
+                                <li>Enter a friend's ID to follow them.</li>
+                                <li>Use the dropdown menu (top left) to switch views between "My Brews" and your friends' lists.</li>
+                             </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Gallery -->
+                 <div class="bg-white dark:bg-[#292524] p-4 rounded-lg border border-coffee-100 dark:border-[#44403c] shadow-sm">
+                    <h4 class="font-bold text-coffee-800 dark:text-white mb-2">4. Photo Gallery</h4>
+                    <div class="flex flex-col sm:flex-row gap-4 items-center">
+                        <div class="flex-shrink-0 text-purple-500 text-3xl">
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                        <p class="text-sm text-coffee-600 dark:text-[#a8a29e]">Use the camera icon on any brew row to upload a photo (latte art, bean bag, setup). You can share these photos specifically with friends, and view them in the global <strong>Photo Gallery</strong> via the main menu.</p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="bg-coffee-50 dark:bg-[#1c1917] px-6 py-3 flex justify-end border-t border-coffee-200 dark:border-[#44403c]">
+                <button onclick="closeHelp()" class="bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] text-white px-6 py-2 rounded-lg text-sm font-medium">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="aboutModal" class="hidden fixed inset-0 z-[95] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-[#292524] rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-coffee-200 dark:border-[#44403c] relative">
+            <button onclick="closeAbout()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-[#78716c] dark:hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="p-8 text-center flex flex-col items-center">
+                <div class="w-16 h-16 bg-coffee-100 dark:bg-[#44403c] rounded-full flex items-center justify-center mb-4 shadow-inner">
+                    <i class="fa-solid fa-heart text-3xl text-red-500 animate-pulse"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-coffee-900 dark:text-white mb-2">About Coffee Dial</h3>
+                <div class="w-12 h-1 bg-coffee-300 dark:bg-[#57534e] rounded-full mb-6"></div>
+                
+                <p class="text-coffee-700 dark:text-[#d6ccc2] mb-6 leading-relaxed text-sm">
+                    This app is made by two amateur brewers, <strong>Tieme & Robert</strong>, who wanted some method to their madness of home coffee experimentation.
+                </p>
+                <p class="text-coffee-600 dark:text-[#a8a29e] text-sm italic mb-6">
+                    Feel free to spread our love for coffee and share the link to this app with friends and follow each other's brews.
+                </p>
+
+                <div class="text-xs text-coffee-400 dark:text-[#57534e]">
+                    Version 1.2.0 (BETA)
+                </div>
             </div>
         </div>
     </div>
@@ -905,6 +1012,12 @@
             renderTable(); // Apply changes
         };
 
+        // --- Help & About Logic ---
+        const openHelp = () => document.getElementById('helpModal').classList.remove('hidden');
+        const closeHelp = () => document.getElementById('helpModal').classList.add('hidden');
+        const openAbout = () => document.getElementById('aboutModal').classList.remove('hidden');
+        const closeAbout = () => document.getElementById('aboutModal').classList.add('hidden');
+
         // --- Notifications Listener ---
         const initNotificationListener = (uid) => {
             if(unsubscribeNotifications) unsubscribeNotifications();
@@ -1263,7 +1376,7 @@
         });
 
         // Expose to window
-        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther });
+        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, openHelp, closeHelp, openAbout, closeAbout });
 
         initTheme();
         const searchInput = document.getElementById('globalSearch'); 
