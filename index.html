@@ -384,9 +384,12 @@
                     <textarea id="photoMessage" rows="2" placeholder="Tell us about this brew..." class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white"></textarea>
                 </div>
                 <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase">Share with specific friends</label>
-                        <span class="text-[10px] text-gray-400 italic">Toggle Green to share, Red to keep private.</span>
+                    <div class="flex justify-between items-end mb-2">
+                        <label class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase">Share with friends</label>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="toggleAllFriends(false)" class="text-[10px] font-bold text-coffee-600 dark:text-[#a8a29e] hover:text-red-500 transition-colors uppercase">None</button>
+                            <button type="button" onclick="toggleAllFriends(true)" class="text-[10px] font-bold text-coffee-600 dark:text-[#a8a29e] hover:text-green-500 transition-colors uppercase">All</button>
+                        </div>
                     </div>
                     <div id="shareWithList" class="max-h-32 overflow-y-auto space-y-2 border border-coffee-100 dark:border-[#44403c] rounded-lg p-2 bg-coffee-50 dark:bg-[#1c1917]"></div>
                 </div>
@@ -882,13 +885,18 @@
                     div.innerHTML = `
                         <span class="text-sm font-medium text-coffee-800 dark:text-[#d6ccc2]">${f.name || f.uid}</span>
                         <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
-                            <input type="checkbox" id="share_${f.uid}" value="${f.uid}" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-red-500"/>
-                            <label for="share_${f.uid}" class="toggle-label block overflow-hidden h-5 rounded-full bg-red-500 cursor-pointer"></label>
+                            <input type="checkbox" id="share_${f.uid}" value="${f.uid}" checked class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 dark:border-gray-600"/>
+                            <label for="share_${f.uid}" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 dark:bg-gray-700 cursor-pointer"></label>
                         </div>
                     `;
                     list.appendChild(div);
                 });
             }
+        };
+
+        const toggleAllFriends = (state) => {
+            const checkboxes = document.querySelectorAll('#shareWithList input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = state);
         };
 
         const closeUploadModal = () => document.getElementById('uploadPhotoModal').classList.add('hidden');
@@ -1468,7 +1476,7 @@
         });
 
         // Expose to window
-        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, openHelp, closeHelp, openAbout, closeAbout });
+        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends });
 
         initTheme();
         const searchInput = document.getElementById('globalSearch'); 
