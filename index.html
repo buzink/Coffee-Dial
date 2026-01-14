@@ -720,42 +720,22 @@
         const handleDrop = async (e) => {
             if (e.stopPropagation) e.stopPropagation();
             const targetRow = e.target.closest('tr');
-
-            // Safety checks
             if (!targetRow || !dragSrcEl) return false;
-
             const srcBody = dragSrcEl.closest('tbody');
             const targetBody = targetRow.closest('tbody');
-
             if (!srcBody || !targetBody) return false;
 
-            // Allow if both are the same body, and that body is one of our tables
-            if (dragSrcEl !== targetRow && 
-                srcBody.id === targetBody.id && 
-                (srcBody.id === 'coffeeTableBody' || srcBody.id === 'activeCoffeeTableBody')) {
-                
-                const oldIndex = parseInt(dragSrcEl.getAttribute('data-index'));
-                const newIndex = parseInt(targetRow.getAttribute('data-index'));
-
-                // Move in the main array
-                const movedItem = coffees.splice(oldIndex, 1)[0];
-                coffees.splice(newIndex, 0, movedItem);
-                
-                // Re-assign customOrder to match new array order
+            if (dragSrcEl !== targetRow && srcBody.id === targetBody.id && (srcBody.id === 'coffeeTableBody' || srcBody.id === 'activeCoffeeTableBody')) {
+                const oldIndex = parseInt(dragSrcEl.getAttribute('data-index')); const newIndex = parseInt(targetRow.getAttribute('data-index'));
+                const movedItem = coffees.splice(oldIndex, 1)[0]; coffees.splice(newIndex, 0, movedItem);
                 coffees.forEach((c, idx) => c.customOrder = idx);
-                
                 renderTable(); 
-
                 try {
                     const batch = writeBatch(db);
-                    coffees.forEach((c) => { 
-                        const ref = doc(db, 'users', currentUser.uid, 'coffees', c.id); 
-                        batch.update(ref, { customOrder: c.customOrder }); 
-                    });
+                    coffees.forEach((c) => { const ref = doc(db, 'users', currentUser.uid, 'coffees', c.id); batch.update(ref, { customOrder: c.customOrder }); });
                     await batch.commit();
                 } catch(err) { console.error("Reorder failed", err); }
-            } 
-            return false;
+            } return false;
         };
         const handleDragEnd = (e) => { if(dragSrcEl) dragSrcEl.classList.remove('opacity-50'); };
 
@@ -1377,7 +1357,7 @@
                 if (isDraggable) { r.setAttribute('draggable', 'true'); r.setAttribute('data-index', index); r.classList.add('cursor-grab'); r.addEventListener('dragstart', handleDragStart); r.addEventListener('dragover', handleDragOver); r.addEventListener('drop', handleDrop); r.addEventListener('dragend', handleDragEnd); }
                 r.innerHTML = rowHTML; t.appendChild(r);
 
-                if(c.isActive && currentView === 'mine') {
+                if(c.isActive) {
                     hasActive = true;
                     const rActive = document.createElement('tr');
                     rActive.className='bg-white dark:bg-[#292524] hover:bg-green-50 dark:hover:bg-green-900/20 border-b border-green-50 dark:border-green-900/10 last:border-b-0 cursor-pointer';
@@ -1405,7 +1385,7 @@
             // Add logic to make colspan dynamic for section headers based on visible columns
             const totalCols = 2 + columnDefs.filter(c => columnPreferences[c.id] !== false).length; // 2 for Grip and Actions
 
-            if(hasActive && currentView === 'mine') {
+            if(hasActive) {
                 const activeHeader = document.createElement('tr'); activeHeader.className = "bg-green-50/50 dark:bg-green-900/20"; activeHeader.innerHTML = `<td colspan="${totalCols}" class="px-4 py-2 font-bold text-green-700 dark:text-green-400 text-xs uppercase tracking-wide"><i class="fa-solid fa-thumbtack mr-2"></i>Active Brews</td>`; activeT.insertBefore(activeHeader, activeT.firstChild);
                 const histHeader = document.createElement('tr'); histHeader.className = "bg-coffee-50/50 dark:bg-[#201d1b]"; histHeader.innerHTML = `<td colspan="${totalCols}" class="px-4 py-2 font-bold text-coffee-600 dark:text-[#a8a29e] text-xs uppercase tracking-wide"><i class="fa-solid fa-clock-rotate-left mr-2"></i>History</td>`; t.insertBefore(histHeader, t.firstChild); activeT.classList.remove('hidden');
             } else { activeT.classList.add('hidden'); }
