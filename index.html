@@ -720,17 +720,42 @@
         const handleDrop = async (e) => {
             if (e.stopPropagation) e.stopPropagation();
             const targetRow = e.target.closest('tr');
-            if (dragSrcEl !== targetRow && targetRow && targetRow.closest('tbody').id === 'coffeeTableBody' && dragSrcEl.closest('tbody').id === 'coffeeTableBody') {
-                const oldIndex = parseInt(dragSrcEl.getAttribute('data-index')); const newIndex = parseInt(targetRow.getAttribute('data-index'));
-                const movedItem = coffees.splice(oldIndex, 1)[0]; coffees.splice(newIndex, 0, movedItem);
+
+            // Safety checks
+            if (!targetRow || !dragSrcEl) return false;
+
+            const srcBody = dragSrcEl.closest('tbody');
+            const targetBody = targetRow.closest('tbody');
+
+            if (!srcBody || !targetBody) return false;
+
+            // Allow if both are the same body, and that body is one of our tables
+            if (dragSrcEl !== targetRow && 
+                srcBody.id === targetBody.id && 
+                (srcBody.id === 'coffeeTableBody' || srcBody.id === 'activeCoffeeTableBody')) {
+                
+                const oldIndex = parseInt(dragSrcEl.getAttribute('data-index'));
+                const newIndex = parseInt(targetRow.getAttribute('data-index'));
+
+                // Move in the main array
+                const movedItem = coffees.splice(oldIndex, 1)[0];
+                coffees.splice(newIndex, 0, movedItem);
+                
+                // Re-assign customOrder to match new array order
                 coffees.forEach((c, idx) => c.customOrder = idx);
+                
                 renderTable(); 
+
                 try {
                     const batch = writeBatch(db);
-                    coffees.forEach((c) => { const ref = doc(db, 'users', currentUser.uid, 'coffees', c.id); batch.update(ref, { customOrder: c.customOrder }); });
+                    coffees.forEach((c) => { 
+                        const ref = doc(db, 'users', currentUser.uid, 'coffees', c.id); 
+                        batch.update(ref, { customOrder: c.customOrder }); 
+                    });
                     await batch.commit();
                 } catch(err) { console.error("Reorder failed", err); }
-            } return false;
+            } 
+            return false;
         };
         const handleDragEnd = (e) => { if(dragSrcEl) dragSrcEl.classList.remove('opacity-50'); };
 
@@ -1357,7 +1382,22 @@
                     const rActive = document.createElement('tr');
                     rActive.className='bg-white dark:bg-[#292524] hover:bg-green-50 dark:hover:bg-green-900/20 border-b border-green-50 dark:border-green-900/10 last:border-b-0 cursor-pointer';
                     rActive.ondblclick = (e) => openCoffeeCard(c.id, e);
-                    rActive.innerHTML = rowHTML.replace(gripIcon, 'fa-star text-green-500'); 
+                    
+                    if (isDraggable) {
+                        rActive.setAttribute('draggable', 'true');
+                        rActive.setAttribute('data-index', index);
+                        rActive.classList.add('cursor-grab');
+                        rActive.addEventListener('dragstart', handleDragStart);
+                        rActive.addEventListener('dragover', handleDragOver);
+                        rActive.addEventListener('drop', handleDrop);
+                        rActive.addEventListener('dragend', handleDragEnd);
+                        // Use a green grip for draggable active rows
+                        rActive.innerHTML = rowHTML.replace(gripIcon, 'fa-grip-vertical text-green-500 cursor-grab'); 
+                    } else {
+                        // Keep star if not draggable (filtered mode)
+                        rActive.innerHTML = rowHTML.replace(gripIcon, 'fa-star text-green-500'); 
+                    }
+                    
                     activeT.appendChild(rActive);
                 }
             });
