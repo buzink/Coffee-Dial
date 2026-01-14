@@ -6,6 +6,8 @@
     <title>Coffee Dial - Brew Log</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Image Compression Library -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
         
@@ -415,6 +417,11 @@
             </div>
             <div id="galleryContent" class="p-4 overflow-y-auto flex-1 bg-coffee-50 dark:bg-[#1c1917]">
                 <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+                <div id="galleryLoadMore" class="text-center py-4 hidden">
+                    <button onclick="loadMoreGallery()" class="bg-coffee-100 dark:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] px-6 py-2 rounded-full text-sm font-bold shadow-sm hover:bg-coffee-200 dark:hover:bg-[#44403c] transition-colors">
+                        Load More <i class="fa-solid fa-chevron-down ml-2"></i>
+                    </button>
+                </div>
                 <div id="galleryEmpty" class="hidden text-center py-10 text-coffee-400 dark:text-[#57534e]">
                     <i class="fa-solid fa-images text-4xl mb-2"></i>
                     <p>No photos found.</p>
@@ -581,7 +588,7 @@
 
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, writeBatch, where, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, writeBatch, where, orderBy, limit, startAfter } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
         import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js';
 
         const app = initializeApp(firebaseConfig);
@@ -599,6 +606,11 @@
         let isPublic = false;
         let dragSrcEl = null;
         let currentUploadCoffeeId = null;
+
+        // --- Gallery Pagination State ---
+        let lastGalleryDoc = null;
+        let currentGalleryMode = 'mine';
+        let isGalleryLoading = false;
 
         // --- PREFERENCES CONFIG ---
         const columnDefs = [
@@ -928,14 +940,46 @@
             progressBar.classList.remove('hidden');
             
             try {
-                const storageRef = ref(storage, `photos/${currentUser.uid}/${Date.now()}_${file.name}`);
+                // --- NEW: Image Compression Logic ---
+                const options = {
+                    maxSizeMB: 1, // Max file size 1MB
+                    maxWidthOrHeight: 1024, // Resize to max 1024px width/height
+                    useWebWorker: true
+                };
+                
+                // --- THUMBNAIL LOGIC ---
+                let thumbFile = null;
+                const thumbOptions = {
+                    maxSizeMB: 0.5, // Increased quality
+                    maxWidthOrHeight: 600, // Increased resolution (2x previous)
+                    useWebWorker: true
+                };
+
+                try {
+                    thumbFile = await imageCompression(file, thumbOptions);
+                } catch (error) {
+                    console.log('Thumbnail generation failed:', error);
+                }
+
+                // Upload Original
+                const timestamp = Date.now();
+                const storageRef = ref(storage, `photos/${currentUser.uid}/${timestamp}_${file.name}_original`);
                 const snapshot = await uploadBytes(storageRef, file);
                 const downloadURL = await getDownloadURL(snapshot.ref);
+                
+                // Upload Thumbnail (if generated)
+                let thumbURL = null;
+                if(thumbFile) {
+                     const thumbRef = ref(storage, `photos/${currentUser.uid}/${timestamp}_${file.name}_thumb`);
+                     const thumbSnapshot = await uploadBytes(thumbRef, thumbFile);
+                     thumbURL = await getDownloadURL(thumbSnapshot.ref);
+                }
 
                 await addDoc(collection(db, 'photos'), {
                     uid: currentUser.uid,
                     uploaderName: currentUser.displayName || 'Unknown User',
                     photoURL: downloadURL,
+                    thumbURL: thumbURL, // Save thumb URL
                     message: message,
                     coffeeId: currentUploadCoffeeId,
                     coffeeSnapshot: coffeeSnapshot,
@@ -968,73 +1012,117 @@
             } else {
                 switchGalleryTab('mine');
             }
+            
+            // Initial load call
+            lastGalleryDoc = null;
+            document.getElementById('galleryGrid').innerHTML = '';
+            document.getElementById('galleryEmpty').classList.add('hidden');
+            document.getElementById('galleryLoadMore').classList.add('hidden');
+            loadMoreGallery();
         };
 
         const switchGalleryTab = async (tab) => {
             const tMine = document.getElementById('tabGalleryMine');
             const tShared = document.getElementById('tabGalleryShared');
-            const grid = document.getElementById('galleryGrid');
-            const empty = document.getElementById('galleryEmpty');
             
-            grid.innerHTML = '';
-            empty.classList.remove('hidden');
+            currentGalleryMode = tab;
+            lastGalleryDoc = null;
+            document.getElementById('galleryGrid').innerHTML = '';
+            document.getElementById('galleryEmpty').classList.add('hidden');
+            document.getElementById('galleryLoadMore').classList.add('hidden');
 
             if(tab === 'mine') {
                 tMine.classList.add('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');
                 tMine.classList.remove('text-coffee-500','dark:text-[#78716c]');
                 tShared.classList.remove('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');
                 tShared.classList.add('text-coffee-500','dark:text-[#78716c]');
-
-                const q = query(collection(db, 'photos'), where('uid', '==', currentUser.uid), orderBy('createdAt', 'desc'));
-                renderGalleryGrid(q, grid, empty);
             } else {
                 tShared.classList.add('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');
                 tShared.classList.remove('text-coffee-500','dark:text-[#78716c]');
                 tMine.classList.remove('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');
                 tMine.classList.add('text-coffee-500','dark:text-[#78716c]');
-
-                // 'sharedWith' array-contains query
-                const q = query(collection(db, 'photos'), where('sharedWith', 'array-contains', currentUser.uid), orderBy('createdAt', 'desc'));
-                renderGalleryGrid(q, grid, empty);
             }
+            
+            loadMoreGallery();
         };
 
-        const renderGalleryGrid = async (q, grid, empty) => {
-            const snapshot = await getDocs(q);
-            if(snapshot.empty) {
-                empty.classList.remove('hidden');
-            } else {
-                empty.classList.add('hidden');
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const card = document.createElement('div');
-                    card.className = "bg-white dark:bg-[#292524] rounded-lg shadow-md overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col";
-                    
-                    const ratingHtml = getStarDisplay(data.coffeeSnapshot?.rating || 0);
-
-                    card.innerHTML = `
-                        <div class="h-48 overflow-hidden bg-gray-100 dark:bg-gray-800 relative group cursor-pointer">
-                            <img src="${data.photoURL}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="Brew Photo" onclick="window.open('${data.photoURL}', '_blank')">
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-xs">
-                                ${new Date(data.createdAt).toLocaleDateString()}
-                            </div>
-                        </div>
-                        <div class="p-3 flex-1 flex flex-col">
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase">${data.uploaderName}</span>
-                                <div class="text-xs">${ratingHtml}</div>
-                            </div>
-                            <p class="text-sm italic text-gray-700 dark:text-gray-300 mb-3 flex-1">"${data.message || ''}"</p>
-                            <div class="bg-coffee-50 dark:bg-[#1c1917] rounded p-2 text-xs border border-coffee-100 dark:border-[#44403c]">
-                                <div class="font-bold text-coffee-800 dark:text-white truncate">${data.coffeeSnapshot?.roaster}</div>
-                                <div class="text-coffee-600 dark:text-[#a8a29e] truncate">${data.coffeeSnapshot?.origin}</div>
-                                <div class="mt-1 inline-block px-1.5 py-0.5 bg-white dark:bg-[#292524] rounded border border-coffee-200 dark:border-[#57534e] text-coffee-700 dark:text-[#d6ccc2] font-mono text-[10px]">${data.coffeeSnapshot?.method}</div>
-                            </div>
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                });
+        const loadMoreGallery = async () => {
+            if(isGalleryLoading) return;
+            isGalleryLoading = true;
+            
+            const btn = document.getElementById('galleryLoadMore');
+            const empty = document.getElementById('galleryEmpty');
+            
+            // Construct Query
+            let q;
+            const constraints = [orderBy('createdAt', 'desc'), limit(9)];
+            
+            if(lastGalleryDoc) {
+                constraints.push(startAfter(lastGalleryDoc));
             }
+            
+            if(currentGalleryMode === 'mine') {
+                q = query(collection(db, 'photos'), where('uid', '==', currentUser.uid), ...constraints);
+            } else {
+                q = query(collection(db, 'photos'), where('sharedWith', 'array-contains', currentUser.uid), ...constraints);
+            }
+            
+            const snapshot = await getDocs(q);
+            
+            if(!snapshot.empty) {
+                lastGalleryDoc = snapshot.docs[snapshot.docs.length - 1];
+                renderGalleryGrid(snapshot.docs);
+                
+                if(snapshot.docs.length < 9) {
+                    btn.classList.add('hidden'); // End of list
+                } else {
+                    btn.classList.remove('hidden');
+                }
+            } else {
+                btn.classList.add('hidden');
+                if(!lastGalleryDoc) { // If absolutely no photos found on first load
+                     empty.classList.remove('hidden');
+                }
+            }
+            
+            isGalleryLoading = false;
+        };
+
+        const renderGalleryGrid = (docs) => {
+            const grid = document.getElementById('galleryGrid');
+            
+            docs.forEach(doc => {
+                const data = doc.data();
+                const card = document.createElement('div');
+                card.className = "bg-white dark:bg-[#292524] rounded-lg shadow-md overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col";
+                
+                const ratingHtml = getStarDisplay(data.coffeeSnapshot?.rating || 0);
+
+                // Use Thumbnail if available, fallback to original
+                const displayUrl = data.thumbURL || data.photoURL;
+
+                card.innerHTML = `
+                    <div class="h-48 overflow-hidden bg-gray-100 dark:bg-gray-800 relative group cursor-pointer">
+                        <img src="${displayUrl}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="Brew Photo" onclick="window.open('${data.photoURL}', '_blank')">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-xs">
+                            ${new Date(data.createdAt).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <div class="p-3 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase">${data.uploaderName}</span>
+                            <div class="text-xs">${ratingHtml}</div>
+                        </div>
+                        <p class="text-sm italic text-gray-700 dark:text-gray-300 mb-3 flex-1">"${data.message || ''}"</p>
+                        <div class="bg-coffee-50 dark:bg-[#1c1917] rounded p-2 text-xs border border-coffee-100 dark:border-[#44403c]">
+                            <div class="font-bold text-coffee-800 dark:text-white truncate">${data.coffeeSnapshot?.roaster}</div>
+                            <div class="text-coffee-600 dark:text-[#a8a29e] truncate">${data.coffeeSnapshot?.origin}</div>
+                            <div class="mt-1 inline-block px-1.5 py-0.5 bg-white dark:bg-[#292524] rounded border border-coffee-200 dark:border-[#57534e] text-coffee-700 dark:text-[#d6ccc2] font-mono text-[10px]">${data.coffeeSnapshot?.method}</div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
         };
 
         // --- Preferences Logic ---
@@ -1476,7 +1564,7 @@
         });
 
         // Expose to window
-        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends });
+        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery });
 
         initTheme();
         const searchInput = document.getElementById('globalSearch'); 
