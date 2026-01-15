@@ -373,17 +373,12 @@
                 <button onclick="closeImageModal(null)" class="bg-black/50 hover:bg-black/70 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors">&times;</button>
             </div>
             
-            <div class="flex-1 overflow-hidden relative bg-coffee-50 dark:bg-[#1c1917] flex items-center justify-center" id="imageContainer">
-                <img id="zoomableImage" src="img/SCA_wheel.png" alt="SCA Flavor Wheel" class="max-w-full max-h-full object-contain cursor-grab" style="transition: transform 0.1s ease-out; transform-origin: center center;">
+            <div class="flex-1 overflow-hidden relative bg-coffee-50 dark:bg-[#1c1917] flex items-center justify-center" id="imageContainer" style="touch-action: none;">
+                <img id="zoomableImage" src="img/SCA_wheel.png" alt="SCA Flavor Wheel" class="max-w-full max-h-full object-contain cursor-grab" style="transform-origin: center center;">
             </div>
 
-            <div class="bg-white dark:bg-[#292524] p-3 border-t border-coffee-200 dark:border-[#44403c] flex justify-center gap-4 z-20">
-                <button onclick="zoomImage(-0.2)" class="p-2 rounded-full bg-coffee-100 dark:bg-[#44403c] hover:bg-coffee-200 dark:hover:bg-[#57534e] text-coffee-700 dark:text-[#d6ccc2]"><i class="fa-solid fa-minus"></i></button>
-                <button onclick="resetZoom()" class="px-4 py-2 rounded-full bg-coffee-100 dark:bg-[#44403c] hover:bg-coffee-200 dark:hover:bg-[#57534e] text-sm font-bold text-coffee-700 dark:text-[#d6ccc2]">Reset</button>
-                <button onclick="zoomImage(0.2)" class="p-2 rounded-full bg-coffee-100 dark:bg-[#44403c] hover:bg-coffee-200 dark:hover:bg-[#57534e] text-coffee-700 dark:text-[#d6ccc2]"><i class="fa-solid fa-plus"></i></button>
-            </div>
-            <div class="absolute bottom-16 left-0 right-0 text-center pointer-events-none">
-                 <span class="bg-black/50 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">Drag to Pan • Pinch to Zoom</span>
+            <div class="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
+                 <span class="bg-black/50 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">Drag to Pan • Pinch to Zoom • Double Tap to Reset</span>
             </div>
         </div>
     </div>
@@ -630,12 +625,6 @@
         let lastGalleryDoc = null;
         let currentGalleryMode = 'mine';
         let isGalleryLoading = false;
-
-        // --- Zoom Logic State ---
-        let imgScale = 1;
-        let imgTranslate = { x: 0, y: 0 };
-        let isPanning = false;
-        let startPan = { x: 0, y: 0 };
 
         // --- PREFERENCES CONFIG ---
         const columnDefs = [
@@ -1370,6 +1359,9 @@
         };
 
         // --- Image Zoom Logic ---
+        let zoomState = { scale: 1, x: 0, y: 0 };
+        let gesture = { startX: 0, startY: 0, startScale: 1, startDist: 0 };
+
         const openImageModal = () => {
             document.getElementById('imageModalOverlay').classList.remove('hidden');
             resetZoom();
@@ -1382,23 +1374,15 @@
         };
 
         const resetZoom = () => {
-            imgScale = 1;
-            imgTranslate = { x: 0, y: 0 };
-            updateZoom();
-        };
-
-        const zoomImage = (delta) => {
-            imgScale += delta;
-            if (imgScale < 0.5) imgScale = 0.5;
-            if (imgScale > 5) imgScale = 5;
-            updateZoom();
-        };
-
-        const updateZoom = () => {
+            zoomState = { scale: 1, x: 0, y: 0 };
             const img = document.getElementById('zoomableImage');
-            img.style.transform = `translate(${imgTranslate.x}px, ${imgTranslate.y}px) scale(${imgScale})`;
-            img.classList.toggle('cursor-grab', imgScale === 1);
-            img.classList.toggle('cursor-move', imgScale > 1);
+            img.style.transition = 'transform 0.3s ease-out';
+            updateImage();
+        };
+
+        const updateImage = () => {
+            const img = document.getElementById('zoomableImage');
+            img.style.transform = `translate(${zoomState.x}px, ${zoomState.y}px) scale(${zoomState.scale})`;
         };
 
         // Zoom Pan Listeners
@@ -1406,48 +1390,69 @@
             const img = document.getElementById('zoomableImage');
             const container = document.getElementById('imageContainer');
 
-            container.addEventListener('mousedown', (e) => {
-                if(imgScale <= 1) return;
-                isPanning = true;
-                startPan = { x: e.clientX - imgTranslate.x, y: e.clientY - imgTranslate.y };
-                img.style.transition = 'none'; // Disable transition for drag
-            });
-
-            window.addEventListener('mousemove', (e) => {
-                if(!isPanning) return;
+            // Wheel (Desktop)
+            container.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                imgTranslate.x = e.clientX - startPan.x;
-                imgTranslate.y = e.clientY - startPan.y;
-                img.style.transform = `translate(${imgTranslate.x}px, ${imgTranslate.y}px) scale(${imgScale})`;
+                const delta = e.deltaY * -0.01;
+                const newScale = Math.min(Math.max(0.5, zoomState.scale + delta), 5);
+                zoomState.scale = newScale;
+                updateImage();
             });
 
-            window.addEventListener('mouseup', () => {
-                if(isPanning) {
-                    isPanning = false;
-                    img.style.transition = 'transform 0.1s ease-out';
+            // Double Tap to Reset
+            container.addEventListener('dblclick', (e) => {
+                e.preventDefault();
+                resetZoom();
+            });
+
+            // Touch Start
+            container.addEventListener('touchstart', (e) => {
+                img.style.transition = 'none'; // Disable transition for instant feedback
+                if (e.touches.length === 2) {
+                    // Pinch Start
+                    e.preventDefault();
+                    gesture.startDist = Math.hypot(
+                        e.touches[0].pageX - e.touches[1].pageX,
+                        e.touches[0].pageY - e.touches[1].pageY
+                    );
+                    gesture.startScale = zoomState.scale;
+                } else if (e.touches.length === 1) {
+                    // Pan Start
+                    gesture.startX = e.touches[0].pageX - zoomState.x;
+                    gesture.startY = e.touches[0].pageY - zoomState.y;
+                }
+            }, { passive: false });
+
+            // Touch Move
+            container.addEventListener('touchmove', (e) => {
+                e.preventDefault(); // Prevent scrolling
+                if (e.touches.length === 2) {
+                    // Pinching
+                    const dist = Math.hypot(
+                         e.touches[0].pageX - e.touches[1].pageX,
+                         e.touches[0].pageY - e.touches[1].pageY
+                    );
+                    if(gesture.startDist > 0) {
+                        zoomState.scale = Math.min(Math.max(0.5, gesture.startScale * (dist / gesture.startDist)), 5);
+                        updateImage();
+                    }
+                } else if (e.touches.length === 1 && zoomState.scale > 1) {
+                    // Panning (only allowed when zoomed in)
+                    zoomState.x = e.touches[0].pageX - gesture.startX;
+                    zoomState.y = e.touches[0].pageY - gesture.startY;
+                    updateImage();
+                }
+            }, { passive: false });
+
+            // Touch End
+            container.addEventListener('touchend', (e) => {
+                if (e.touches.length === 0) {
+                    // Restore transition for smooth snapping/resetting
+                     img.style.transition = 'transform 0.2s ease-out';
+                     // Optional: Snap back if zoomed out too far
+                     if (zoomState.scale < 1) resetZoom();
                 }
             });
-            
-            // Touch events for mobile
-             container.addEventListener('touchstart', (e) => {
-                if(imgScale <= 1 || e.touches.length !== 1) return;
-                isPanning = true;
-                startPan = { x: e.touches[0].clientX - imgTranslate.x, y: e.touches[0].clientY - imgTranslate.y };
-                img.style.transition = 'none';
-            });
-             window.addEventListener('touchmove', (e) => {
-                if(!isPanning || e.touches.length !== 1) return;
-                // e.preventDefault(); // Sometimes creates scroll issues on mobile, testing without
-                imgTranslate.x = e.touches[0].clientX - startPan.x;
-                imgTranslate.y = e.touches[0].clientY - startPan.y;
-                img.style.transform = `translate(${imgTranslate.x}px, ${imgTranslate.y}px) scale(${imgScale})`;
-            });
-             window.addEventListener('touchend', () => {
-                 if(isPanning) {
-                    isPanning = false;
-                    img.style.transition = 'transform 0.1s ease-out';
-                }
-             });
         };
         // Initialize listeners
         initZoomListeners();
@@ -1785,7 +1790,7 @@
         });
 
         // Expose to window
-        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery, zoomImage, resetZoom });
+        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery, openImageModal, closeImageModal, resetZoom });
 
         initTheme();
         const searchInput = document.getElementById('globalSearch'); 
