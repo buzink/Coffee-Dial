@@ -145,7 +145,6 @@
                 <form id="coffeeForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                     <input type="hidden" id="editId" name="editId" value="">
                     
-                    <!-- Updated Inputs with Datalists for Autocomplete -->
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Roaster</label>
                         <input type="text" id="roaster" name="roaster" list="roasterList" placeholder="e.g. La Cabra" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
@@ -201,7 +200,6 @@
                         <input type="hidden" id="tempMode" name="tempMode" value="numeric">
                     </div>
                     
-                    <!-- New Drink Variable -->
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Drink</label>
                         <select id="drinkType" name="drinkType" onchange="toggleDrinkOther()" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] cursor-pointer">
@@ -276,7 +274,6 @@
                             <th id="th-recipe" scope="col" class="px-4 py-2 text-center whitespace-nowrap">Recipe</th>
                             <th id="th-time" scope="col" class="px-4 py-2 text-right whitespace-nowrap" onclick="sortBy('time')">Time</th>
                             <th id="th-temp" scope="col" class="px-4 py-2 text-center filterable whitespace-nowrap" onclick="sortBy('temp')" ondblclick="openFilterMenu(event, 'temp')">Temp</th>
-                            <!-- New Drink Column -->
                             <th id="th-drink" scope="col" class="px-4 py-2 text-center filterable whitespace-nowrap" onclick="sortBy('drink')" ondblclick="openFilterMenu(event, 'drink')">Drink</th>
                             <th id="th-notes" scope="col" class="px-4 py-2 whitespace-nowrap">Notes</th>
                             <th id="th-improve" scope="col" class="px-4 py-2 whitespace-nowrap">Improve</th>
@@ -314,10 +311,8 @@
                 <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
                     <div><span class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase mb-0.5">Origin</span><span id="cardOrigin" class="font-medium text-coffee-800 dark:text-[#d6ccc2]"></span></div>
                     <div><span class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase mb-0.5">Blend/Farmer</span><span id="cardFarmer" class="font-medium text-coffee-800 dark:text-[#d6ccc2]"></span></div>
-                    <!-- Variety Removed from Card -->
                     <div><span class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase mb-0.5">Process</span><span id="cardProcess" class="font-medium text-coffee-800 dark:text-[#d6ccc2]"></span></div>
                     <div><span class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase mb-0.5">Roast</span><div id="cardRoastType"></div></div>
-                    <!-- Drink Moved to Left of Method -->
                     <div><span class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase mb-0.5">Drink</span><span id="cardDrink" class="font-medium text-coffee-800 dark:text-[#d6ccc2]"></span></div>
                     <div><span class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase mb-0.5">Method</span><span id="cardMethod" class="inline-block px-2 py-0.5 rounded bg-coffee-100 dark:bg-[#44403c] text-coffee-800 dark:text-[#d6ccc2] text-xs font-bold"></span></div>
                 </div>
@@ -351,6 +346,14 @@
                 <div class="flex items-center justify-between mb-4"><span class="text-sm font-medium text-coffee-900 dark:text-white">Public Profile</span><button id="togglePublicBtn" onclick="togglePublicProfile()" class="bg-gray-200 dark:bg-[#44403c] w-12 h-6 rounded-full p-1 transition-colors relative"><div class="bg-white w-4 h-4 rounded-full shadow-md transform transition-transform"></div></button></div>
                 <p class="text-xs text-coffee-500 dark:text-[#78716c] mb-4">When enabled, anyone with your Share ID can see your brews.</p>
                 <div id="shareIdContainer" class="hidden"><label class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase">Your Share ID</label><div class="flex gap-2"><input type="text" id="myShareId" readonly class="flex-1 bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1 text-sm font-mono text-coffee-900 dark:text-white select-all"><button onclick="copyShareId()" class="bg-coffee-200 dark:bg-[#44403c] hover:bg-coffee-300 px-3 rounded text-coffee-700 dark:text-[#d6ccc2]"><i class="fa-regular fa-copy"></i></button></div></div>
+                
+                <hr class="my-6 border-coffee-200 dark:border-[#44403c]">
+                <!-- Followers List Section -->
+                <div class="text-xs font-semibold text-coffee-500 dark:text-[#78716c] uppercase mb-2">Followers</div>
+                <div id="followersList" class="space-y-2 max-h-48 overflow-y-auto mb-4">
+                     <p class="text-xs text-gray-400 italic">No followers yet.</p>
+                </div>
+
                 <hr class="my-6 border-coffee-200 dark:border-[#44403c]">
                 <button onclick="googleLogout()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-300 py-2 rounded-lg text-sm font-medium">Sign Out</button>
             </div>
@@ -363,10 +366,25 @@
         </div>
     </div>
 
-    <div id="imageModalOverlay" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onclick="closeImageModal(event)">
-        <div class="bg-white dark:bg-[#292524] rounded-xl shadow-2xl max-w-3xl max-h-[90vh] overflow-auto relative">
-            <button onclick="closeImageModal(null)" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white text-2xl font-bold">&times;</button>
-            <img src="img/SCA_wheel.png" alt="SCA Flavor Wheel" class="w-full h-auto">
+    <!-- Image Modal with Zoom & Pan -->
+    <div id="imageModalOverlay" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-[#292524] rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden relative flex flex-col h-[80vh]">
+            <div class="absolute top-0 right-0 p-4 z-20">
+                <button onclick="closeImageModal(null)" class="bg-black/50 hover:bg-black/70 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors">&times;</button>
+            </div>
+            
+            <div class="flex-1 overflow-hidden relative bg-coffee-50 dark:bg-[#1c1917] flex items-center justify-center" id="imageContainer">
+                <img id="zoomableImage" src="img/SCA_wheel.png" alt="SCA Flavor Wheel" class="max-w-full max-h-full object-contain cursor-grab" style="transition: transform 0.1s ease-out; transform-origin: center center;">
+            </div>
+
+            <div class="bg-white dark:bg-[#292524] p-3 border-t border-coffee-200 dark:border-[#44403c] flex justify-center gap-4 z-20">
+                <button onclick="zoomImage(-0.2)" class="p-2 rounded-full bg-coffee-100 dark:bg-[#44403c] hover:bg-coffee-200 dark:hover:bg-[#57534e] text-coffee-700 dark:text-[#d6ccc2]"><i class="fa-solid fa-minus"></i></button>
+                <button onclick="resetZoom()" class="px-4 py-2 rounded-full bg-coffee-100 dark:bg-[#44403c] hover:bg-coffee-200 dark:hover:bg-[#57534e] text-sm font-bold text-coffee-700 dark:text-[#d6ccc2]">Reset</button>
+                <button onclick="zoomImage(0.2)" class="p-2 rounded-full bg-coffee-100 dark:bg-[#44403c] hover:bg-coffee-200 dark:hover:bg-[#57534e] text-coffee-700 dark:text-[#d6ccc2]"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <div class="absolute bottom-16 left-0 right-0 text-center pointer-events-none">
+                 <span class="bg-black/50 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">Drag to Pan • Pinch to Zoom</span>
+            </div>
         </div>
     </div>
 
@@ -600,7 +618,8 @@
         let currentUser = null;
         let currentView = 'mine'; 
         let coffees = [];
-        let following = []; 
+        let following = [];
+        let followers = []; 
         let unsubscribeData = null; 
         let unsubscribeNotifications = null;
         let isPublic = false;
@@ -611,6 +630,12 @@
         let lastGalleryDoc = null;
         let currentGalleryMode = 'mine';
         let isGalleryLoading = false;
+
+        // --- Zoom Logic State ---
+        let imgScale = 1;
+        let imgTranslate = { x: 0, y: 0 };
+        let isPanning = false;
+        let startPan = { x: 0, y: 0 };
 
         // --- PREFERENCES CONFIG ---
         const columnDefs = [
@@ -861,6 +886,7 @@
                 tFoll.classList.add('text-coffee-500','dark:text-[#78716c]');
                 cProf.classList.remove('hidden');
                 cFoll.classList.add('hidden');
+                loadFollowersList(); // Load followers when profile is opened
             } else {
                 tFoll.classList.add('bg-coffee-50','dark:bg-[#1c1917]','text-coffee-700','dark:text-[#d6ccc2]');
                 tFoll.classList.remove('text-coffee-500','dark:text-[#78716c]');
@@ -874,9 +900,121 @@
         const togglePublicProfile = async () => { if(!currentUser) return; isPublic = !isPublic; updatePublicToggleUI(); await updateDoc(doc(db, 'users', currentUser.uid), { isPublic: isPublic }); };
         const updatePublicToggleUI = () => { const btn=document.getElementById('togglePublicBtn'),dot=btn.firstElementChild,con=document.getElementById('shareIdContainer');if(isPublic){btn.className="bg-green-500 w-12 h-6 rounded-full p-1 transition-colors relative";dot.className="bg-white w-4 h-4 rounded-full shadow-md transform translate-x-6 transition-transform";con.classList.remove('hidden');}else{btn.className="bg-gray-300 dark:bg-[#44403c] w-12 h-6 rounded-full p-1 transition-colors relative";dot.className="bg-white w-4 h-4 rounded-full shadow-md transform translate-x-0 transition-transform";con.classList.add('hidden');} };
         const copyShareId = () => { document.getElementById('myShareId').select(); document.execCommand('copy'); alert("ID Copied!"); };
-        const followUser = async () => { const i=document.getElementById('friendIdInput');const u=i.value.trim();if(!u||u===currentUser.uid)return alert("Invalid ID");try{const d=await getDoc(doc(db,'users',u));let n='Friend';if(d.exists()&&d.data().displayName)n=d.data().displayName;await setDoc(doc(db,'users',currentUser.uid,'following',u),{uid:u,name:n,addedAt:new Date().toISOString()});i.value='';loadFollowingList();}catch(e){console.error(e);alert("Could not follow user. Check ID.");} };
-        const unfollowUser = async (u) => { if(!confirm("Unfollow?"))return;await deleteDoc(doc(db,'users',currentUser.uid,'following',u));loadFollowingList();if(currentView===u){document.getElementById('viewSelect').value='mine';changeView('mine');} };
-        const loadFollowingList = async () => { if(!currentUser)return;const s=await getDocs(collection(db,'users',currentUser.uid,'following'));following=[];s.forEach(d=>following.push(d.data()));const l=document.getElementById('followingList');l.innerHTML='';following.forEach(f=>{const d=document.createElement('div');d.className="flex justify-between items-center bg-coffee-50 dark:bg-[#1c1917] p-2 rounded border border-coffee-200 dark:border-[#44403c]";d.innerHTML=`<span class="text-sm font-mono text-coffee-700 dark:text-[#a8a29e] truncate w-40">${f.name||f.uid}</span> <button onclick="unfollowUser('${f.uid}')" class="text-xs text-red-500 hover:text-red-700">Unfollow</button>`;l.appendChild(d);});const sl=document.getElementById('viewSelect');sl.innerHTML='<option value="mine">My Brews</option>';following.forEach(f=>{const o=document.createElement('option');o.value=f.uid;o.text=f.name||`Friend (${f.uid.substr(0,5)}...)`;sl.appendChild(o);});sl.value=currentView; };
+        
+        // --- Follow Logic (Double Write) ---
+        const followUser = async () => { 
+            const i=document.getElementById('friendIdInput'); const u=i.value.trim();
+            if(!u||u===currentUser.uid) return alert("Invalid ID");
+            
+            try {
+                const d = await getDoc(doc(db, 'users', u));
+                let n = 'Friend';
+                if(d.exists() && d.data().displayName) n = d.data().displayName;
+                
+                // Write to My Following AND Target's Followers
+                const batch = writeBatch(db);
+                
+                // My Following List
+                const myRef = doc(db, 'users', currentUser.uid, 'following', u);
+                batch.set(myRef, { uid: u, name: n, addedAt: new Date().toISOString() });
+                
+                // Target's Followers List
+                const targetRef = doc(db, 'users', u, 'followers', currentUser.uid);
+                batch.set(targetRef, { 
+                    uid: currentUser.uid, 
+                    name: currentUser.displayName || 'Unknown User', 
+                    addedAt: new Date().toISOString() 
+                });
+
+                await batch.commit();
+
+                i.value='';
+                loadFollowingList();
+                alert(`Following ${n}!`);
+            } catch(e) { 
+                console.error(e); 
+                alert("Could not follow user. Check ID or permissions."); 
+            } 
+        };
+
+        const unfollowUser = async (u) => { 
+            if(!confirm("Unfollow?")) return;
+            try {
+                const batch = writeBatch(db);
+                
+                // Delete from my following
+                batch.delete(doc(db, 'users', currentUser.uid, 'following', u));
+                
+                // Delete from their followers (Best effort)
+                batch.delete(doc(db, 'users', u, 'followers', currentUser.uid));
+                
+                await batch.commit();
+                
+                loadFollowingList();
+                if(currentView===u){ document.getElementById('viewSelect').value='mine'; changeView('mine'); }
+            } catch(e) {
+                console.error("Unfollow error", e);
+                alert("Error unfollowing");
+            }
+        };
+
+        const loadFollowingList = async () => { 
+            if(!currentUser) return;
+            const s = await getDocs(collection(db, 'users', currentUser.uid, 'following'));
+            following = [];
+            s.forEach(d => following.push(d.data()));
+            
+            const l = document.getElementById('followingList');
+            l.innerHTML = '';
+            if(following.length === 0) {
+                l.innerHTML = '<p class="text-xs text-gray-400 italic">You are not following anyone yet.</p>';
+            } else {
+                following.forEach(f => {
+                    const d = document.createElement('div');
+                    d.className = "flex justify-between items-center bg-coffee-50 dark:bg-[#1c1917] p-2 rounded border border-coffee-200 dark:border-[#44403c]";
+                    d.innerHTML = `<span class="text-sm font-mono text-coffee-700 dark:text-[#a8a29e] truncate w-40">${f.name||f.uid}</span> <button onclick="unfollowUser('${f.uid}')" class="text-xs text-red-500 hover:text-red-700">Unfollow</button>`;
+                    l.appendChild(d);
+                });
+            }
+
+            const sl = document.getElementById('viewSelect');
+            sl.innerHTML = '<option value="mine">My Brews</option>';
+            following.forEach(f => {
+                const o = document.createElement('option');
+                o.value = f.uid;
+                o.text = f.name || `Friend (${f.uid.substr(0,5)}...)`;
+                sl.appendChild(o);
+            });
+            sl.value = currentView; 
+        };
+
+        // --- NEW: Load Followers List ---
+        const loadFollowersList = async () => {
+            if(!currentUser) return;
+            const listEl = document.getElementById('followersList');
+            listEl.innerHTML = '<p class="text-xs text-gray-400 italic animate-pulse">Loading...</p>';
+            
+            try {
+                const s = await getDocs(collection(db, 'users', currentUser.uid, 'followers'));
+                followers = [];
+                s.forEach(d => followers.push(d.data()));
+                
+                listEl.innerHTML = '';
+                if(followers.length === 0) {
+                    listEl.innerHTML = '<p class="text-xs text-gray-400 italic">No followers yet.</p>';
+                } else {
+                     followers.forEach(f => {
+                        const d = document.createElement('div');
+                        d.className = "flex justify-between items-center bg-coffee-50 dark:bg-[#1c1917] p-2 rounded border border-coffee-200 dark:border-[#44403c]";
+                        d.innerHTML = `<span class="text-sm font-mono text-coffee-700 dark:text-[#a8a29e] truncate w-full">${f.name||f.uid}</span>`;
+                        listEl.appendChild(d);
+                    });
+                }
+            } catch(e) {
+                console.error("Error loading followers", e);
+                listEl.innerHTML = '<p class="text-xs text-red-400 italic">Error loading followers.</p>';
+            }
+        };
 
         // --- Photo & Gallery Logic ---
         const openUploadModal = (coffeeId) => {
@@ -940,18 +1078,18 @@
             progressBar.classList.remove('hidden');
             
             try {
-                // --- NEW: Image Compression Logic ---
+                // Image Compression Logic
                 const options = {
                     maxSizeMB: 1, // Max file size 1MB
                     maxWidthOrHeight: 1024, // Resize to max 1024px width/height
                     useWebWorker: true
                 };
                 
-                // --- THUMBNAIL LOGIC ---
+                // THUMBNAIL LOGIC
                 let thumbFile = null;
                 const thumbOptions = {
-                    maxSizeMB: 0.5, // Increased quality
-                    maxWidthOrHeight: 600, // Increased resolution (2x previous)
+                    maxSizeMB: 0.5,
+                    maxWidthOrHeight: 600,
                     useWebWorker: true
                 };
 
@@ -1231,6 +1369,89 @@
             }
         };
 
+        // --- Image Zoom Logic ---
+        const openImageModal = () => {
+            document.getElementById('imageModalOverlay').classList.remove('hidden');
+            resetZoom();
+        };
+
+        const closeImageModal = (e) => {
+            if (!e || e.target.id === 'imageModalOverlay' || e.target.closest('button')) {
+                document.getElementById('imageModalOverlay').classList.add('hidden');
+            }
+        };
+
+        const resetZoom = () => {
+            imgScale = 1;
+            imgTranslate = { x: 0, y: 0 };
+            updateZoom();
+        };
+
+        const zoomImage = (delta) => {
+            imgScale += delta;
+            if (imgScale < 0.5) imgScale = 0.5;
+            if (imgScale > 5) imgScale = 5;
+            updateZoom();
+        };
+
+        const updateZoom = () => {
+            const img = document.getElementById('zoomableImage');
+            img.style.transform = `translate(${imgTranslate.x}px, ${imgTranslate.y}px) scale(${imgScale})`;
+            img.classList.toggle('cursor-grab', imgScale === 1);
+            img.classList.toggle('cursor-move', imgScale > 1);
+        };
+
+        // Zoom Pan Listeners
+        const initZoomListeners = () => {
+            const img = document.getElementById('zoomableImage');
+            const container = document.getElementById('imageContainer');
+
+            container.addEventListener('mousedown', (e) => {
+                if(imgScale <= 1) return;
+                isPanning = true;
+                startPan = { x: e.clientX - imgTranslate.x, y: e.clientY - imgTranslate.y };
+                img.style.transition = 'none'; // Disable transition for drag
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if(!isPanning) return;
+                e.preventDefault();
+                imgTranslate.x = e.clientX - startPan.x;
+                imgTranslate.y = e.clientY - startPan.y;
+                img.style.transform = `translate(${imgTranslate.x}px, ${imgTranslate.y}px) scale(${imgScale})`;
+            });
+
+            window.addEventListener('mouseup', () => {
+                if(isPanning) {
+                    isPanning = false;
+                    img.style.transition = 'transform 0.1s ease-out';
+                }
+            });
+            
+            // Touch events for mobile
+             container.addEventListener('touchstart', (e) => {
+                if(imgScale <= 1 || e.touches.length !== 1) return;
+                isPanning = true;
+                startPan = { x: e.touches[0].clientX - imgTranslate.x, y: e.touches[0].clientY - imgTranslate.y };
+                img.style.transition = 'none';
+            });
+             window.addEventListener('touchmove', (e) => {
+                if(!isPanning || e.touches.length !== 1) return;
+                // e.preventDefault(); // Sometimes creates scroll issues on mobile, testing without
+                imgTranslate.x = e.touches[0].clientX - startPan.x;
+                imgTranslate.y = e.touches[0].clientY - startPan.y;
+                img.style.transform = `translate(${imgTranslate.x}px, ${imgTranslate.y}px) scale(${imgScale})`;
+            });
+             window.addEventListener('touchend', () => {
+                 if(isPanning) {
+                    isPanning = false;
+                    img.style.transition = 'transform 0.1s ease-out';
+                }
+             });
+        };
+        // Initialize listeners
+        initZoomListeners();
+
         // --- Standard Logic ---
         const setRating = (r) => { const c=document.getElementById('starContainer'); document.getElementById('ratingInput').value=r; for(let i=0;i<c.children.length;i++){ if(i<r)c.children[i].classList.add('active'); else c.children[i].classList.remove('active'); } };
         const getStarDisplay = (r) => { if(!r)return'-'; let h=''; for(let i=0;i<r;i++)h+='<i class="fa-solid fa-star text-xs text-yellow-400"></i>'; return h; };
@@ -1391,8 +1612,7 @@
             if(!document.getElementById('mainMenuDropdown').contains(e.target) && !e.target.closest('button[onclick*="toggleMainMenu"]')) document.getElementById('mainMenuDropdown').classList.add('hidden');
         };
         const toggleMainMenu = (e) => { if(e) e.stopPropagation(); document.getElementById('mainMenuDropdown').classList.toggle('hidden'); };
-        const openImageModal = () => document.getElementById('imageModalOverlay').classList.remove('hidden');
-        const closeImageModal = (e) => { if(!e || e.target.id === 'imageModalOverlay' || e.target.closest('button')) document.getElementById('imageModalOverlay').classList.add('hidden'); };
+        
         const openCoffeeCard = (id, e) => {
             if(window.getSelection().toString().length > 0) return;
             const c = coffees.find(x => x.id === id); if(!c) return;
@@ -1494,7 +1714,8 @@
                 if(columnPreferences.drink !== false) rowHTML += `<td class="px-4 py-2 text-sm font-medium text-center">${c.drink || '-'}</td>`;
                 if(columnPreferences.notes !== false) rowHTML += `<td class="px-4 py-2 text-sm max-w-xs truncate" title="${c.notes}">${c.notes || '-'}</td>`;
                 if(columnPreferences.improve !== false) rowHTML += `<td class="px-4 py-2 text-sm italic text-red-400 dark:text-red-400/80 max-w-xs truncate" title="${c.improve || ''}">${c.improve || '-'}</td>`;
-                if(columnPreferences.rating !== false) rowHTML += `<td class="px-4 py-2 text-center">${getStarDisplay(c.rating)}</td>`;
+                // ADDED whitespace-nowrap TO RATING COLUMN
+                if(columnPreferences.rating !== false) rowHTML += `<td class="px-4 py-2 text-center whitespace-nowrap">${getStarDisplay(c.rating)}</td>`;
                 if(columnPreferences.date !== false) rowHTML += `<td class="px-4 py-2 text-xs font-mono text-coffee-500">${displayDate}</td>`;
                 
                 // Actions always visible
@@ -1564,7 +1785,7 @@
         });
 
         // Expose to window
-        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery });
+        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery, zoomImage, resetZoom });
 
         initTheme();
         const searchInput = document.getElementById('globalSearch'); 
