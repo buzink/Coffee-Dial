@@ -722,7 +722,7 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, writeBatch, where, orderBy, limit, startAfter } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-        import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js';
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -1061,24 +1061,60 @@
             const checkboxes = document.querySelectorAll('#shareWithList input[type="checkbox"]:checked');
             const sharedWith = Array.from(checkboxes).map(cb => cb.value);
             const coffeeData = coffees.find(c => c.id === currentUploadCoffeeId); if(!coffeeData) return alert("Coffee data not found.");
-            const coffeeSnapshot = { roaster: coffeeData.roaster || coffeeData.name || 'Unknown', origin: coffeeData.origin || coffeeData.beanType || 'Unknown', method: coffeeData.method || '-', rating: coffeeData.rating || 0 };
+            
+            const coffeeSnapshot = { 
+                roaster: coffeeData.roaster || coffeeData.name || 'Unknown', 
+                origin: coffeeData.origin || coffeeData.beanType || 'Unknown', 
+                farmer: coffeeData.farmer || '-',
+                method: coffeeData.method || '-', 
+                rating: coffeeData.rating || 0 
+            };
+            
             const progressBar = document.getElementById('uploadProgress'); progressBar.classList.remove('hidden');
+            
             try {
-                let thumbFile = null; const thumbOptions = { maxSizeMB: 0.5, maxWidthOrHeight: 600, useWebWorker: true };
-                try { thumbFile = await imageCompression(file, thumbOptions); } catch (error) { console.log('Thumbnail generation failed:', error); }
                 const timestamp = Date.now();
                 const storageRef = ref(storage, `photos/${currentUser.uid}/${timestamp}_${file.name}_original`);
-                const snapshot = await uploadBytes(storageRef, file);
+                
+                // Compression for the main "Original" image to reduce file size while keeping high resolution
+                const originalOptions = {
+                    maxSizeMB: 1.5, // Target file size around 1.5MB to save significant space
+                    maxWidthOrHeight: 1920, // Max resolution 1920px
+                    useWebWorker: true
+                };
+                
+                const compressedOriginal = await imageCompression(file, originalOptions);
+                const snapshot = await uploadBytes(storageRef, compressedOriginal);
                 const downloadURL = await getDownloadURL(snapshot.ref);
+
+                // Compression for the Small Thumbnail
                 let thumbURL = null;
-                if(thumbFile) {
-                     const thumbRef = ref(storage, `photos/${currentUser.uid}/${timestamp}_${file.name}_thumb`);
-                     const thumbSnapshot = await uploadBytes(thumbRef, thumbFile);
-                     thumbURL = await getDownloadURL(thumbSnapshot.ref);
-                }
-                await addDoc(collection(db, 'photos'), { uid: currentUser.uid, uploaderName: currentUser.displayName || 'Unknown User', photoURL: downloadURL, thumbURL: thumbURL, message: message, coffeeId: currentUploadCoffeeId, coffeeSnapshot: coffeeSnapshot, sharedWith: sharedWith, createdAt: new Date().toISOString() });
-                closeUploadModal(); alert("Photo uploaded successfully!");
-            } catch (error) { console.error("Upload failed", error); alert("Upload failed: " + error.message); }
+                const thumbOptions = { maxSizeMB: 0.1, maxWidthOrHeight: 600, useWebWorker: true };
+                try { 
+                    const thumbFile = await imageCompression(file, thumbOptions);
+                    const thumbRef = ref(storage, `photos/${currentUser.uid}/${timestamp}_${file.name}_thumb`);
+                    const thumbSnapshot = await uploadBytes(thumbRef, thumbFile);
+                    thumbURL = await getDownloadURL(thumbSnapshot.ref);
+                } catch (error) { console.log('Thumbnail generation failed:', error); }
+
+                await addDoc(collection(db, 'photos'), { 
+                    uid: currentUser.uid, 
+                    uploaderName: currentUser.displayName || 'Unknown User', 
+                    photoURL: downloadURL, 
+                    thumbURL: thumbURL, 
+                    message: message, 
+                    coffeeId: currentUploadCoffeeId, 
+                    coffeeSnapshot: coffeeSnapshot, 
+                    sharedWith: sharedWith, 
+                    createdAt: new Date().toISOString() 
+                });
+                
+                closeUploadModal(); 
+                alert("Photo uploaded successfully!");
+            } catch (error) { 
+                console.error("Upload failed", error); 
+                alert("Upload failed: " + error.message); 
+            }
         };
 
         const openGallery = async () => {
@@ -1117,12 +1153,49 @@
         const renderGalleryGrid = (docs) => {
             const grid = document.getElementById('galleryGrid');
             docs.forEach(doc => {
-                const data = doc.data(); const card = document.createElement('div'); card.className = "bg-white dark:bg-[#292524] rounded-lg shadow-md overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col";
+                const data = doc.data(); 
+                const card = document.createElement('div'); 
+                card.className = "bg-white dark:bg-[#292524] rounded-lg shadow-md overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col relative group";
                 const ratingHtml = getStarDisplay(data.coffeeSnapshot?.rating || 0);
                 const displayUrl = data.thumbURL || data.photoURL;
-                card.innerHTML = `<div class="h-48 overflow-hidden bg-gray-100 dark:bg-gray-800 relative group cursor-pointer"><img src="${displayUrl}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="Brew Photo" onclick="window.open('${data.photoURL}', '_blank')"><div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-xs">${new Date(data.createdAt).toLocaleDateString()}</div></div><div class="p-3 flex-1 flex flex-col"><div class="flex justify-between items-start mb-2"><span class="text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase">${data.uploaderName}</span><div class="text-xs">${ratingHtml}</div></div><p class="text-sm italic text-gray-700 dark:text-gray-300 mb-3 flex-1">"${data.message || ''}"</p><div class="bg-coffee-50 dark:bg-[#1c1917] rounded p-2 text-xs border border-coffee-100 dark:border-[#44403c]"><div class="font-bold text-coffee-800 dark:text-white truncate">${data.coffeeSnapshot?.roaster}</div><div class="text-coffee-600 dark:text-[#a8a29e] truncate">${data.coffeeSnapshot?.origin}</div><div class="mt-1 inline-block px-1.5 py-0.5 bg-white dark:bg-[#292524] rounded border border-coffee-200 dark:border-[#57534e] text-coffee-700 dark:text-[#d6ccc2] font-mono text-[10px]">${data.coffeeSnapshot?.method}</div></div></div>`;
+                
+                // Red trash icon fades in only when card is hovered
+                const deleteBtn = currentGalleryMode === 'mine' ? 
+                    `<button onclick="deletePhoto('${doc.id}', '${data.photoURL}', '${data.thumbURL || ''}', event)" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all z-10 opacity-0 group-hover:opacity-100" title="Delete Photo"><i class="fa-solid fa-trash-can text-xs"></i></button>` : '';
+
+                // Secondary info displays farmer if exists, else origin
+                const secondaryInfo = data.coffeeSnapshot?.farmer || data.coffeeSnapshot?.origin || '-';
+
+                card.innerHTML = `${deleteBtn}<div class="h-48 overflow-hidden bg-gray-100 dark:bg-gray-800 relative cursor-pointer"><img src="${displayUrl}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="Brew Photo" onclick="window.open('${data.photoURL}', '_blank')"><div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-xs">${new Date(data.createdAt).toLocaleDateString()}</div></div><div class="p-3 flex-1 flex flex-col"><div class="flex justify-between items-start mb-2"><span class="text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase">${data.uploaderName}</span><div class="text-xs">${ratingHtml}</div></div><p class="text-sm italic text-gray-700 dark:text-gray-300 mb-3 flex-1">"${data.message || ''}"</p><div class="bg-coffee-50 dark:bg-[#1c1917] rounded p-2 text-xs border border-coffee-100 dark:border-[#44403c]"><div class="font-bold text-coffee-800 dark:text-white truncate">${data.coffeeSnapshot?.roaster}</div><div class="text-coffee-600 dark:text-[#a8a29e] truncate">${secondaryInfo}</div><div class="mt-1 inline-block px-1.5 py-0.5 bg-white dark:bg-[#292524] rounded border border-coffee-200 dark:border-[#57534e] text-coffee-700 dark:text-[#d6ccc2] font-mono text-[10px]">${data.coffeeSnapshot?.method}</div></div></div>`;
                 grid.appendChild(card);
             });
+        };
+
+        const deletePhoto = async (photoId, photoURL, thumbURL, ev) => {
+            if(ev) ev.stopPropagation();
+            if(!confirm("Are you sure you want to permanently delete this photo? This cannot be undone.")) return;
+            
+            try {
+                // 1. Delete from Firestore
+                await deleteDoc(doc(db, 'photos', photoId));
+                
+                // 2. Delete original image from Storage
+                const photoRef = ref(storage, photoURL);
+                await deleteObject(photoRef);
+                
+                // 3. Delete thumbnail if it exists
+                if(thumbURL) {
+                    const thumbRef = ref(storage, thumbURL);
+                    await deleteObject(thumbRef);
+                }
+                
+                alert("Photo deleted successfully.");
+                // Refresh the current gallery view
+                openGallery();
+            } catch (err) {
+                console.error("Deletion failed", err);
+                alert("Error deleting photo: " + err.message);
+            }
         };
 
         const openPreferences = () => {
@@ -1449,7 +1522,7 @@
             }
         });
 
-        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, switchGalleryTab, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery, resetZoom, openStats, closeStats, changeStatsView, toggleStatsUniqueTable });
+        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchGalleryTab, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, deletePhoto, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery, resetZoom, openStats, closeStats, changeStatsView, toggleStatsUniqueTable });
 
         initTheme();
         const searchInput = document.getElementById('globalSearch'); 
