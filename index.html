@@ -46,6 +46,17 @@
         /* Toggle Switch */
         .toggle-checkbox:checked { right: 0; border-color: #68D391; }
         .toggle-checkbox:checked + .toggle-label { background-color: #68D391; }
+
+        /* AI Loading and Flash Animations */
+        .ai-loading-pulse { animation: ai-pulse 1.5s infinite; }
+        @keyframes ai-pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        @keyframes ai-flash {
+            0% { background-color: transparent; }
+            30% { background-color: rgba(199, 210, 254, 0.5); } /* Light Indigo */
+            100% { background-color: transparent; }
+        }
+        .ai-flash-effect { animation: ai-flash 2s ease-out; }
     </style>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { coffee: { 50: '#fdf8f6', 100: '#f2e8e5', 200: '#eaddd7', 300: '#e0ccbb', 400: '#d2bab0', 500: '#a18e84', 600: '#8c7365', 700: '#7f5539', 800: '#9c6644', 900: '#4a3b32', } } } } }
@@ -135,7 +146,6 @@
         </div>
 
         <div id="formContainer" class="hidden bg-white dark:bg-[#292524] rounded-xl shadow-lg border border-coffee-100 dark:border-[#44403c] mb-8 transition-all duration-300 overflow-hidden group" aria-expanded="false">
-             <!-- Modified Header -->
              <div class="p-6 flex justify-between items-center bg-coffee-50/50 dark:bg-[#292524] border-b border-coffee-100 dark:border-[#44403c]">
                 <div onclick="toggleForm()" class="flex-1 cursor-pointer flex items-center gap-2">
                     <h2 id="formTitle" class="text-lg font-semibold flex items-center gap-2 text-coffee-900 dark:text-white select-none">
@@ -143,6 +153,13 @@
                     </h2>
                 </div>
                 <div class="flex items-center gap-3">
+                    <!-- AI MAGIC BUTTON (Hidden by default, shown when expanded) -->
+                    <button type="button" onclick="triggerAIScan()" id="aiScanBtn" class="hidden flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI Scan Bag
+                    </button>
+                    <!-- Hidden input (No capture="environment" means user can pick source) -->
+                    <input type="file" id="aiFileInput" accept="image/*" class="hidden" onchange="handleAIFile(event)">
+                    
                     <button id="cancelEditBtn" onclick="resetFormState(event)" class="hidden text-xs text-red-500 hover:text-red-700 dark:text-red-400 underline z-10 relative">
                         Cancel Edit
                     </button>
@@ -170,8 +187,8 @@
                         <datalist id="originList"></datalist>
                     </div>
                     
-                    <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Variety</label><input type="text" id="variety" name="variety" placeholder="e.g. Geisha" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors"></div>
-                    <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Processing</label><input type="text" id="processing" name="processing" placeholder="e.g. Natural" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors"></div>
+                    <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Variety</label><input type="text" id="variety" name="variety" placeholder="e.g. Geisha" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors"></div>
+                    <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Processing</label><input type="text" id="processing" name="processing" placeholder="e.g. Natural" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors"></div>
                     <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Roast Type</label><select id="roastType" name="roastType" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] cursor-pointer"><option value="" disabled selected>Select Roast</option><option value="Light">Light</option><option value="Medium">Medium</option><option value="Medium-Dark">Medium-Dark</option><option value="Dark">Dark</option></select></div>
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Brewing Method</label>
@@ -743,6 +760,8 @@
             appId: "1:513325852224:web:0af5f15c4968a5bfad61a5"
         };
         
+        const CLOUD_FUNCTION_URL = "https://us-central1-coffee-dial-app-9db38.cloudfunctions.net/analyzeCoffeeBag";
+
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, writeBatch, where, orderBy, limit, startAfter } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
@@ -810,6 +829,75 @@
         let scaState = { level: 0, path: [], currentNode: null };
 
         // --- Functions ---
+        
+        // AI SCAN FUNCTIONS
+        const triggerAIScan = () => {
+            if (!currentUser) return alert("Please sign in to use AI scanning.");
+            document.getElementById('aiFileInput').click();
+        };
+
+        const handleAIFile = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const btn = document.getElementById('aiScanBtn');
+            const originalContent = btn.innerHTML;
+            
+            try {
+                // UI Loading State
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
+                btn.classList.add('ai-loading-pulse');
+
+                // 1. Compress image
+                const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1024, useWebWorker: true };
+                const compressedFile = await imageCompression(file, options);
+                
+                // 2. Base64
+                const base64String = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                    reader.readAsDataURL(compressedFile);
+                });
+
+                // 3. Call Backend
+                const response = await fetch(CLOUD_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ base64Image: base64String })
+                });
+
+                if (!response.ok) throw new Error("AI Analysis Failed.");
+
+                const data = await response.json();
+
+                // 4. Fill and Flash Effect
+                const fieldsToFill = ['roaster', 'farmer', 'origin', 'variety', 'processing', 'roastType'];
+                
+                fieldsToFill.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (data[id]) {
+                        el.value = data[id];
+                        // Apply flash effect
+                        el.classList.add('ai-flash-effect');
+                        // Remove class after animation finishes (2s) so it can be re-triggered later
+                        setTimeout(() => el.classList.remove('ai-flash-effect'), 2000);
+                    }
+                });
+
+                toggleForm(true);
+                
+            } catch (error) {
+                console.error(error);
+                alert("Error scanning bag: " + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+                btn.classList.remove('ai-loading-pulse');
+                event.target.value = ''; // Reset file input
+            }
+        };
+
         const googleLogin = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
         const googleLogout = () => signOut(auth).then(() => window.location.reload());
 
@@ -1397,7 +1485,19 @@
             if (m === 'numeric') { conNum.classList.remove('hidden'); conProf.classList.add('hidden'); btnNum.className = activeClass; btnProf.className = inactiveClass; } else { conProf.classList.remove('hidden'); conNum.classList.add('hidden'); btnProf.className = activeClass; btnNum.className = inactiveClass; }
         };
         
-        const toggleForm = (f=null) => { const c=document.getElementById('formContainer'),o=document.getElementById('formContent'),e=c.getAttribute('aria-expanded')==='true',s=f!==null?f:!e; c.setAttribute('aria-expanded',s?'true':'false'); if(s){ o.classList.remove('hidden'); if(document.getElementById('notesMode').value === 'sca') renderScaWheel(); } else { o.classList.add('hidden'); } };
+        const toggleForm = (f=null) => { 
+            const c=document.getElementById('formContainer'),o=document.getElementById('formContent'),e=c.getAttribute('aria-expanded')==='true',s=f!==null?f:!e; 
+            const aiBtn = document.getElementById('aiScanBtn');
+            c.setAttribute('aria-expanded',s?'true':'false'); 
+            if(s){ 
+                o.classList.remove('hidden'); 
+                aiBtn.classList.remove('hidden');
+                if(document.getElementById('notesMode').value === 'sca') renderScaWheel(); 
+            } else { 
+                o.classList.add('hidden'); 
+                aiBtn.classList.add('hidden');
+            } 
+        };
         
         const populateForm = (c) => { 
             document.getElementById('roaster').value=c.roaster||c.name||''; document.getElementById('farmer').value=c.farmer||''; document.getElementById('origin').value=c.origin||c.beanType||''; document.getElementById('variety').value=c.variety||''; document.getElementById('processing').value=c.processing||''; document.getElementById('roastType').value=c.roastType||''; document.getElementById('grinder').value=c.grinder||''; document.getElementById('grind').value=c.grind||''; document.getElementById('inputWeight').value=c.weight||''; document.getElementById('inputRatio').value=c.ratio||''; document.getElementById('inputYield').value=(c.weight&&c.ratio)?(c.weight*c.ratio).toFixed(1):''; document.getElementById('time').value=c.time||''; document.getElementById('notes').value=c.notes||''; document.getElementById('improve').value=c.improve||'';
@@ -1574,7 +1674,11 @@
             }
         });
 
-        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchGalleryTab, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, deletePhoto, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, toggleMethodOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery, resetZoom, openStats, closeStats, changeStatsView, toggleStatsUniqueTable });
+        Object.assign(window, { 
+            triggerAIScan, 
+            handleAIFile,
+            googleLogin, googleLogout, openFriendsModal, closeModal, switchGalleryTab, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, deletePhoto, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, toggleMethodOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery, resetZoom, openStats, closeStats, changeStatsView, toggleStatsUniqueTable 
+        });
 
         initTheme();
         const searchInput = document.getElementById('globalSearch'); 
