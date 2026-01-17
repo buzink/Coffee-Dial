@@ -46,6 +46,10 @@
         /* Toggle Switch */
         .toggle-checkbox:checked { right: 0; border-color: #68D391; }
         .toggle-checkbox:checked + .toggle-label { background-color: #68D391; }
+        
+        /* AI Loading Animation */
+        .ai-pulse { animation: aiPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes aiPulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { coffee: { 50: '#fdf8f6', 100: '#f2e8e5', 200: '#eaddd7', 300: '#e0ccbb', 400: '#d2bab0', 500: '#a18e84', 600: '#8c7365', 700: '#7f5539', 800: '#9c6644', 900: '#4a3b32', } } } } }
@@ -135,18 +139,37 @@
         </div>
 
         <div id="formContainer" class="hidden bg-white dark:bg-[#292524] rounded-xl shadow-lg border border-coffee-100 dark:border-[#44403c] mb-8 transition-all duration-300 overflow-hidden group" aria-expanded="false">
-             <div onclick="toggleForm()" class="p-6 cursor-pointer flex justify-between items-center bg-coffee-50/50 dark:bg-[#292524] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors">
-                <h2 id="formTitle" class="text-lg font-semibold flex items-center gap-2 text-coffee-900 dark:text-white select-none">
-                    <i class="fa-solid fa-plus-circle text-coffee-700 dark:text-[#d6ccc2]"></i> <span>Add New Brew</span>
-                </h2>
-                <div class="flex items-center gap-4">
+             <!-- Modified Header with Scan Button -->
+             <div class="p-6 flex justify-between items-center bg-coffee-50/50 dark:bg-[#292524] border-b border-coffee-100 dark:border-[#44403c]">
+                <div onclick="toggleForm()" class="flex-1 cursor-pointer flex items-center gap-2">
+                    <h2 id="formTitle" class="text-lg font-semibold flex items-center gap-2 text-coffee-900 dark:text-white select-none">
+                        <i class="fa-solid fa-plus-circle text-coffee-700 dark:text-[#d6ccc2]"></i> <span>Add New Brew</span>
+                    </h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <!-- Scan Button -->
+                    <button type="button" onclick="document.getElementById('bagScannerInput').click()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow flex items-center gap-2 transition-all">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="hidden sm:inline">AI Scan Bag</span>
+                    </button>
+                    <input type="file" id="bagScannerInput" accept="image/*" capture="environment" class="hidden" onchange="handleBagScan(this)">
+                    
                     <button id="cancelEditBtn" onclick="resetFormState(event)" class="hidden text-xs text-red-500 hover:text-red-700 dark:text-red-400 underline z-10 relative">
                         Cancel Edit
                     </button>
-                    <i class="fa-solid fa-chevron-down text-coffee-400 chevron-rotate"></i>
+                    <i onclick="toggleForm()" class="fa-solid fa-chevron-down text-coffee-400 chevron-rotate cursor-pointer"></i>
                 </div>
             </div>
-            <div id="formContent" class="hidden px-6 pb-6 border-t border-coffee-100 dark:border-[#44403c]">
+
+            <div id="formContent" class="hidden px-6 pb-6 border-t border-coffee-100 dark:border-[#44403c] relative">
+                <!-- AI Loading Overlay -->
+                <div id="aiLoadingOverlay" class="hidden absolute inset-0 bg-white/80 dark:bg-[#1c1917]/80 z-50 flex flex-col items-center justify-center backdrop-blur-sm rounded-b-xl">
+                    <div class="bg-white dark:bg-[#292524] p-6 rounded-2xl shadow-xl flex flex-col items-center border border-purple-100 dark:border-purple-900">
+                        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-purple-600 mb-3"></i>
+                        <p class="font-bold text-coffee-900 dark:text-white animate-pulse">Analyzing Coffee Bag...</p>
+                        <p class="text-xs text-coffee-500 dark:text-[#78716c] mt-1 text-center">Extracting roaster, origin & notes via Gemini</p>
+                    </div>
+                </div>
+
                 <form id="coffeeForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                     <input type="hidden" id="editId" name="editId" value="">
                     
@@ -738,17 +761,24 @@
             messagingSenderId: "513325852224",
             appId: "1:513325852224:web:0af5f15c4968a5bfad61a5"
         };
+        
+        // Gemini Config
+        const GEMINI_API_KEY = "AIzaSyCFY6UTKZ5fWiUHv39Jr_1icN5WCyAMb4M";
 
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, getDoc, getDocs, onSnapshot, query, writeBatch, where, orderBy, limit, startAfter } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js';
+        import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
         const provider = new GoogleAuthProvider();
+        
+        // Init Gemini
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
         let currentUser = null;
         let currentView = 'mine'; 
@@ -1151,6 +1181,108 @@
                 alert("Upload failed: " + error.message); 
             }
         };
+
+        // --- GEMINI AI SCAN LOGIC ---
+        // UPDATED: Now tries 2.0-flash first, then 1.5-flash as fallback
+        const handleBagScan = async (input) => {
+            const file = input.files[0];
+            if (!file) return;
+
+            // 1. Show UI Loading State
+            const overlay = document.getElementById('aiLoadingOverlay');
+            const formContainer = document.getElementById('formContainer');
+            
+            // Ensure form is open
+            if (formContainer.getAttribute('aria-expanded') === 'false') toggleForm(true);
+            overlay.classList.remove('hidden');
+
+            try {
+                // 2. Prepare Image for Gemini
+                const base64Data = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                    reader.readAsDataURL(file);
+                });
+
+                const imagePart = {
+                    inlineData: {
+                        data: base64Data,
+                        mimeType: file.type
+                    }
+                };
+
+                // 3. The Prompt
+                const prompt = `
+                    Analyze this coffee bag image. Extract the data into a strict JSON format. 
+                    Do not include Markdown formatting or \`\`\`json blocks. Just the raw JSON string.
+                    
+                    Fields required:
+                    - roaster (string)
+                    - farmer (string, or Blend name)
+                    - origin (string, Country/Region)
+                    - variety (string)
+                    - processing (string, e.g., Washed, Natural)
+                    - roastType (string, EXACTLY ONE OF: "Light", "Medium", "Medium-Dark", "Dark". Guess based on color if not written.)
+                    - notes (string, comma separated flavor notes)
+                    
+                    If a field is not found, leave it as an empty string "".
+                `;
+
+                // 4. Call API with Fallback
+                let text = "";
+                
+                // Attempt 1: Try gemini-2.0-flash (Newest)
+                try {
+                    console.log("Attempting gemini-2.0-flash...");
+                    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                    const result = await model.generateContent([prompt, imagePart]);
+                    const response = await result.response;
+                    text = response.text();
+                } catch (error20) {
+                    console.warn("Gemini 2.0 failed, trying 1.5...", error20);
+                    // Attempt 2: Try gemini-1.5-flash (Standard alias)
+                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    const result = await model.generateContent([prompt, imagePart]);
+                    const response = await result.response;
+                    text = response.text();
+                }
+
+                // 5. Clean and Parse JSON
+                const cleanJson = text.replace(/```json|```/g, '').trim();
+                const data = JSON.parse(cleanJson);
+
+                // 6. Populate Form
+                const setVal = (id, val) => {
+                    const el = document.getElementById(id);
+                    if(el && val) {
+                        el.value = val;
+                        // Visual feedback flash
+                        el.classList.add('bg-purple-100', 'dark:bg-purple-900/30', 'transition-colors', 'duration-1000');
+                        setTimeout(() => el.classList.remove('bg-purple-100', 'dark:bg-purple-900/30'), 2000);
+                    }
+                };
+
+                setVal('roaster', data.roaster);
+                setVal('farmer', data.farmer);
+                setVal('origin', data.origin);
+                setVal('variety', data.variety);
+                setVal('processing', data.processing);
+                setVal('roastType', data.roastType);
+                setVal('notes', data.notes);
+                
+                setNotesMode('manual');
+
+            } catch (error) {
+                console.error("AI Scan Error:", error);
+                // CHANGE: Detailed alert for debugging
+                alert("AI Scan Failed: " + error.message + "\n\n⚠️ IMPORTANT: If you are in the EU (Netherlands), a '404' or '400' error means you MUST link a Billing Account (Credit Card) to your Google Cloud Project at console.cloud.google.com due to EU identity regulations. This is required even for the Free Tier.");
+            } finally {
+                // Hide Loading
+                overlay.classList.add('hidden');
+                input.value = ''; 
+            }
+        };
+
 
         const openGallery = async () => {
             document.getElementById('galleryModal').classList.remove('hidden');
@@ -1570,7 +1702,7 @@
             }
         });
 
-        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchGalleryTab, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, deletePhoto, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, toggleMethodOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery, resetZoom, openStats, closeStats, changeStatsView, toggleStatsUniqueTable });
+        Object.assign(window, { googleLogin, googleLogout, openFriendsModal, closeModal, switchGalleryTab, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, deletePhoto, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, toggleMethodOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery, resetZoom, openStats, closeStats, changeStatsView, toggleStatsUniqueTable, handleBagScan });
 
         initTheme();
         const searchInput = document.getElementById('globalSearch'); 
