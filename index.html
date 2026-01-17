@@ -57,6 +57,10 @@
             100% { background-color: transparent; }
         }
         .ai-flash-effect { animation: ai-flash 2s ease-out; }
+
+        /* Typewriter: No border-right or blinking animation */
+        .typewriter p { overflow: hidden; white-space: normal; margin: 0 auto; letter-spacing: .05em; animation: typing 3.5s steps(40, end); }
+        @keyframes typing { from { width: 0 } to { width: 100% } }
     </style>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { coffee: { 50: '#fdf8f6', 100: '#f2e8e5', 200: '#eaddd7', 300: '#e0ccbb', 400: '#d2bab0', 500: '#a18e84', 600: '#8c7365', 700: '#7f5539', 800: '#9c6644', 900: '#4a3b32', } } } } }
@@ -129,7 +133,7 @@
         <div id="viewSelectorContainer" class="hidden mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-4 w-full sm:w-auto">
                 <div class="flex items-center gap-2">
-                    <select id="viewSelect" onchange="changeView(this.value)" class="bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] text-coffee-900 dark:text-white text-sm rounded-lg block p-2.5 shadow-sm font-bold min-w-[150px]">
+                    <select id="viewSelect" onchange="changeView(this.value)" class="bg-white dark:bg-[#292524] border border-coffee-100 dark:border-[#44403c] text-coffee-900 dark:text-white text-sm rounded-lg block p-2.5 shadow-sm font-bold min-w-[150px]">
                         <option value="mine">My Brews</option>
                         </select>
                 </div>
@@ -137,7 +141,7 @@
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <i class="fa-solid fa-search text-coffee-400"></i>
                     </div>
-                    <input type="text" id="globalSearch" class="block w-full sm:w-64 p-2.5 pl-10 pr-10 text-sm text-coffee-900 border border-coffee-200 rounded-lg bg-white dark:bg-[#292524] dark:border-[#44403c] dark:placeholder-[#57534e] dark:text-white focus:ring-coffee-500 focus:border-coffee-500" placeholder="Search brews...">
+                    <input type="text" id="globalSearch" class="block w-full sm:w-64 p-2.5 pl-10 pr-10 text-sm text-coffee-900 border border-coffee-100 rounded-lg bg-white dark:bg-[#292524] dark:border-[#44403c] dark:placeholder-[#57534e] dark:text-white focus:ring-1 focus:ring-coffee-500 focus:border-coffee-500 shadow-sm transition-all" placeholder="Search brews...">
                     <button id="searchClearBtn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-coffee-400 hover:text-coffee-600 dark:hover:text-white transition-colors cursor-pointer">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
@@ -153,11 +157,9 @@
                     </h2>
                 </div>
                 <div class="flex items-center gap-3">
-                    <!-- AI MAGIC BUTTON (Hidden by default, shown when expanded) -->
                     <button type="button" onclick="triggerAIScan()" id="aiScanBtn" class="hidden flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> AI Scan Bag
                     </button>
-                    <!-- Hidden input (No capture="environment" means user can pick source) -->
                     <input type="file" id="aiFileInput" accept="image/*" class="hidden" onchange="handleAIFile(event)">
                     
                     <button id="cancelEditBtn" onclick="resetFormState(event)" class="hidden text-xs text-red-500 hover:text-red-700 dark:text-red-400 underline z-10 relative">
@@ -173,17 +175,17 @@
                     
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Roaster</label>
-                        <input type="text" id="roaster" name="roaster" list="roasterList" placeholder="e.g. La Cabra" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
+                        <input type="text" id="roaster" name="roaster" list="roasterList" placeholder="e.g. La Cabra" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                         <datalist id="roasterList"></datalist>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Blend/Farmer</label>
-                        <input type="text" id="farmer" name="farmer" list="farmerList" placeholder="e.g. Felipe Arcila" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
+                        <input type="text" id="farmer" name="farmer" list="farmerList" placeholder="e.g. Felipe Arcila" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                         <datalist id="farmerList"></datalist>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Origin</label>
-                        <input type="text" id="origin" name="origin" list="originList" placeholder="e.g. Ethiopia" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
+                        <input type="text" id="origin" name="origin" list="originList" placeholder="e.g. Ethiopia" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                         <datalist id="originList"></datalist>
                     </div>
                     
@@ -203,12 +205,12 @@
                             <option value="Chemex">Chemex</option>
                             <option value="Other">Other</option>
                         </select>
-                        <input type="text" id="methodOther" name="methodOther" placeholder="e.g. Moka Pot" class="hidden mt-2 w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
+                        <input type="text" id="methodOther" name="methodOther" placeholder="e.g. Moka Pot" class="hidden mt-2 w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                     </div>
                     <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Grind Size</label><input type="number" step="any" id="grind" name="grind" placeholder="e.g. 14" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09]"></div>
                     <div>
                         <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Grinder</label>
-                        <input type="text" id="grinder" name="grinder" list="grinderList" placeholder="e.g. Niche Zero" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
+                        <input type="text" id="grinder" name="grinder" list="grinderList" placeholder="e.g. Niche Zero" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                         <datalist id="grinderList"></datalist>
                     </div>
                     <div class="col-span-1 md:col-span-2 lg:col-span-1 grid grid-cols-3 gap-2 bg-coffee-50/50 dark:bg-[#201d1b] p-2 rounded-lg border border-coffee-100 dark:border-[#44403c]">
@@ -288,7 +290,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Improve / Next Time</label>
-                            <input type="text" id="improve" name="improve" placeholder="e.g. Grind finer, hotter water" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white placeholder-coffee-400 dark:placeholder-[#57534e] focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
+                            <input type="text" id="improve" name="improve" placeholder="e.g. Grind finer, hotter water" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                         </div>
                     </div>
 
@@ -378,7 +380,7 @@
                 <div><span class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase mb-1">Notes</span><p id="cardNotes" class="text-sm text-coffee-800 dark:text-[#d6ccc2] italic bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-lg border border-yellow-100 dark:border-yellow-900/20"></p></div>
                 <div id="cardImproveContainer" class="hidden"><span class="block text-xs font-bold text-red-500 dark:text-red-400 uppercase mb-1">To Improve</span><p id="cardImprove" class="text-sm text-coffee-800 dark:text-[#d6ccc2] bg-red-50 dark:bg-red-900/10 p-2 rounded-lg border border-red-100 dark:border-red-900/20"></p></div>
             </div>
-            <div class="bg-coffee-50 dark:bg-[#1c1917] p-4 border-t border-coffee-200 dark:border-[#44403c] flex justify-between items-center text-xs text-coffee-400 dark:text-[#57534e]"><span id="cardDate"></span><button onclick="closeCoffeeCard(null)" class="font-bold text-coffee-600 dark:text-[#a8a29e] hover:text-coffee-900 dark:hover:text-white">Close</button></div>
+            <div class="bg-coffee-50 dark:bg-[#1c1917] p-4 border-t border-coffee-200 dark:border-[#44403c] flex justify-between items-center text-xs text-coffee-400 dark:text-[#57534e]"><span id="cardDate"></span><button onclick="closeCoffeeCard(null)" class="font-bold text-coffee-600 dark:text-[#a8a29e] hover:text-coffee-900 dark:hover:white">Close</button></div>
         </div>
     </div>
 
@@ -391,12 +393,26 @@
                     <select id="statsViewSelect" onchange="changeStatsView(this.value)" class="bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] text-coffee-900 dark:text-white text-xs rounded-lg block p-2 shadow-sm font-bold min-w-[150px]">
                         <option value="mine">My Brews</option>
                     </select>
+                    <button type="button" onclick="triggerAIProfile()" id="statsAIBtn" class="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI Profile
+                    </button>
                 </div>
                 <button onclick="closeStats()" class="text-gray-500 hover:text-gray-700 dark:text-[#78716c] dark:hover:text-white absolute top-5 right-5 sm:static"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             
             <div id="statsModalContent" class="p-6 overflow-y-auto bg-coffee-50/50 dark:bg-[#1c1917]">
                 
+                <!-- AI Profile Result Box -->
+                <div id="aiProfileContainer" class="hidden relative mb-8 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/30 p-5 rounded-2xl shadow-inner typewriter">
+                    <button onclick="document.getElementById('aiProfileContainer').classList.add('hidden')" class="absolute top-3 right-3 text-indigo-400 hover:text-indigo-600 dark:hover:text-white transition-colors">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <div class="flex items-center gap-2 mb-2 text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase tracking-widest">
+                        <i class="fa-solid fa-sparkles"></i> AI Brew Sommelier
+                    </div>
+                    <p id="aiProfileText" class="text-sm text-coffee-800 dark:text-indigo-100 italic leading-relaxed"></p>
+                </div>
+
                 <!-- 1. General Charts View -->
                 <div id="statsGeneralView" class="space-y-8">
                     <!-- General Stats Grid -->
@@ -760,7 +776,8 @@
             appId: "1:513325852224:web:0af5f15c4968a5bfad61a5"
         };
         
-        const CLOUD_FUNCTION_URL = "https://analyzecoffeebag-p522o3qtpa-uc.a.run.app";
+        const BAG_AI_URL = "https://analyzecoffeebag-p522o3qtpa-uc.a.run.app";
+        const STATS_AI_URL = "https://analyzebrewprofile-p522o3qtpa-uc.a.run.app";
 
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
@@ -783,6 +800,9 @@
         let isPublic = false;
         let dragSrcEl = null;
         let currentUploadCoffeeId = null;
+
+        // --- Stats Specific Tracker ---
+        let currentStatsData = [];
 
         // --- Gallery Pagination State ---
         let lastGalleryDoc = null;
@@ -861,7 +881,7 @@
                 });
 
                 // 3. Call Backend
-                const response = await fetch(CLOUD_FUNCTION_URL, {
+                const response = await fetch(BAG_AI_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ base64Image: base64String })
@@ -895,6 +915,63 @@
                 btn.innerHTML = originalContent;
                 btn.classList.remove('ai-loading-pulse');
                 event.target.value = ''; // Reset file input
+            }
+        };
+
+        // STATS AI PROFILER FUNCTION (Updated with correct naming logic)
+        const triggerAIProfile = async () => {
+            if (currentStatsData.length === 0) return alert("No brews found for this user to analyze.");
+
+            const btn = document.getElementById('statsAIBtn');
+            const originalContent = btn.innerHTML;
+            const container = document.getElementById('aiProfileContainer');
+            const textBox = document.getElementById('aiProfileText');
+            
+            const statsSelect = document.getElementById('statsViewSelect');
+            const selectedValue = statsSelect.value;
+            
+            // Logic to determine a friendly name for the AI
+            let aiTargetName = statsSelect.options[statsSelect.selectedIndex].text;
+            if (selectedValue === 'mine') {
+                aiTargetName = currentUser.displayName || "Home Brewer";
+            }
+
+            try {
+                // UI Loading
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Reading brews...';
+                btn.classList.add('ai-loading-pulse');
+                container.classList.add('hidden');
+
+                // 1. Prepare Data
+                const dataString = currentStatsData.slice(0, 100).map(c => 
+                    `Roaster: ${c.roaster || c.name || '-'}, Origin: ${c.origin || c.beanType || '-'}, Farmer: ${c.farmer || '-'}, Process: ${c.processing || '-'}, Roast: ${c.roastType || '-'}, Method: ${c.method || '-'}, Drink: ${c.drink || '-'}, Rating: ${c.rating || 0}/5, Notes: ${c.notes || 'None'}`
+                ).join('\n');
+
+                // 2. Call Backend
+                const response = await fetch(STATS_AI_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        brewData: dataString,
+                        userName: aiTargetName 
+                    })
+                });
+
+                if (!response.ok) throw new Error("Analysis failed.");
+                const data = await response.json();
+
+                // 3. Display
+                textBox.innerText = data.profile;
+                container.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                alert("Error generating profile: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+                btn.classList.remove('ai-loading-pulse');
             }
         };
 
@@ -1377,7 +1454,10 @@
             following.forEach(f => { const o = document.createElement('option'); o.value = f.uid; o.text = f.name || `Friend (${f.uid.substr(0,5)}...)`; sl.appendChild(o); });
             sl.value = currentView; toggleStatsUniqueTable(false); changeStatsView(currentView);
         };
-        const closeStats = () => document.getElementById('statsModal').classList.add('hidden');
+        const closeStats = () => {
+            document.getElementById('statsModal').classList.add('hidden');
+            document.getElementById('aiProfileContainer').classList.add('hidden'); // Clear AI box when closing
+        };
 
         const toggleStatsUniqueTable = (show) => {
             const gen = document.getElementById('statsGeneralView');
@@ -1387,19 +1467,37 @@
         };
 
         const changeStatsView = async (uid) => {
+            document.getElementById('aiProfileContainer').classList.add('hidden'); // Reset AI Box on view change
             let dataToUse = [];
-            if (uid === currentView) dataToUse = coffees;
-            else {
+            if (uid === 'mine') {
+                 // Fetch current user's latest data to ensure stats are fresh
+                 const q = collection(db, 'users', currentUser.uid, 'coffees');
+                 const snap = await getDocs(q);
+                 snap.forEach(doc => dataToUse.push({ id: doc.id, ...doc.data() }));
+            } else {
                 const q = collection(db, 'users', uid, 'coffees');
                 const snap = await getDocs(q);
                 snap.forEach(doc => dataToUse.push({ id: doc.id, ...doc.data() }));
             }
-            if(dataToUse.length === 0) { calculateStats([]); return; }
             calculateStats(dataToUse);
         };
 
         const calculateStats = (dataToUse) => {
-            const total = dataToUse.length; const now = new Date(); const oneDay = 24 * 60 * 60 * 1000;
+            // Update the data tracker for the AI Sommelier
+            currentStatsData = dataToUse;
+
+            const total = dataToUse.length; 
+            if(total === 0) {
+                 document.getElementById('statTotalBrews').innerText = '0'; document.getElementById('statMonthBrews').innerText = '0'; document.getElementById('statWeekBrews').innerText = '0'; document.getElementById('statAvgBrews').innerText = '0';
+                 document.getElementById('statUniqueCoffees').innerText = '0';
+                 document.getElementById('mostBrewedName').innerText = '-'; document.getElementById('mostBrewedCount').innerText = '0 brews';
+                 document.getElementById('topCoffeesList').innerHTML = '<p class="text-sm text-gray-400 italic">No brews found.</p>';
+                 document.getElementById('uniqueLeaderboardBody').innerHTML = "<tr><td colspan='4' class='text-center py-4 italic text-coffee-400'>No data.</td></tr>";
+                 renderCharts({}, {}, {}, {});
+                 return;
+            }
+
+            const now = new Date(); const oneDay = 24 * 60 * 60 * 1000;
             const last30 = dataToUse.filter(c => (now - new Date(c.createdAt)) < 30 * oneDay).length;
             const last7 = dataToUse.filter(c => (now - new Date(c.createdAt)) < 7 * oneDay).length;
             const firstDate = new Date(Math.min(...dataToUse.map(c => new Date(c.createdAt || now))));
@@ -1579,26 +1677,19 @@
             document.getElementById('cardRatio').textContent = (c.ratio ? '1:' + c.ratio : '-');
             const outWeight = (c.weight && c.ratio) ? (c.weight * c.ratio).toFixed(1) : '-';
             document.getElementById('cardOut').textContent = (outWeight !== '-' ? (outWeight.endsWith('.0') ? parseInt(outWeight) : outWeight) + 'g' : '-');
-            
-            // Logic for dynamic Grinder Title and Grind Value
             const grinderVal = c.grinder || '';
             const grindVal = c.grind || '-';
             const titleEl = document.getElementById('cardGrindTitle');
             const valEl = document.getElementById('cardGrindValue');
-
-            if (grinderVal) {
-                titleEl.textContent = grinderVal;
-            } else {
-                titleEl.textContent = 'Grind';
-            }
+            if (grinderVal) titleEl.textContent = grinderVal;
+            else titleEl.textContent = 'Grind';
             valEl.textContent = grindVal;
-            
             document.getElementById('cardTime').textContent = formatTime(c.time);
             document.getElementById('cardTemp').innerHTML = getTempBadge(c.temp);
             document.getElementById('cardDrink').textContent = c.drink || '-';
             const notesEl = document.getElementById('cardNotes');
             if(c.notes) { notesEl.textContent = '"' + c.notes + '"'; notesEl.classList.remove('hidden'); } else { notesEl.classList.add('hidden'); }
-            const improveEl = document.getElementById('cardImprove'); const improveCon = document.getElementById('cardImproveContainer');
+            const improveEl = document.getElementById('cardNotes'); const improveCon = document.getElementById('cardImproveContainer');
             if(c.improve) { improveEl.textContent = '"' + c.improve + '"'; improveCon.classList.remove('hidden'); } else { improveCon.classList.add('hidden'); }
             document.getElementById('cardDate').textContent = 'Brewed: ' + (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '-');
             document.getElementById('coffeeCardOverlay').classList.remove('hidden');
@@ -1677,6 +1768,7 @@
         Object.assign(window, { 
             triggerAIScan, 
             handleAIFile,
+            triggerAIProfile,
             googleLogin, googleLogout, openFriendsModal, closeModal, switchGalleryTab, switchModalTab, togglePublicProfile, copyShareId, followUser, unfollowUser, changeView, toggleForm, resetFormState, handleFormSubmit, handleRecipeInput, setTempMode, setNotesMode, resetSca, addScaToNotes, editCoffee, duplicateCoffee, cloneBrew, deleteCoffee, discardForm, toggleActive, sortBy, openFilterMenu, closeFilterMenu, applyFilter, clearAllFilters, closeMenus, initTheme, toggleTheme, handleDragStart, handleDragOver, handleDrop, handleDragEnd, getFilteredCoffees, setRating, exportCSV, openImageModal, closeImageModal, openCoffeeCard, closeCoffeeCard, toggleMainMenu, openUploadModal, closeUploadModal, handlePhotoSubmit, openGallery, deletePhoto, openEasterEgg, closeEasterEgg, openPreferences, savePreferences, clearSearch, toggleDrinkOther, toggleMethodOther, openHelp, closeHelp, openAbout, closeAbout, toggleAllFriends, loadMoreGallery, resetZoom, openStats, closeStats, changeStatsView, toggleStatsUniqueTable 
         });
 
