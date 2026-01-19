@@ -1648,53 +1648,93 @@
             const bottomBar = document.getElementById('cardBottomBar');
             const improveContainer = document.getElementById('cardImproveContainer');
             
-            // Temporary UI adjustments for snapshot
+            // 1. Prepare UI for Snapshot
             shareControls.classList.add('hidden');
             closeBtn.classList.add('hidden'); 
             bottomBar.style.display = 'none';
             
-            // Hide Improve Container if it's visible, for the shared image
+            // Hide Improve Container if it's visible (optional, based on your preference)
             const wasImproveVisible = !improveContainer.classList.contains('hidden');
             if (wasImproveVisible) improveContainer.classList.add('hidden');
             
-            // Disable transforms temporarily to avoid blur
+            // Disable transforms temporarily to avoid blurry text during capture
             const originalTransform = content.style.transform;
             content.style.transform = 'none';
 
             try {
-                await new Promise(r => setTimeout(r, 100)); // allow UI to update
-                // Use scale 4 for high resolution
+                // 2. Wait for UI repaint efficiently (Replaces setTimeout)
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+                // 3. Generate Canvas
+                // iOS Fix: Reduced scale from 4 to 2. Scale 4 hits iOS memory limits and causes timeouts.
+                // Scale 2 is sufficient for Retina displays.
                 const canvas = await html2canvas(content, { 
-                    scale: 4, 
+                    scale: 2, 
                     backgroundColor: getComputedStyle(content).backgroundColor, 
                     useCORS: true,
-                    allowTaint: true 
+                    logging: false, // Turn off logging for performance
+                    allowTaint: false // formatting fix: allowTaint: true prevents export
                 });
                 
-                // Restore UI
+                // 4. Restore UI immediately so user doesn't see a glitch
                 shareControls.classList.remove('hidden');
                 closeBtn.classList.remove('hidden'); 
                 bottomBar.style.display = '';
                 content.style.transform = originalTransform;
                 if (wasImproveVisible) improveContainer.classList.remove('hidden');
 
+                // 5. Convert to Blob and Share
                 canvas.toBlob(async (blob) => {
-                    if (!blob) return alert('Failed to generate image');
-                    const file = new File([blob], `brew_${c.roaster || 'coffee'}_${Date.now()}.png`, { type: 'image/png' });
+                    if (!blob) return alert('Failed to generate image data');
+                    
+                    const fileName = `brew_${(c.roaster || 'coffee').replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.png`;
+                    const file = new File([blob], fileName, { type: 'image/png' });
+
                     if (navigator.share) {
-                        try { await navigator.share({ files: [file], title: 'My Coffee Brew', text: `Check out this brew of ${c.roaster}!` }); } catch (err) { if (err.name !== 'AbortError') console.error('Share failed:', err); }
+                        try {
+                            // Check if we can share files
+                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                await navigator.share({
+                                    files: [file],
+                                    title: 'Coffee Dial Brew',
+                                    text: `Check out this brew of ${c.roaster}!`
+                                });
+                            } else {
+                                throw new Error('Device does not support file sharing.');
+                            }
+                        } catch (err) {
+                            // Ignore AbortError (user cancelled)
+                            if (err.name !== 'AbortError') {
+                                console.error('Share failed:', err);
+                                // iOS Fallback: If share fails (timeout), open image in new tab
+                                const dataUrl = canvas.toDataURL();
+                                const win = window.open();
+                                if(win) {
+                                    win.document.write('<img src="' + dataUrl + '" style="width:100%"/>');
+                                    win.document.write('<h3 style="font-family:sans-serif; text-align:center;">Long press image to Share</h3>');
+                                } else {
+                                    alert("Sharing failed and pop-up blocked. Please screenshot instead.");
+                                }
+                            }
+                        }
                     } else {
-                        const link = document.createElement('a'); link.download = file.name; link.href = canvas.toDataURL(); link.click();
+                        // Desktop/Non-supported fallback
+                        const link = document.createElement('a'); 
+                        link.download = fileName; 
+                        link.href = canvas.toDataURL(); 
+                        link.click();
                     }
-                }, 'image/png');
+                }, 'image/png', 0.9); // 0.9 quality compression
+
             } catch (err) {
                 console.error("Card generation failed", err); 
+                // Restore UI in case of error
                 shareControls.classList.remove('hidden');
                 closeBtn.classList.remove('hidden'); 
                 bottomBar.style.display = '';
                 content.style.transform = originalTransform;
                 if (wasImproveVisible) improveContainer.classList.remove('hidden');
-                alert("Could not generate card image.");
+                alert("Could not generate card image. Please try taking a screenshot.");
             }
         };
 
