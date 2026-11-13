@@ -59,44 +59,6 @@ This workflow runs lint for `getPhotoSignedUrl` function source on:
 - Pull requests targeting `main` for function path changes
 - Manual workflow dispatch
 
-## deploy-ai-functions.yml
-
-This workflow deploys both AI functions from one consolidated source folder:
-- `cloud/google-cloud-functions/ai-functions-source`
-
-It runs on:
-- Pushes to `main` that touch the AI function folder
-- Manual workflow dispatch
-
-The workflow:
-1. Lints the consolidated package.
-2. Deploys `analyzeCoffeeBag` with entry point `analyzeCoffeeBag`.
-3. Deploys `analyzeBrewProfile` with entry point `analyzeBrewProfile`.
-
-Secret handling:
-- Uses Google Secret Manager binding at deploy time:
-  - `--set-secrets=GEMINI_API_KEY=GEMINI_API_KEY:latest`
-- No plaintext Gemini API key is stored in repo or GitHub Actions secrets.
-
-Required permissions in GCP:
-- Deployer service account:
-  - `roles/cloudfunctions.developer`
-  - `roles/run.admin`
-  - `roles/artifactregistry.writer`
-  - `roles/iam.serviceAccountUser` on runtime service account
-- Runtime service account:
-  - `roles/secretmanager.secretAccessor` on secret `GEMINI_API_KEY`
-
-## lint-ai-functions.yml
-
-This workflow runs lint for the consolidated AI function package:
-- `cloud/google-cloud-functions/ai-functions-source`
-
-It runs on:
-- Push to `main` for AI function path changes
-- Pull requests targeting `main` for AI function path changes
-- Manual workflow dispatch
-
 ## deploy-notifications-function.yml
 
 This workflow deploys push notification functions from:
@@ -126,6 +88,7 @@ Expected deployer permissions:
 - `roles/run.admin`
 - `roles/artifactregistry.writer`
 - `roles/iam.serviceAccountUser` on the function runtime service account
+- `roles/secretmanager.viewer` (the Firebase CLI checks the web push secrets before deploying)
 
 Runtime service account should include:
 - Firestore access (`roles/datastore.user`)

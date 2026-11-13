@@ -4,14 +4,14 @@ This folder contains Cloud Function source code that is deployed automatically f
 
 Workflows:
 - `deploy-get-photo-signed-url.yml`
-- `deploy-ai-functions.yml`
 - `deploy-notifications-function.yml`
 - `lint-get-photo-signed-url.yml`
-- `lint-ai-functions.yml`
 - `lint-notifications-function.yml`
 
 For workflow details and required IAM roles, see:
 - `.github/workflows/README.md`
+
+There are no AI functions here. AI bag scan and the AI profile call the Gemini API straight from the app, with an API key each user enters under Preferences > AI (`src/core/gemini-client.js`, `src/core/ai-settings.js`).
 
 ## Deployment Model
 
@@ -25,7 +25,7 @@ For workflow details and required IAM roles, see:
   - `GCP_PROJECT_ID`
   - `GCP_WORKLOAD_IDENTITY_PROVIDER`
   - `GCP_DEPLOYER_SERVICE_ACCOUNT`
-- App secret (`GEMINI_API_KEY`) is stored in **Google Secret Manager** and injected at deploy time via `--set-secrets`.
+- The web push key pair and subject (`WEB_PUSH_VAPID_PUBLIC_KEY`, `WEB_PUSH_VAPID_PRIVATE_KEY`, `WEB_PUSH_SUBJECT`) are stored in **Google Secret Manager** and read by the notifications functions at runtime. The public key must match `WEB_PUSH_VAPID_KEY` in `src/config/firebase.js` and the pair imported under Cloud Messaging > Web Push certificates.
 
 ## Install gcloud CLI
 
@@ -119,30 +119,30 @@ gcloud functions logs read getPhotoSignedUrl \
   --gen2 --region=us-central1 --project=coffee-dial-buzink --limit=100
 ```
 
-AI function logs:
+Notification function logs:
 ```bash
-gcloud functions logs read analyzeCoffeeBag \
+gcloud functions logs read notifyOnMomentCreated \
   --gen2 --region=us-central1 --project=coffee-dial-buzink --limit=100
 
-gcloud functions logs read analyzeBrewProfile \
+gcloud functions logs read notifyOnCommentCreated \
   --gen2 --region=us-central1 --project=coffee-dial-buzink --limit=100
 ```
 
-## Secret Manager checks (for GEMINI)
+## Secret Manager checks (web push)
 
-Check secret exists:
+Check a secret exists:
 ```bash
-gcloud secrets describe GEMINI_API_KEY --project=coffee-dial-buzink
+gcloud secrets describe WEB_PUSH_VAPID_PRIVATE_KEY --project=coffee-dial-buzink
 ```
 
 List versions:
 ```bash
-gcloud secrets versions list GEMINI_API_KEY --project=coffee-dial-buzink
+gcloud secrets versions list WEB_PUSH_VAPID_PRIVATE_KEY --project=coffee-dial-buzink
 ```
 
-Check runtime SA can access the secret:
+Check the runtime SA can access the secret:
 ```bash
-gcloud secrets get-iam-policy GEMINI_API_KEY \
+gcloud secrets get-iam-policy WEB_PUSH_VAPID_PRIVATE_KEY \
   --project=coffee-dial-buzink \
   --format='table(bindings.role,bindings.members)'
 ```
@@ -151,4 +151,4 @@ gcloud secrets get-iam-policy GEMINI_API_KEY \
 
 If GitHub Actions is unavailable, you can still deploy manually with the same source folders/workflow settings. Use the workflow files as source of truth for flags:
 - `.github/workflows/deploy-get-photo-signed-url.yml`
-- `.github/workflows/deploy-ai-functions.yml`
+- `.github/workflows/deploy-notifications-function.yml`

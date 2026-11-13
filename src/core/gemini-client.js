@@ -2,7 +2,6 @@
 // their own API key (stored through ai-settings.js) and requests go straight to Google.
 
 export const DEFAULT_GEMINI_MODEL = 'gemini-flash-latest';
-export const GEMINI_API_KEY_URL = 'https://aistudio.google.com/apikey';
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
