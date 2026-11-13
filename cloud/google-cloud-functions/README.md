@@ -50,7 +50,7 @@ Install Google Cloud CLI from:
 ```bash
 gcloud init
 gcloud auth login
-gcloud config set project coffee-dial-app-9db38
+gcloud config set project coffee-dial-buzink
 ```
 
 ## Values to put in GitHub Secrets
@@ -65,14 +65,14 @@ gcloud config get-value project
 ### 2) `GCP_DEPLOYER_SERVICE_ACCOUNT`
 Use your deployer SA email (example):
 ```bash
-echo github-function-deployer@coffee-dial-app-9db38.iam.gserviceaccount.com
+echo github-function-deployer@coffee-dial-buzink.iam.gserviceaccount.com
 ```
 
 ### 3) `GCP_WORKLOAD_IDENTITY_PROVIDER`
 If you already created WIF, list providers and copy the full `name` value:
 ```bash
 gcloud iam workload-identity-pools providers list \
-  --project="coffee-dial-app-9db38" \
+  --project="coffee-dial-buzink" \
   --location="global" \
   --workload-identity-pool="github-pool" \
   --format="table(name,displayName,state)"
@@ -86,8 +86,8 @@ projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers
 ### Optional: set GitHub secrets from CLI
 If you use GitHub CLI (`gh`):
 ```bash
-gh secret set GCP_PROJECT_ID --body "coffee-dial-app-9db38"
-gh secret set GCP_DEPLOYER_SERVICE_ACCOUNT --body "github-function-deployer@coffee-dial-app-9db38.iam.gserviceaccount.com"
+gh secret set GCP_PROJECT_ID --body "coffee-dial-buzink"
+gh secret set GCP_DEPLOYER_SERVICE_ACCOUNT --body "github-function-deployer@coffee-dial-buzink.iam.gserviceaccount.com"
 gh secret set GCP_WORKLOAD_IDENTITY_PROVIDER --body "projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID"
 ```
 
@@ -95,19 +95,19 @@ gh secret set GCP_WORKLOAD_IDENTITY_PROVIDER --body "projects/PROJECT_NUMBER/loc
 
 List functions:
 ```bash
-gcloud functions list --gen2 --regions=us-central1 --project=coffee-dial-app-9db38
+gcloud functions list --gen2 --regions=us-central1 --project=coffee-dial-buzink
 ```
 
 Describe a function:
 ```bash
 gcloud functions describe getPhotoSignedUrl \
-  --gen2 --region=us-central1 --project=coffee-dial-app-9db38
+  --gen2 --region=us-central1 --project=coffee-dial-buzink
 ```
 
 Get service URL only:
 ```bash
 gcloud functions describe getPhotoSignedUrl \
-  --gen2 --region=us-central1 --project=coffee-dial-app-9db38 \
+  --gen2 --region=us-central1 --project=coffee-dial-buzink \
   --format='value(serviceConfig.uri)'
 ```
 
@@ -116,34 +116,34 @@ gcloud functions describe getPhotoSignedUrl \
 Latest logs for one function:
 ```bash
 gcloud functions logs read getPhotoSignedUrl \
-  --gen2 --region=us-central1 --project=coffee-dial-app-9db38 --limit=100
+  --gen2 --region=us-central1 --project=coffee-dial-buzink --limit=100
 ```
 
 AI function logs:
 ```bash
 gcloud functions logs read analyzeCoffeeBag \
-  --gen2 --region=us-central1 --project=coffee-dial-app-9db38 --limit=100
+  --gen2 --region=us-central1 --project=coffee-dial-buzink --limit=100
 
 gcloud functions logs read analyzeBrewProfile \
-  --gen2 --region=us-central1 --project=coffee-dial-app-9db38 --limit=100
+  --gen2 --region=us-central1 --project=coffee-dial-buzink --limit=100
 ```
 
 ## Secret Manager checks (for GEMINI)
 
 Check secret exists:
 ```bash
-gcloud secrets describe GEMINI_API_KEY --project=coffee-dial-app-9db38
+gcloud secrets describe GEMINI_API_KEY --project=coffee-dial-buzink
 ```
 
 List versions:
 ```bash
-gcloud secrets versions list GEMINI_API_KEY --project=coffee-dial-app-9db38
+gcloud secrets versions list GEMINI_API_KEY --project=coffee-dial-buzink
 ```
 
 Check runtime SA can access the secret:
 ```bash
 gcloud secrets get-iam-policy GEMINI_API_KEY \
-  --project=coffee-dial-app-9db38 \
+  --project=coffee-dial-buzink \
   --format='table(bindings.role,bindings.members)'
 ```
 

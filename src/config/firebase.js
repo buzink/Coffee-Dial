@@ -3,15 +3,15 @@ import { getAuth, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 export const firebaseConfig = {
-    apiKey: 'AIzaSyAjKRgCrNuwaAvjOJPzTrmippI2sv5QG6M',
-    authDomain: 'coffee-dial-app-9db38.firebaseapp.com',
-    projectId: 'coffee-dial-app-9db38',
-    storageBucket: 'coffee-dial-app-9db38.firebasestorage.app',
-    messagingSenderId: '513325852224',
-    appId: '1:513325852224:web:0af5f15c4968a5bfad61a5'
+    apiKey: 'AIzaSyADTao9VnV_UTHcLrbtYyM7QE9vIwPd2Mw',
+    authDomain: 'coffee-dial-buzink.firebaseapp.com',
+    projectId: 'coffee-dial-buzink',
+    storageBucket: 'coffee-dial-buzink.firebasestorage.app',
+    messagingSenderId: '669572954724',
+    appId: '1:669572954724:web:39545364784d8b36af7d71'
 };
 
-export const WEB_PUSH_VAPID_KEY = 'BEyGyjZoS52SNCQedvEPYEWht5Kuk_N2lZbVrtLbWUNX5tA1US6Us2XeE9WhMsTLTW_BEkHAzWKXc9loPkGtoK0';
+export const WEB_PUSH_VAPID_KEY = 'BPJDSgMnLuRDdj-TK_zCYEqfjBgQef_CZU1L_MVlzIbHYBkIluGdj1oWFnPQ6lUftK7CKirEUkO0Ybj7MpNLKC8';
 
 export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);

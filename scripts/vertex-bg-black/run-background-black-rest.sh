@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Pulled from repo config/docs:
 # - projectId in src/config/firebase.js
 # - functions region in cloud/google-cloud-functions/README.md and configs
-PROJECT_ID="${PROJECT_ID:-coffee-dial-app-9db38}"
+PROJECT_ID="${PROJECT_ID:-coffee-dial-buzink}"
 LOCATION="${LOCATION:-us-central1}"
 
 MODEL_ID="${MODEL_ID:-imagen-3.0-capability-001}"

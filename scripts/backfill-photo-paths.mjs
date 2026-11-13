@@ -1,8 +1,8 @@
 import admin from "firebase-admin";
 import {URL} from "node:url";
 
-const DEFAULT_PROJECT_ID = "coffee-dial-app-9db38";
-const DEFAULT_BUCKET = "coffee-dial-app-9db38.firebasestorage.app";
+const DEFAULT_PROJECT_ID = "coffee-dial-buzink";
+const DEFAULT_BUCKET = "coffee-dial-buzink.firebasestorage.app";
 const PAGE_SIZE = 400;
 const WRITE_BATCH_LIMIT = 400;
 

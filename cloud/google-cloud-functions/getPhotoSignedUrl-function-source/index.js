@@ -2,7 +2,7 @@ const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 
 const configuredBucket = process.env.STORAGE_BUCKET ||
-  "coffee-dial-app-9db38.firebasestorage.app";
+  "coffee-dial-buzink.firebasestorage.app";
 
 if (!admin.apps.length) {
   admin.initializeApp({

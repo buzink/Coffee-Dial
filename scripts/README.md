@@ -6,8 +6,8 @@ Use Application Default Credentials (ADC):
 
 ```bash
 gcloud auth application-default login
-gcloud auth application-default set-quota-project coffee-dial-app-9db38
-gcloud config set project coffee-dial-app-9db38
+gcloud auth application-default set-quota-project coffee-dial-buzink
+gcloud config set project coffee-dial-buzink
 ```
 
 ## Shared conventions
@@ -15,7 +15,7 @@ gcloud config set project coffee-dial-app-9db38
 - All migration/backfill scripts run in `dry-run` mode by default.
 - Add `--apply` to write changes.
 - Optional common flags:
-  - `--project coffee-dial-app-9db38`
+  - `--project coffee-dial-buzink`
   - `--uid <USER_UID>`
   - `--limit-users <N>`
 
@@ -119,6 +119,6 @@ Examples:
 ## Direct script usage examples
 
 ```bash
-node scripts/sync-legacy-beans.mjs --project coffee-dial-app-9db38 --uid <USER_UID>
-node scripts/recalculate-all-beans-left.mjs --apply --project coffee-dial-app-9db38 --limit-users 100
+node scripts/sync-legacy-beans.mjs --project coffee-dial-buzink --uid <USER_UID>
+node scripts/recalculate-all-beans-left.mjs --apply --project coffee-dial-buzink --limit-users 100
 ```

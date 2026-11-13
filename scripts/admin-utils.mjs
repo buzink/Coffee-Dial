@@ -1,6 +1,6 @@
 import admin from "firebase-admin";
 
-export const DEFAULT_PROJECT_ID = "coffee-dial-app-9db38";
+export const DEFAULT_PROJECT_ID = "coffee-dial-buzink";
 const WRITE_BATCH_LIMIT = 400;
 
 export function parseCommonArgs(argv, projectDefault = DEFAULT_PROJECT_ID) {

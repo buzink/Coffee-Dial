@@ -35,5 +35,5 @@ steps:
 substitutions:
   _REGION: us-central1
   _RUNTIME: nodejs22
-  _SERVICE_ACCOUNT: coffee-dial-app-9db38@appspot.gserviceaccount.com
-  _STORAGE_BUCKET: coffee-dial-app-9db38.firebasestorage.app
+  _SERVICE_ACCOUNT: coffee-dial-buzink@appspot.gserviceaccount.com
+  _STORAGE_BUCKET: coffee-dial-buzink.firebasestorage.app

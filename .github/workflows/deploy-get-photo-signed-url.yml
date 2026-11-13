@@ -43,8 +43,8 @@ jobs:
       FUNCTION_RUNTIME: nodejs22
       FUNCTION_SOURCE: cloud/google-cloud-functions/getPhotoSignedUrl-function-source
       FUNCTION_ENTRY_POINT: getPhotoSignedUrl
-      FUNCTION_SERVICE_ACCOUNT: coffee-dial-app-9db38@appspot.gserviceaccount.com
-      STORAGE_BUCKET: coffee-dial-app-9db38.firebasestorage.app
+      FUNCTION_SERVICE_ACCOUNT: coffee-dial-buzink@appspot.gserviceaccount.com
+      STORAGE_BUCKET: coffee-dial-buzink.firebasestorage.app
     steps:
       - name: Checkout
         uses: actions/checkout@v4
