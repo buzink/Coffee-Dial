@@ -21,6 +21,8 @@ export const createBrewsActionsModule = ({
     setRating,
     toggleForm,
     populateForm,
+    applyBrewGraphToForm = null,
+    loadBrewWithGraph = null,
     updateBeanDropdown,
     setBrewGearScope,
     setCoffeeDetailsCollapsed,
@@ -161,6 +163,7 @@ export const createBrewsActionsModule = ({
         delete d.scale2Capture;
         delete d.scale2FlowCapture;
         delete d.scale2RawCapture;
+        delete d.hasGraph;
         delete d.swirlCount;
         delete d.pourCount;
         delete d.bloomTime;
@@ -486,11 +489,15 @@ export const createBrewsActionsModule = ({
         const maxFlowEl = document.getElementById('graphMaxFlow');
         const avgFlowEl = document.getElementById('graphAvgFlow');
         const firstDripFromState = scale()?.getFirstDripSeconds?.();
+        // These inputs live in the graph modal, which is only mounted once it has been opened.
+        // When it is not there, an edit must keep the stored values instead of clearing them.
+        const brewBeingEdited = eid ? coffees.find((c) => c.id === eid) : null;
         d.firstDrip = Number.isFinite(Number(firstDripFromState))
             ? Number(firstDripFromState)
             : parseNum(firstDripEl ? firstDripEl.value : null);
-        d.maxFlow = parseNum(maxFlowEl ? maxFlowEl.value : null);
-        d.avgFlow = parseNum(avgFlowEl ? avgFlowEl.value : null);
+        if (d.firstDrip === null && !firstDripEl && brewBeingEdited) d.firstDrip = brewBeingEdited.firstDrip ?? null;
+        d.maxFlow = maxFlowEl ? parseNum(maxFlowEl.value) : (brewBeingEdited?.maxFlow ?? null);
+        d.avgFlow = avgFlowEl ? parseNum(avgFlowEl.value) : (brewBeingEdited?.avgFlow ?? null);
 
         const scaleCaptureData = scale()?.getCaptureData?.();
         if (scaleCaptureData) {
@@ -912,7 +919,17 @@ export const createBrewsActionsModule = ({
             updateBeanDropdown({ includeAll: true });
             setBrewGearScope({ includeAll: true });
             document.getElementById('editId').value = c.id;
+            // The captures live in their own document. Show the form right away and add the
+            // graph when it arrives; if it cannot be loaded, saving leaves the stored graph as is.
             populateForm(c);
+            if (typeof loadBrewWithGraph === 'function' && c.hasGraph === true) {
+                void loadBrewWithGraph(c).then((withGraph) => {
+                    if (withGraph === c) return;
+                    if (document.getElementById('editId')?.value !== c.id) return;
+                    if (!document.getElementById('formContainer')?.classList.contains('editing-mode')) return;
+                    applyBrewGraphToForm?.(withGraph);
+                });
+            }
             document.getElementById('formContainer').classList.add('editing-mode');
             setCoffeeDetailsCollapsed(true);
             document.getElementById('formTitle').innerHTML = '<span class="text-orange-500">Edit brew</span>';

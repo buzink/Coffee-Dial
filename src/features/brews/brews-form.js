@@ -155,6 +155,42 @@ export const createBrewsFormModule = ({ setTempMode, setRating, setNotesMode, ge
         refreshBrewGearField();
     };
 
+    // Loading captures into the scale module resets the first drip / max flow / avg flow fields,
+    // so the brew's stored values are put back afterwards. Without this an edit would save them
+    // as empty.
+    const applyBrewGraphStatsToForm = (c, coffeeScale = getCoffeeScale?.()) => {
+        const firstDripEl = document.getElementById('graphFirstDrip');
+        const maxFlowEl = document.getElementById('graphMaxFlow');
+        const avgFlowEl = document.getElementById('graphAvgFlow');
+        if (coffeeScale?.setFirstDripSeconds) coffeeScale.setFirstDripSeconds(c.firstDrip ?? null);
+        else if (firstDripEl) firstDripEl.value = c.firstDrip ?? '';
+        if (maxFlowEl) maxFlowEl.value = c.maxFlow ?? '';
+        if (avgFlowEl) avgFlowEl.value = c.avgFlow ?? '';
+    };
+
+    // Puts a brew's captures into the scale module so the form shows its graph. Called again
+    // when captures that live in their own document arrive after the form was filled.
+    const applyBrewGraphToForm = (c) => {
+        const coffeeScale = getCoffeeScale?.();
+        if (coffeeScale?.setCaptureData) {
+            const hasData = c.scaleCapture || c.scaleFlowCapture || c.scaleRawCapture || c.scale2Capture;
+            const graphData = hasData
+                ? {
+                      capture: c.scaleCapture || { startAt: null, samples: [] },
+                      flowCapture: c.scaleFlowCapture || { startAt: (c.scaleCapture && c.scaleCapture.startAt) || null, samples: [] },
+                      rawCapture: c.scaleRawCapture || { startAt: (c.scaleCapture && c.scaleCapture.startAt) || null, samples: [] },
+                      firstDrip: c.firstDrip,
+                      ...(c.scale2Capture ? { scale2Capture: c.scale2Capture } : {}),
+                      ...(c.scale2FlowCapture ? { scale2FlowCapture: c.scale2FlowCapture } : {}),
+                      ...(c.scale2RawCapture ? { scale2RawCapture: c.scale2RawCapture } : {})
+                  }
+                : null;
+            coffeeScale.setCaptureData(graphData);
+        }
+        if (coffeeScale?.syncGraphFormFields) coffeeScale.syncGraphFormFields();
+        applyBrewGraphStatsToForm(c, coffeeScale);
+    };
+
     const populateForm = (c) => {
         refreshBrewGearField();
         document.getElementById('roaster').value = c.roaster || c.name || '';
@@ -238,36 +274,17 @@ export const createBrewsFormModule = ({ setTempMode, setRating, setNotesMode, ge
             if (fillBeanDetails) fillBeanDetails('');
         }
 
-        if (coffeeScale?.setCaptureData) {
-            const hasData = c.scaleCapture || c.scaleFlowCapture || c.scaleRawCapture || c.scale2Capture;
-            const graphData = hasData
-                ? {
-                      capture: c.scaleCapture || { startAt: null, samples: [] },
-                      flowCapture: c.scaleFlowCapture || { startAt: (c.scaleCapture && c.scaleCapture.startAt) || null, samples: [] },
-                      rawCapture: c.scaleRawCapture || { startAt: (c.scaleCapture && c.scaleCapture.startAt) || null, samples: [] },
-                      firstDrip: c.firstDrip,
-                      ...(c.scale2Capture ? { scale2Capture: c.scale2Capture } : {}),
-                      ...(c.scale2FlowCapture ? { scale2FlowCapture: c.scale2FlowCapture } : {}),
-                      ...(c.scale2RawCapture ? { scale2RawCapture: c.scale2RawCapture } : {})
-                  }
-                : null;
-            coffeeScale.setCaptureData(graphData);
-        }
+        applyBrewGraphToForm(c);
 
         if (coffeeScale?.setRecipeSteps) coffeeScale.setRecipeSteps(c.recipeSteps || []);
         if (coffeeScale?.syncGraphFormFields) coffeeScale.syncGraphFormFields();
 
-        const firstDripEl = document.getElementById('graphFirstDrip');
-        const maxFlowEl = document.getElementById('graphMaxFlow');
-        const avgFlowEl = document.getElementById('graphAvgFlow');
-        if (coffeeScale?.setFirstDripSeconds) coffeeScale.setFirstDripSeconds(c.firstDrip ?? null);
-        else if (firstDripEl) firstDripEl.value = c.firstDrip ?? '';
-        if (maxFlowEl) maxFlowEl.value = c.maxFlow ?? '';
-        if (avgFlowEl) avgFlowEl.value = c.avgFlow ?? '';
+        applyBrewGraphStatsToForm(c, coffeeScale);
     };
 
     return {
         populateForm,
+        applyBrewGraphToForm,
         refreshBrewGearField,
         setBrewGearScope,
         getSelectedBrewGearIds,

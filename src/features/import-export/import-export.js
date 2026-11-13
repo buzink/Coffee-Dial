@@ -1,4 +1,7 @@
+import { encodeBrewGraphDoc, splitBrewGraph } from '../../core/brew-graphs.js';
+
 export const createImportExportModule = ({
+    loadBrewsWithGraphs = null,
     getCurrentUser,
     getPendingImportBrews,
     setPendingImportBrews,
@@ -179,17 +182,38 @@ export const createImportExportModule = ({
 
         try {
             const col = collection(db, 'users', user.uid, 'coffees');
-            const chunkSize = 400;
+            // Brews from a JSON export can carry scale captures. Those go into the brew's graph
+            // document, like everywhere else. A batch is limited in size as well as in number of
+            // writes, so batches are closed early when captures make them large.
+            const MAX_BATCH_WRITES = 400;
+            const MAX_BATCH_CHARS = 1500000;
             const pending = getPendingImportBrews();
-            for (let i = 0; i < pending.length; i += chunkSize) {
-                const batch = writeBatch(db);
-                const slice = pending.slice(i, i + chunkSize);
-                slice.forEach((brew) => {
-                    const ref = doc(col);
-                    batch.set(ref, brew);
-                });
+            let batch = writeBatch(db);
+            let batchWrites = 0;
+            let batchChars = 0;
+            const flush = async () => {
+                if (!batchWrites) return;
                 await batch.commit();
+                batch = writeBatch(db);
+                batchWrites = 0;
+                batchChars = 0;
+            };
+            for (const pendingBrew of pending) {
+                const { brew, graph } = splitBrewGraph(pendingBrew);
+                const graphChars = graph ? JSON.stringify(graph).length : 0;
+                const writes = graph ? 2 : 1;
+                if (batchWrites + writes > MAX_BATCH_WRITES || (batchChars && batchChars + graphChars > MAX_BATCH_CHARS)) {
+                    await flush();
+                }
+                const ref = doc(col);
+                // An imported flag is only trusted when the captures come with it.
+                delete brew.hasGraph;
+                batch.set(ref, graph ? { ...brew, hasGraph: true } : brew);
+                if (graph) batch.set(doc(db, 'users', user.uid, 'brewGraphs', ref.id), encodeBrewGraphDoc(graph));
+                batchWrites += writes;
+                batchChars += graphChars;
             }
+            await flush();
 
             resetImportState();
             closeImportExportModal();
@@ -213,7 +237,7 @@ export const createImportExportModule = ({
         closeImportExportModal();
     };
 
-    const performExport = () => {
+    const performExport = async () => {
         const exportType = document.getElementById('exportType').value;
         const format = document.getElementById('exportFormat').value;
         const brews = getFilteredCoffees();
@@ -224,10 +248,10 @@ export const createImportExportModule = ({
 
         if (exportType === 'brews') {
             if (format === 'csv') exportBrewsAsCSV(brews);
-            else if (format === 'json') exportAsJSON(brews);
+            else if (format === 'json') await exportAsJSON(brews);
         } else if (exportType === 'brews-beanconqueror') {
             if (format === 'csv') exportBrewsAsBeanconquerorCSV(brews);
-            else if (format === 'json') exportAsJSON(brews);
+            else if (format === 'json') await exportAsJSON(brews);
         } else if (exportType === 'coffees') {
             if (format === 'csv') exportCoffeesAsCSV(getBeans());
             else if (format === 'json') exportCoffeesAsJSON(getBeans());
@@ -289,7 +313,24 @@ export const createImportExportModule = ({
         document.body.removeChild(link);
     };
 
-    const exportAsJSON = (brews) => {
+    const exportAsJSON = async (sourceBrews) => {
+        // A JSON export is a full backup, so it includes the scale captures. Those live in their
+        // own document per brew and are fetched here.
+        let brews = sourceBrews;
+        if (typeof loadBrewsWithGraphs === 'function') {
+            const loaded = await loadBrewsWithGraphs(sourceBrews);
+            brews = loaded.brews;
+            if (loaded.failed > 0) {
+                const proceed = await openAppConfirm({
+                    title: 'Export without some graphs?',
+                    message: `${loaded.failed} graph(s) could not be loaded and will be missing from the export.`,
+                    confirmLabel: 'Export anyway',
+                    cancelLabel: 'Cancel',
+                    danger: false
+                });
+                if (!proceed) return;
+            }
+        }
         const normalized = brews.map((brew) => {
             const typeDisplay = getCoffeeTypeDisplay(brew);
             const type = getCoffeeTypeForBrew(brew);
@@ -312,13 +353,15 @@ export const createImportExportModule = ({
                 }
             };
         });
-        const jsonContent = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(normalized, null, 2))}`;
+        // A Blob rather than a data: URL, which browsers cut off at a few megabytes.
+        const blobUrl = URL.createObjectURL(new Blob([JSON.stringify(normalized, null, 2)], { type: 'application/json' }));
         const link = document.createElement('a');
-        link.setAttribute('href', jsonContent);
+        link.setAttribute('href', blobUrl);
         link.setAttribute('download', 'coffee_log.json');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
     };
 
     const exportCoffeesAsCSV = () => {

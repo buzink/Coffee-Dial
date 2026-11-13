@@ -69,6 +69,7 @@ export const createBrewsCoordinator = ({
 }) => {
     const {
         populateForm,
+        applyBrewGraphToForm,
         refreshBrewGearField,
         setBrewGearScope,
         getSelectedBrewGearIds,
@@ -89,6 +90,7 @@ export const createBrewsCoordinator = ({
     } = createBrewsActionsModule({
         ...actionsDeps,
         populateForm: (...args) => populateForm(...args),
+        applyBrewGraphToForm: (...args) => applyBrewGraphToForm(...args),
         setBrewGearScope: (...args) => setBrewGearScope(...args),
         getSelectedBrewGearIds: () => getSelectedBrewGearIds(),
         setSelectedBrewGearIds: (...args) => setSelectedBrewGearIds(...args)

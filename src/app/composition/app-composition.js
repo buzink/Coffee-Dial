@@ -1,10 +1,11 @@
         import { WEB_PUSH_VAPID_KEY, app as firebaseApp, auth, db, provider, getFunctionsInstance, loadFunctionsApi, loadMessagingApi, getStorageInstance, loadStorageApi } from '../../config/firebase.js';
         import { signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { collection, collectionGroup, doc, setDoc, addDoc, updateDoc, deleteDoc, getDoc, getDocs, getDocsFromCache, arrayUnion, arrayRemove, onSnapshot, query, writeBatch, where, orderBy, limit, startAfter } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { collection, collectionGroup, doc, setDoc, addDoc, updateDoc, deleteDoc, getDoc, getDocs, getDocsFromCache, arrayUnion, arrayRemove, onSnapshot, query, writeBatch, deleteField, where, orderBy, limit, startAfter } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
         import { parseBeanconquerorCSV, mapBeanconquerorBrews } from '../../features/import-export/importers/beanconqueror.js';
         import { initEmailLinkAuth } from '../../integrations/email-link-auth.js';
         import { createAiSettingsStore } from '../../core/ai-settings.js';
         import { createHomeSnapshotStore } from '../../core/home-snapshot.js';
+        import { createBrewGraphStore } from '../../core/brew-graphs.js';
         import { closeAutoPinToast, closeStickyToast, showAutoPinToast, showToast } from '../../core/notify.js';
         import { closeAppConfirm, openAppConfirm, resolveAppConfirm, installDialogAdapters } from '../../core/confirm.js';
         import { getStarDisplay, formatBeanOpenedDate, formatTime, getRoastBadge } from '../../core/format.js';
@@ -299,11 +300,20 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             orderBy,
             limit,
             startAfter,
-            writeBatch
+            writeBatch,
+            deleteField
         });
         const aiSettings = createAiSettingsStore({
             dataService,
             getCurrentUser: () => getCurrentUserState()
+        });
+        // Graphs belong to whoever's brews are on screen: the user's own, or a friend's.
+        const brewGraphs = createBrewGraphStore({
+            dataService,
+            getOwnerUid: () => {
+                const view = getCurrentViewState();
+                return view && view !== 'mine' ? view : getCurrentUserState()?.uid || null;
+            }
         });
         const homeSnapshot = createHomeSnapshotStore({
             dataService,
@@ -1202,6 +1212,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 galleryModulePromise = (async () => {
                     const { createGalleryModule } = await import('../../features/gallery/gallery.js');
                     return createGalleryModule({
+                        loadBrewWithGraph: (...args) => brewGraphs.loadBrewWithGraph(...args),
                         ensureGalleryMounted,
                         getCurrentUser: () => getCurrentUserState(),
                         getCurrentUploadCoffeeId: () => getCurrentUploadCoffeeIdState(),
@@ -1342,6 +1353,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 importExportModulePromise = (async () => {
                     const { createImportExportModule } = await import('../../features/import-export/import-export.js');
                     return createImportExportModule({
+                        loadBrewsWithGraphs: (...args) => brewGraphs.loadBrewsWithGraphs(...args),
                         getCurrentUser: () => getCurrentUserState(),
                         getPendingImportBrews: () => getPendingImportBrewsState(),
                         setPendingImportBrews: (value) => setPendingImportBrewsState(value),
@@ -1398,6 +1410,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                     await ensureLabResultsModalMounted();
                     const { createLabResultsModule } = await import('../../features/brews/lab-results.js');
                     return createLabResultsModule({
+                        loadBrewsWithGraphs: (...args) => brewGraphs.loadBrewsWithGraphs(...args),
                         getFilteredCoffees,
                         getCoffeeTypeDisplay,
                         getChart,
@@ -1496,6 +1509,8 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                     const { createBrewsCardGraphModule } = await import('../../features/brews/brews-card-graph.js');
                     return createBrewsCardGraphModule({
                         getCurrentCardGraphData: () => getCurrentCardGraphDataState(),
+                        setCurrentCardGraphData: (value) => setCurrentCardGraphDataState(value),
+                        loadBrewWithGraph: (...args) => brewGraphs.loadBrewWithGraph(...args),
                         getCurrentCardCoffee: () => getCurrentCardCoffeeState(),
                         getCurrentCoffeeCardId: () => getCurrentCoffeeCardIdState(),
                         getBrewTableOrder: (...args) => getBrewTableOrder(...args),
@@ -1564,6 +1579,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 fillBeanDetails
             },
             actionsDeps: {
+                loadBrewWithGraph: (...args) => brewGraphs.loadBrewWithGraph(...args),
                 getCurrentUser: () => getCurrentUserState(),
                 getCurrentView: () => getCurrentViewState(),
                 getCurrentCoffeeCardId: () => getCurrentCoffeeCardIdState(),

@@ -24,6 +24,8 @@
     "backfill:beans-left-recalculate:dry": "node scripts/recalculate-all-beans-left.mjs",
     "backfill:public-profiles:dry": "node scripts/backfill-public-profiles.mjs",
     "backfill:public-profiles:apply": "node scripts/backfill-public-profiles.mjs --apply",
+    "migrate:brew-graphs:dry": "node scripts/migrate-brew-graphs.mjs",
+    "migrate:brew-graphs:apply": "node scripts/migrate-brew-graphs.mjs --apply",
     "migrations:all:dry": "node scripts/run-all-migrations.mjs",
     "migrations:all:apply": "node scripts/run-all-migrations.mjs --apply",
     "backfill:beans-left-recalculate:apply": "node scripts/recalculate-all-beans-left.mjs --apply",

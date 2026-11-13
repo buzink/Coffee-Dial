@@ -1,5 +1,9 @@
+import { createBrewsVmModule } from './brews.vm.js';
+
 export const createBrewsCardGraphModule = ({
     getCurrentCardGraphData,
+    setCurrentCardGraphData = null,
+    loadBrewWithGraph = null,
     getCurrentCardCoffee,
     getCurrentCoffeeCardId,
     getBrewTableOrder,
@@ -7,6 +11,29 @@ export const createBrewsCardGraphModule = ({
     dispatchCommand,
     ensureGraphModalsMounted = null
 }) => {
+    const brewsVm = createBrewsVmModule();
+    let graphLoadFailed = false;
+
+    // The captures live in their own document; fetch them the first time the graph is opened.
+    const ensureCurrentCardGraphData = async () => {
+        graphLoadFailed = false;
+        const existing = getCurrentCardGraphData();
+        if (existing) return existing;
+        const brew = getCurrentCardCoffee();
+        if (!brew || brew.hasGraph !== true || typeof loadBrewWithGraph !== 'function') return null;
+        const brewId = brew.id;
+        const withGraph = await loadBrewWithGraph(brew);
+        // The user may have moved to another card while the graph was loading.
+        if (getCurrentCoffeeCardId() !== brewId) return getCurrentCardGraphData();
+        const graphVm = brewsVm.buildCardGraphData(withGraph);
+        if (!graphVm.graphData) {
+            graphLoadFailed = withGraph === brew;
+            return null;
+        }
+        setCurrentCardGraphData?.(graphVm.graphData);
+        return graphVm.graphData;
+    };
+
     const updateCoffeeGraphNav = () => {
         const order = getBrewTableOrder();
         const idx = order.indexOf(getCurrentCoffeeCardId());
@@ -26,8 +53,8 @@ export const createBrewsCardGraphModule = ({
         if (typeof ensureGraphModalsMounted === 'function') {
             await ensureGraphModalsMounted();
         }
-        const currentGraphData = getCurrentCardGraphData();
-        if (!currentGraphData && !forceOpen) return;
+        const currentGraphData = await ensureCurrentCardGraphData();
+        if (!currentGraphData && !forceOpen && !graphLoadFailed) return;
 
         const modal = document.getElementById('cardGraphModal');
         if (!modal) return;
@@ -97,7 +124,13 @@ export const createBrewsCardGraphModule = ({
         if (rendered) {
             if (emptyEl) emptyEl.classList.add('hidden');
         } else {
-            if (emptyEl) emptyEl.classList.remove('hidden');
+            if (emptyEl) {
+                emptyEl.classList.remove('hidden');
+                if (emptyEl.dataset.defaultText === undefined) emptyEl.dataset.defaultText = emptyEl.textContent;
+                emptyEl.textContent = graphLoadFailed
+                    ? 'The graph could not be loaded. Check your connection and try again.'
+                    : emptyEl.dataset.defaultText;
+            }
             const ctx = canvas?.getContext?.('2d');
             if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
         }

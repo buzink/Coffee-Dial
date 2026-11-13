@@ -18,7 +18,8 @@ export const createDataService = ({
     orderBy,
     limit,
     startAfter,
-    writeBatch
+    writeBatch,
+    deleteField
 }) => ({
     db,
     collection,
@@ -39,5 +40,6 @@ export const createDataService = ({
     orderBy,
     limit,
     startAfter,
-    writeBatch
+    writeBatch,
+    deleteField
 });

@@ -1,3 +1,4 @@
+import { brewHasGraph, hasInlineBrewGraph } from '../../core/brew-graphs.js';
 export const createBrewsVmModule = () => {
     const formatOutWeight = (weight, ratio) => {
         if (!weight || !ratio) return '-';
@@ -42,12 +43,10 @@ export const createBrewsVmModule = () => {
     };
 
     const buildCardGraphData = (brew) => {
-        const hasGraph = !!(
-            (brew.scaleCapture && brew.scaleCapture.samples && brew.scaleCapture.samples.length) ||
-            (brew.scaleFlowCapture && brew.scaleFlowCapture.samples && brew.scaleFlowCapture.samples.length) ||
-            (brew.scaleRawCapture && brew.scaleRawCapture.samples && brew.scaleRawCapture.samples.length) ||
-            (brew.scale2Capture && brew.scale2Capture.samples && brew.scale2Capture.samples.length)
-        );
+        const hasGraph = brewHasGraph(brew);
+        // The captures may not be loaded yet (they live in their own document): the card then
+        // shows the graph button and loads them when the graph is opened.
+        if (hasGraph && !hasInlineBrewGraph(brew)) return { hasGraph: true, graphData: null };
         if (!hasGraph) return { hasGraph: false, graphData: null };
         return {
             hasGraph: true,

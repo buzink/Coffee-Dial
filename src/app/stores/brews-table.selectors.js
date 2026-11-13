@@ -1,3 +1,5 @@
+import { brewHasGraph } from '../../core/brew-graphs.js';
+
 export const DEFAULT_ACTIVE_FILTERS = {
     bean: null,
     coffeeType: null,
@@ -135,12 +137,7 @@ export const selectBrewsQuickFilterValues = ({ key, coffees = [], beans = [], co
     return selectBrewsUniqueValuesForKey({ coffees, key });
 };
 
-const hasBrewGraphData = (brew) =>
-    !!(
-        (brew?.scaleCapture && Array.isArray(brew.scaleCapture.samples) && brew.scaleCapture.samples.length) ||
-        (brew?.scaleFlowCapture && Array.isArray(brew.scaleFlowCapture.samples) && brew.scaleFlowCapture.samples.length) ||
-        (brew?.scaleRawCapture && Array.isArray(brew.scaleRawCapture.samples) && brew.scaleRawCapture.samples.length)
-    );
+const hasBrewGraphData = (brew) => brewHasGraph(brew);
 
 export const selectFilteredSortedBrews = ({
     coffees = [],

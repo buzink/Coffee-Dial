@@ -197,6 +197,7 @@ const createGalleryCommentsModule = ({
 };
 
 export const createGalleryModule = ({
+    loadBrewWithGraph = null,
     ensureGalleryMounted = null,
     getCurrentUser,
     getCurrentUploadCoffeeId,
@@ -1743,6 +1744,15 @@ export const createGalleryModule = ({
         document.querySelectorAll('.action-menu').forEach((el) => el.classList.add('hidden'));
         setCurrentUploadCoffeeId(coffeeId);
         currentUploadMomentBrew = getCoffees().find((coffee) => coffee.id === coffeeId) || null;
+        // The "graph" moment type needs the brew's captures, which live in their own document.
+        const brewForMoment = currentUploadMomentBrew;
+        if (brewForMoment?.hasGraph === true && typeof loadBrewWithGraph === 'function') {
+            void loadBrewWithGraph(brewForMoment).then((withGraph) => {
+                if (currentUploadMomentBrew !== brewForMoment) return;
+                currentUploadMomentBrew = withGraph;
+                updateUploadMomentTypeUi();
+            });
+        }
         document.getElementById('uploadPhotoModal')?.classList.remove('hidden');
         const file = document.getElementById('photoInput');
         const msg = document.getElementById('photoMessage');
@@ -1894,8 +1904,11 @@ export const createGalleryModule = ({
 
         const checkboxes = document.querySelectorAll('#shareWithList input[type="checkbox"]:checked');
         const sharedWith = Array.from(checkboxes).map((cb) => cb.value);
-        const coffeeData = getCoffees().find((c) => c.id === uploadCoffeeId);
+        let coffeeData = getCoffees().find((c) => c.id === uploadCoffeeId);
         if (!coffeeData) return alert('Coffee data not found.');
+        if (momentType === 'graph' && typeof loadBrewWithGraph === 'function') {
+            coffeeData = await loadBrewWithGraph(coffeeData);
+        }
         if (momentType === 'graph' && !hasCapturedGraphForBrew(coffeeData)) {
             return alert('Graph option is only available when this brew has captured weight and flow data.');
         }

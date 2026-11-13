@@ -1,3 +1,4 @@
+import { hasInlineBrewGraph } from '../../core/brew-graphs.js';
 const LAB_RESULT_AXIS_FIELDS = [
     { key: 'brew', label: 'Brew' },
     { key: 'date', label: 'Date' },
@@ -154,6 +155,7 @@ const formatLabGraphTimeOfDay = (value) => {
 };
 
 export const createLabResultsModule = ({
+    loadBrewsWithGraphs = null,
     getFilteredCoffees,
     getCoffeeTypeDisplay,
     getChart,
@@ -174,6 +176,7 @@ export const createLabResultsModule = ({
     let longPressBrewId = null;
     let suppressNextTileClickBrewId = null;
     let longPressListenersBound = false;
+    let graphRenderToken = 0;
 
     const getModal = () => document.getElementById('labResultsModal');
     const LONG_PRESS_MS = 420;
@@ -421,8 +424,12 @@ export const createLabResultsModule = ({
     };
 
     const renderCaptureGraph = async () => {
+        // Each call supersedes earlier ones that are still waiting for the chart library or graphs.
+        graphRenderToken += 1;
+        const renderToken = graphRenderToken;
         const canvas = document.getElementById('labResultsGraphCanvas');
         const chartCtor = await resolveChartCtor();
+        if (renderToken !== graphRenderToken) return;
         if (!canvas || typeof chartCtor !== 'function') return;
 
         if (!selectedGraphKeys.size) {
@@ -431,11 +438,25 @@ export const createLabResultsModule = ({
             return;
         }
 
-        const selectedBrews = getSelectedBrews();
+        let selectedBrews = getSelectedBrews();
         if (!selectedBrews.length) {
             destroyLabGraph();
             setGraphEmptyState('Select at least one brew');
             return;
+        }
+
+        // Weight and flow graphs plot the scale captures, which live in their own document per
+        // brew and are fetched here for the selected brews only.
+        let failedGraphs = 0;
+        const needsCaptures = selectedGraphKeys.has('weightGraph') || selectedGraphKeys.has('flowGraph');
+        const missingCaptures = selectedBrews.some((brew) => brew.hasGraph === true && !hasInlineBrewGraph(brew));
+        if (needsCaptures && missingCaptures && typeof loadBrewsWithGraphs === 'function') {
+            destroyLabGraph();
+            setGraphEmptyState('Loading graphs...');
+            const loaded = await loadBrewsWithGraphs(selectedBrews);
+            if (renderToken !== graphRenderToken) return;
+            selectedBrews = loaded.brews;
+            failedGraphs = loaded.failed;
         }
 
         const { datasets, axisMeta, mappedPointCount } = buildCaptureDatasets({
@@ -452,6 +473,8 @@ export const createLabResultsModule = ({
                 setGraphEmptyState('No valid points for selected X-axis and Y-axis');
             } else if (axisMeta.customMode && !axisMeta.hasAxisSelection) {
                 setGraphEmptyState('Select one X-axis and at least one Y-axis for Custom graph');
+            } else if (failedGraphs > 0) {
+                setGraphEmptyState('The graphs could not be loaded. Check your connection and try again.');
             } else {
                 setGraphEmptyState('No capture samples found for selected brews');
             }
