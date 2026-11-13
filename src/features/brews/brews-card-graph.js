@@ -13,6 +13,14 @@ export const createBrewsCardGraphModule = ({
 }) => {
     const brewsVm = createBrewsVmModule();
     let graphLoadFailed = false;
+    let graphOpenRequest = 0;
+    const EMPTY_GRAPH = {
+        capture: { startAt: null, samples: [] },
+        flowCapture: { startAt: null, samples: [] },
+        rawCapture: { startAt: null, samples: [] },
+        scale2Capture: { startAt: null, samples: [] },
+        scale2FlowCapture: { startAt: null, samples: [] }
+    };
 
     // The captures live in their own document; fetch them the first time the graph is opened.
     const ensureCurrentCardGraphData = async () => {
@@ -50,11 +58,19 @@ export const createBrewsCardGraphModule = ({
 
     const openCardGraphModal = async (e, forceOpen = false) => {
         if (e) e.stopPropagation();
+        // Opening is asynchronous (the modal and the graph may still have to load). Each call
+        // supersedes the ones before it, so paging quickly never lets an older brew's result
+        // draw over a newer one.
+        graphOpenRequest += 1;
+        const request = graphOpenRequest;
+        const isStale = () => request !== graphOpenRequest;
         if (typeof ensureGraphModalsMounted === 'function') {
             await ensureGraphModalsMounted();
+            if (isStale()) return;
         }
-        const currentGraphData = await ensureCurrentCardGraphData();
-        if (!currentGraphData && !forceOpen && !graphLoadFailed) return;
+        const brewAtOpen = getCurrentCardCoffee() || {};
+        const needsLoad = !getCurrentCardGraphData() && brewAtOpen.hasGraph === true;
+        if (!getCurrentCardGraphData() && !needsLoad && !forceOpen) return;
 
         const modal = document.getElementById('cardGraphModal');
         if (!modal) return;
@@ -106,36 +122,50 @@ export const createBrewsCardGraphModule = ({
         if (maxFlowEl) maxFlowEl.value = c.maxFlow ?? '';
         if (avgFlowEl) avgFlowEl.value = c.avgFlow ?? '';
 
+        updateCoffeeGraphNav();
+
+        const showEmptyState = async (message) => {
+            // Drawing an empty graph also makes the renderer forget the previous brew's graph,
+            // which it would otherwise redraw on hover.
+            try {
+                await dispatchCommand?.('scales.renderGraph', { canvasId: 'cardGraphCanvas', graphData: EMPTY_GRAPH });
+            } catch (_) { /* the canvas is cleared below either way */ }
+            if (isStale()) return;
+            const ctx = canvas?.getContext?.('2d');
+            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (emptyEl) {
+                if (emptyEl.dataset.defaultText === undefined) emptyEl.dataset.defaultText = emptyEl.textContent;
+                emptyEl.textContent = message || emptyEl.dataset.defaultText;
+                emptyEl.classList.remove('hidden');
+            }
+        };
+
+        if (needsLoad) await showEmptyState('Loading graph...');
+        if (isStale()) return;
+        const currentGraphData = await ensureCurrentCardGraphData();
+        if (isStale()) return;
+
         let rendered = false;
-        console.log('[brews-card-graph] currentGraphData:', !!currentGraphData, 'dispatchCommand:', typeof dispatchCommand);
         if (currentGraphData) {
             try {
                 const result = await dispatchCommand?.('scales.renderGraph', {
                     canvasId: 'cardGraphCanvas',
                     graphData: currentGraphData
                 });
-                console.log('[brews-card-graph] scales.renderGraph result:', result);
                 rendered = !!result;
             } catch (error) {
                 console.error('Card graph render command failed:', error);
             }
         }
 
+        if (isStale()) return;
         if (rendered) {
             if (emptyEl) emptyEl.classList.add('hidden');
         } else {
-            if (emptyEl) {
-                emptyEl.classList.remove('hidden');
-                if (emptyEl.dataset.defaultText === undefined) emptyEl.dataset.defaultText = emptyEl.textContent;
-                emptyEl.textContent = graphLoadFailed
-                    ? 'The graph could not be loaded. Check your connection and try again.'
-                    : emptyEl.dataset.defaultText;
-            }
-            const ctx = canvas?.getContext?.('2d');
-            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            await showEmptyState(
+                graphLoadFailed ? 'The graph could not be loaded. Check your connection and try again.' : ''
+            );
         }
-
-        updateCoffeeGraphNav();
     };
 
     const closeCardGraphModal = (e) => {
@@ -150,7 +180,8 @@ export const createBrewsCardGraphModule = ({
         const idx = order.indexOf(getCurrentCoffeeCardId());
         const nextIdx = idx + direction;
         if (nextIdx < 0 || nextIdx >= order.length) return;
-        dispatchCommand?.('brews.openCard', { id: order[nextIdx], event: null, options: { keepNavigationOrder: true } });
+        // Wait until the card has switched; the graph is read from the card that is open.
+        await dispatchCommand?.('brews.openCard', { id: order[nextIdx], event: null, options: { keepNavigationOrder: true } });
         await openCardGraphModal(null, true);
     };
 

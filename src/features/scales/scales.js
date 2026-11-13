@@ -326,6 +326,9 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
     const scale2FlowData = dataOverride?.scale2FlowCapture ?? (scale2FlowCapture.samples.length ? scale2FlowCapture : null);
     const scale2FlowSamples = (scale2FlowData?.samples || []).filter((s) => Number.isFinite(s?.flow));
     if (!samples.length && !flowSamples.length && !scale2Samples.length && !scale2FlowSamples.length) {
+      // Forget the previous render, otherwise hovering would redraw the old graph on this canvas.
+      graphRenderCache.delete(targetEl);
+      graphHoverState.delete(targetEl);
       ctx.fillStyle = "#999";
       ctx.font = "12px system-ui";
       ctx.fillText("No data", padding.left, padding.top + 12);
