@@ -4,6 +4,7 @@
         import { parseBeanconquerorCSV, mapBeanconquerorBrews } from '../../features/import-export/importers/beanconqueror.js';
         import { initEmailLinkAuth } from '../../integrations/email-link-auth.js';
         import { createAiSettingsStore } from '../../core/ai-settings.js';
+        import { createHomeSnapshotStore } from '../../core/home-snapshot.js';
         import { closeAutoPinToast, closeStickyToast, showAutoPinToast, showToast } from '../../core/notify.js';
         import { closeAppConfirm, openAppConfirm, resolveAppConfirm, installDialogAdapters } from '../../core/confirm.js';
         import { getStarDisplay, formatBeanOpenedDate, formatTime, getRoastBadge } from '../../core/format.js';
@@ -301,6 +302,10 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             writeBatch
         });
         const aiSettings = createAiSettingsStore({
+            dataService,
+            getCurrentUser: () => getCurrentUserState()
+        });
+        const homeSnapshot = createHomeSnapshotStore({
             dataService,
             getCurrentUser: () => getCurrentUserState()
         });
@@ -753,6 +758,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             googleLogin,
             googleLogout,
             initUserData,
+            applyLocalHomeSnapshot,
             markOnboardingSeen,
             changeView,
             ensureGasListenerForCurrentView,
@@ -809,7 +815,8 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             getNotificationPreferences: () => getNotificationPreferencesState(),
             setNotificationPreferences: (value) => setNotificationPreferencesState(value),
             getIntegrationPreferences: () => getIntegrationPreferencesState(),
-            setIntegrationPreferences: (value) => setIntegrationPreferencesState(value)
+            setIntegrationPreferences: (value) => setIntegrationPreferencesState(value),
+            homeSnapshot
         });
 
         const {
@@ -1693,6 +1700,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
 
         const authStateChangedHandler = createAuthStateChangedHandler({
             initUserData,
+            applyLocalHomeSnapshot,
             initPushNotifications: async () => pushNotifications.handlePreferencesChanged(null, { trigger: 'auth-init' }),
             loadFollowingList,
             changeView,

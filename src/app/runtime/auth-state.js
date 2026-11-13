@@ -8,6 +8,7 @@ const logAbsoluteTime = (label) => {
 
 export const createAuthStateChangedHandler = ({
     initUserData,
+    applyLocalHomeSnapshot,
     initPushNotifications,
     loadFollowingList,
     changeView,
@@ -58,6 +59,13 @@ export const createAuthStateChangedHandler = ({
             document.getElementById('signedOutAuthBody').classList.add('hidden');
             document.getElementById('signedInContent').classList.add('hidden');
             setMenuVisibility(true);
+            // Draw the home tiles from this device's snapshot before any network request, so
+            // they are usable while the rest loads.
+            if (applyLocalHomeSnapshot?.(user)) {
+                setBootstrapLoadingVisible(false);
+                document.getElementById('signedInContent').classList.remove('hidden');
+                logAbsoluteTime('Home tiles visible from snapshot');
+            }
             logTimeA('initUserData: start');
             const { shouldShowOnboarding } = await initUserData(user);
             logTimeA('initUserData: done');

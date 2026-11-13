@@ -2,6 +2,7 @@ import {
     DEFAULT_INTEGRATION_PREFERENCES,
     normalizeIntegrationPreferences
 } from '../../core/integration-preferences.js';
+import { buildHomeSnapshot } from '../../core/home-snapshot.js';
 
 const DEFAULT_NOTIFICATION_PREFERENCES = {
     pushEnabled: false,
@@ -69,7 +70,8 @@ export const createSessionAuthViewModule = ({
     getNotificationPreferences,
     setNotificationPreferences,
     getIntegrationPreferences,
-    setIntegrationPreferences
+    setIntegrationPreferences,
+    homeSnapshot = null
 }) => {
     const { auth, provider, signInWithPopup, signOut } = authService || {};
     const { db, doc, setDoc, updateDoc, getDoc, getDocs, getDocsFromCache, collection, query, where, orderBy, limit, onSnapshot } = dataService || {};
@@ -86,6 +88,75 @@ export const createSessionAuthViewModule = ({
     const INITIAL_BREWS_LIMIT = 120;
     const INITIAL_PINNED_BREWS_LIMIT = 120;
     let hasCompletedInitialViewBootstrap = false;
+
+    // Home snapshot ("shadow table"): see src/core/home-snapshot.js.
+    const newLiveState = () => ({ beans: null, coffeeTypes: null, gasItems: null, brewsComplete: false });
+    let live = newLiveState();
+    let homeSnapshotApplied = false;
+    let pinnedSeedRequestId = null;
+    let homeSnapshotSaveTimer = null;
+
+    // Set once the server has confirmed the full brews collection, i.e. the local Firestore cache
+    // is complete. From then on a page load reads everything from that cache instead of fetching
+    // the latest brews (with their large scale captures) from the server again.
+    const fullCacheKey = (uid) => `coffeeDial.fullCache.${db?.app?.options?.projectId || 'default'}.${uid}`;
+    const isFullCacheReady = (uid) => {
+        try { return localStorage.getItem(fullCacheKey(uid)) === '1'; } catch (_) { return false; }
+    };
+    const markFullCacheReady = (uid) => {
+        try { localStorage.setItem(fullCacheKey(uid), '1'); } catch (_) { /* ignore */ }
+    };
+
+    const scheduleHomeSnapshotSave = ({ isMine, requestId }) => {
+        if (!homeSnapshot || !isMine) return;
+        if (homeSnapshotSaveTimer) clearTimeout(homeSnapshotSaveTimer);
+        homeSnapshotSaveTimer = setTimeout(() => {
+            homeSnapshotSaveTimer = null;
+            if (requestId !== latestViewRequestId) return;
+            // Only save from complete data, otherwise tiles would go missing from the snapshot.
+            if (!live.brewsComplete || !live.beans || !live.coffeeTypes || !live.gasItems) return;
+            void homeSnapshot.save(buildHomeSnapshot({
+                coffees: getCoffees() || [],
+                beans: live.beans,
+                coffeeTypes: live.coffeeTypes,
+                gasItems: live.gasItems,
+                pinnedPrefs: getPinnedBrewsPreferences()
+            }));
+        }, 1500);
+    };
+
+    const applyHomeSnapshot = (snapshot) => {
+        if (!snapshot) return false;
+        if (snapshot.pinnedPrefs) {
+            setPinnedBrewsPreferences({ ...getPinnedBrewsPreferences(), ...snapshot.pinnedPrefs });
+            applyAnimationPreference();
+        }
+        setBeans(snapshot.beans);
+        setCoffeeTypes(snapshot.coffeeTypes);
+        setGasItems(Array.isArray(snapshot.gasItems) ? snapshot.gasItems : []);
+        setCoffees(snapshot.coffees);
+        updateCoffeeTypeSelectors();
+        updateBeanDropdown();
+        if (refreshBrewGearSelectors) refreshBrewGearSelectors();
+        updateAutocompleteLists();
+        setHasLoadedBeans(true);
+        setHasLoadedBrews(true);
+        renderPinnedTiles();
+        return true;
+    };
+
+    // Called as soon as the signed-in user is known, before any network request.
+    const applyLocalHomeSnapshot = (user) => {
+        if (!homeSnapshot || !user?.uid) return false;
+        try {
+            homeSnapshotApplied = applyHomeSnapshot(homeSnapshot.readLocal(user.uid));
+        } catch (error) {
+            console.warn('Could not apply the local home snapshot.', error);
+            homeSnapshotApplied = false;
+        }
+        console.log(`[PERF-DATA] home snapshot from this device: ${homeSnapshotApplied ? 'applied' : 'none'}`);
+        return homeSnapshotApplied;
+    };
     const googleLogin = () => signInWithPopup(auth, provider).catch((e) => alert(e.message));
 
     const googleLogout = () => signOut(auth).then(() => location.reload());
@@ -130,12 +201,27 @@ export const createSessionAuthViewModule = ({
     const attachLiveViewListeners = ({ targetUid, isMine, requestId }) => {
         if (requestId !== latestViewRequestId) return;
 
+        let isFirstBrewsSnapshot = true;
         const brewsRef = collection(db, 'users', targetUid, 'coffees');
         setUnsubscribeData(
             onSnapshot(
                 brewsRef,
+                // Metadata changes tell us when the server has confirmed the cached result.
+                { includeMetadataChanges: true },
                 (snapshot) => {
                     if (requestId !== latestViewRequestId) return;
+                    if (!snapshot.metadata.fromCache && isMine) markFullCacheReady(targetUid);
+                    if (!snapshot.metadata.fromCache || isFullCacheReady(targetUid)) live.brewsComplete = true;
+                    if (!isFirstBrewsSnapshot && snapshot.docChanges().length === 0) {
+                        // Metadata-only event: nothing to draw, but the data may now count as complete.
+                        scheduleHomeSnapshotSave({ isMine, requestId });
+                        return;
+                    }
+                    if (isFirstBrewsSnapshot) {
+                        const navStart = performance.timing?.navigationStart || performance.timeOrigin || 0;
+                        console.log(`[PERF-ABSOLUTE] All brews from live listener (${snapshot.size}, fromCache=${snapshot.metadata.fromCache}): ${Date.now() - navStart}ms from navigation start`);
+                    }
+                    isFirstBrewsSnapshot = false;
                     const nextCoffees = [];
                     snapshot.forEach((docSnap) => nextCoffees.push({ id: docSnap.id, ...docSnap.data() }));
                     if (!getCurrentSort().key) {
@@ -146,6 +232,7 @@ export const createSessionAuthViewModule = ({
                     renderTable();
                     updateAutocompleteLists();
                     setHasLoadedBrews(true);
+                    scheduleHomeSnapshotSave({ isMine, requestId });
                 },
                 (error) => {
                     console.error(error);
@@ -165,6 +252,8 @@ export const createSessionAuthViewModule = ({
                     const nextBeans = [];
                     snapshot.forEach((docSnap) => nextBeans.push({ id: docSnap.id, ...docSnap.data() }));
                     setBeans(nextBeans);
+                    live.beans = nextBeans;
+                    scheduleHomeSnapshotSave({ isMine, requestId });
 
                     if (isMine) updateBeanDropdown();
                     if (!document.getElementById('beansModal').classList.contains('hidden')) {
@@ -192,6 +281,8 @@ export const createSessionAuthViewModule = ({
                     const nextCoffeeTypes = [];
                     snapshot.forEach((docSnap) => nextCoffeeTypes.push({ id: docSnap.id, ...docSnap.data() }));
                     setCoffeeTypes(nextCoffeeTypes);
+                    live.coffeeTypes = nextCoffeeTypes;
+                    scheduleHomeSnapshotSave({ isMine, requestId });
                     updateCoffeeTypeSelectors();
                     if (isMine) updateBeanDropdown();
                     if (!document.getElementById('coffeeTypesModal').classList.contains('hidden')) {
@@ -213,9 +304,12 @@ export const createSessionAuthViewModule = ({
                 }
             )
         );
+
+        // Gear is small and part of the home snapshot, so keep it live as well.
+        attachGasLiveListener({ targetUid, requestId, isMine });
     };
 
-    const attachGasLiveListener = ({ targetUid, requestId }) => {
+    const attachGasLiveListener = ({ targetUid, requestId, isMine = false }) => {
         if (requestId !== latestViewRequestId) return;
         if (getUnsubscribeGas()) return;
 
@@ -228,6 +322,8 @@ export const createSessionAuthViewModule = ({
                     const nextGasItems = [];
                     snapshot.forEach((docSnap) => nextGasItems.push({ id: docSnap.id, ...docSnap.data() }));
                     setGasItems(nextGasItems);
+                    live.gasItems = nextGasItems;
+                    scheduleHomeSnapshotSave({ isMine, requestId });
                     if (refreshBrewGearSelectors) refreshBrewGearSelectors();
                     if (!getModal('gasModal')?.classList.contains('hidden')) {
                         renderGasTable();
@@ -404,13 +500,18 @@ export const createSessionAuthViewModule = ({
         clearViewSubscriptions();
         setHasLoadedBrews(false);
         setHasLoadedBeans(false);
+        live = newLiveState();
+        if (homeSnapshotSaveTimer) {
+            clearTimeout(homeSnapshotSaveTimer);
+            homeSnapshotSaveTimer = null;
+        }
 
         const user = getCurrentUser();
         if (!user) return;
 
         const isMine = uid === 'mine';
         const targetUid = isMine ? user.uid : uid;
-        currentViewListenerContext = { targetUid, requestId };
+        currentViewListenerContext = { targetUid, requestId, isMine };
         const sortByPinnedOrder = (left, right) => {
             const orderDelta = (left?.customOrder || 0) - (right?.customOrder || 0);
             if (orderDelta !== 0) return orderDelta;
@@ -492,6 +593,7 @@ export const createSessionAuthViewModule = ({
             setHasLoadedBeans(true);
 
             setCoffees(nextPinnedBrews);
+            pinnedSeedRequestId = requestId;
             updateAutocompleteLists();
             setHasLoadedBrews(true);
 
@@ -528,6 +630,14 @@ export const createSessionAuthViewModule = ({
 
                 const nextCoffees = [];
                 brewsSnap.forEach((docSnap) => nextCoffees.push({ id: docSnap.id, ...docSnap.data() }));
+                if (pinnedSeedRequestId === requestId) {
+                    // Keep pinned brews that are older than the latest batch, so their tiles stay
+                    // on screen until the full collection arrives.
+                    const loadedIds = new Set(nextCoffees.map((brew) => brew.id));
+                    (getCoffees() || []).forEach((brew) => {
+                        if (brew?.isActive && !loadedIds.has(brew.id)) nextCoffees.push(brew);
+                    });
+                }
                 if (!getCurrentSort().key) {
                     nextCoffees.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 }
@@ -637,17 +747,46 @@ export const createSessionAuthViewModule = ({
             }
         };
 
+        // With a complete local cache the live listeners deliver everything from IndexedDB right
+        // away; the staged server load is only worth it on a device that has no full cache yet.
+        const startFullLoad = () => {
+            if (isMine && isFullCacheReady(targetUid)) {
+                console.log('[PERF-DATA] changeView: full local cache, attaching live listeners directly');
+                attachLiveViewListeners({ targetUid, isMine, requestId });
+                return Promise.resolve();
+            }
+            return loadCompleteViewData();
+        };
+
         const shouldUsePinnedBootstrap = !hasCompletedInitialViewBootstrap;
         console.log(`[PERF-DATA] changeView: shouldUsePinnedBootstrap=${shouldUsePinnedBootstrap}`);
         if (shouldUsePinnedBootstrap) {
             let renderedPinnedBootstrap = false;
-            try {
-                renderedPinnedBootstrap = await loadPinnedBootstrapSnapshot();
-            } catch (error) {
-                console.warn('Pinned bootstrap load failed, falling back to full load:', error);
+            if (isMine && homeSnapshot) {
+                // Tiles were already drawn from this device's copy; otherwise try the cloud copy.
+                renderedPinnedBootstrap = homeSnapshotApplied;
+                if (!renderedPinnedBootstrap) {
+                    const cloudSnapshot = await homeSnapshot.readCloud(targetUid);
+                    if (requestId !== latestViewRequestId) return;
+                    try {
+                        renderedPinnedBootstrap = applyHomeSnapshot(cloudSnapshot);
+                    } catch (error) {
+                        console.warn('Could not apply the cloud home snapshot.', error);
+                    }
+                    console.log(`[PERF-DATA] home snapshot from the cloud: ${renderedPinnedBootstrap ? 'applied' : 'none'}`);
+                }
+                homeSnapshotApplied = false;
+                if (renderedPinnedBootstrap) pinnedSeedRequestId = requestId;
+            }
+            if (!renderedPinnedBootstrap) {
+                try {
+                    renderedPinnedBootstrap = await loadPinnedBootstrapSnapshot();
+                } catch (error) {
+                    console.warn('Pinned bootstrap load failed, falling back to full load:', error);
+                }
             }
             if (renderedPinnedBootstrap) {
-                void loadCompleteViewData().then(() => {
+                void startFullLoad().then(() => {
                     if (requestId === latestViewRequestId) {
                         hasCompletedInitialViewBootstrap = true;
                     }
@@ -656,7 +795,7 @@ export const createSessionAuthViewModule = ({
             }
         }
 
-        await loadCompleteViewData();
+        await startFullLoad();
         if (requestId === latestViewRequestId) {
             hasCompletedInitialViewBootstrap = true;
         }
@@ -910,6 +1049,7 @@ export const createSessionAuthViewModule = ({
         googleLogin,
         googleLogout,
         initUserData,
+        applyLocalHomeSnapshot,
         markOnboardingSeen,
         changeView,
         ensureGasListenerForCurrentView,
