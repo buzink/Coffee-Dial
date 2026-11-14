@@ -229,7 +229,7 @@ export const createSocialModule = ({
             }
         };
         populateSelect(document.getElementById('viewSelect'), 'brews');
-        populateSelect(document.getElementById('beansViewSelect'), 'beans');
+        populateSelect(document.getElementById('beansViewSelect'), 'bags');
         populateSelect(document.getElementById('coffeeTypesViewSelect'), 'coffees');
         populateSelect(document.getElementById('gasViewSelect'), 'gear');
     };
