@@ -2659,6 +2659,8 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 'menuAddBrewBtn',
                 'headerNav',
                 'menuBrewsBtn',
+                'bottomNav',
+                'fabAddBrewBtn',
                 'menuStatsBtn',
                 'menuBeansBtn',
                 'menuCoffeesBtn',

@@ -99,8 +99,8 @@
                     <button type="button" data-nav-page="statistics" data-action-click="openStats()" class="app-header-nav-item"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i><span>Statistics</span></button>
                 </nav>
 
-                <div class="flex flex-shrink-0 items-center gap-4 ml-auto">
-                    <div class="relative">
+                <div class="app-header-actions flex flex-shrink-0 items-center gap-4 ml-auto">
+                    <div class="app-header-add relative">
                         <button id="menuAddBrewBtn" data-action-click="openAddBrewFromPinned(event)" class="hidden w-11 h-11 rounded-full hover:bg-coffee-50 dark:hover:bg-[#44403c] transition-colors text-coffee-600 dark:text-[#a8a29e] border border-coffee-200 dark:border-[#57534e] flex items-center justify-center leading-none" title="Add brew" aria-label="Add brew">
                             <i class="fa-solid fa-plus"></i>
                         </button>
@@ -123,7 +123,7 @@
                         </div>
                     </div>
 
-                    <div class="relative">
+                    <div class="app-header-menu relative">
                         <button id="mainMenuBtn" data-action-click="toggleMainMenu(event)" class="relative w-11 h-11 rounded-full md:hover:bg-coffee-50 md:dark:hover:bg-[#44403c] transition-colors text-coffee-600 dark:text-[#a8a29e] flex items-center justify-center leading-none focus:outline-none" title="Menu">
                             <i class="fa-solid fa-bars text-xl"></i>
                             <span id="menuBadge" class="hidden absolute top-1 right-1 block h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-[#292524] bg-red-500"></span>
@@ -200,6 +200,16 @@
         <div id="gasTableMount"></div>
         <div id="statsPageMount"></div>
     </main>
+
+    <!-- Mobile: main sections in a bar at the bottom, and a floating add button above it -->
+    <nav id="bottomNav" class="app-bottom-nav app-glass hidden" aria-label="Main sections">
+        <button type="button" data-nav-page="brews" data-action-click="openBrews()" class="app-bottom-nav-item"><i class="fa-solid fa-mug-saucer" aria-hidden="true"></i><span>Brews</span></button>
+        <button type="button" data-nav-page="beans" data-action-click="openBeans()" class="app-bottom-nav-item"><i class="fa-solid fa-seedling" aria-hidden="true"></i><span>Beans</span></button>
+        <button type="button" data-nav-page="coffees" data-action-click="openCoffeeTypes()" class="app-bottom-nav-item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>Coffees</span></button>
+    </nav>
+    <button id="fabAddBrewBtn" type="button" data-action-click="openAddBrewFromPinned(event)" class="app-fab app-glass hidden" title="Add brew" aria-label="Add brew">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+    </button>
 
     <div id="coffeeTypeCardMount"></div>
     <div id="gasCardMount"></div>

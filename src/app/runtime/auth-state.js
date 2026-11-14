@@ -25,6 +25,8 @@ export const createAuthStateChangedHandler = ({
             'menuAddBrewBtn',
             'headerNav',
             'menuBrewsBtn',
+            'bottomNav',
+            'fabAddBrewBtn',
             'menuStatsBtn',
             'menuBeansBtn',
             'menuCoffeesBtn',
