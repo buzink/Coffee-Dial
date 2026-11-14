@@ -200,7 +200,53 @@
             width: 100%;
             display: flex;
             flex-direction: column;
+        }
+
+        /* Main sections in the header. Items that do not fit are hidden (header-nav.js). */
+        .app-header-nav {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin: 0 0.75rem 0 0;
             overflow: hidden;
+        }
+        .app-header-nav-item {
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            height: 2.5rem;
+            padding: 0 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+            color: #8c7365;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+        .app-header-nav-item:hover { background-color: #fdf8f6; color: #4a3b32; }
+        .dark .app-header-nav-item { color: #a8a29e; }
+        .dark .app-header-nav-item:hover { background-color: #44403c; color: #ffffff; }
+        .app-header-nav-item[data-nav-overflow] { display: none; }
+
+        /* Current page: the visible page, or Brews when none is. */
+        body:not(:has([data-app-page]:not(.hidden))) .app-header-nav-item[data-nav-page="brews"],
+        body:has(#statsPage:not(.hidden)) .app-header-nav-item[data-nav-page="statistics"],
+        body:has(#beansPage:not(.hidden)) .app-header-nav-item[data-nav-page="beans"],
+        body:has(#coffeeTypesPage:not(.hidden)) .app-header-nav-item[data-nav-page="coffees"],
+        body:has(#gasPage:not(.hidden)) .app-header-nav-item[data-nav-page="gear"] {
+            background-color: #f2e8e5;
+            color: #4a3b32;
+        }
+        .dark body:not(:has([data-app-page]:not(.hidden))) .app-header-nav-item[data-nav-page="brews"],
+        .dark body:has(#statsPage:not(.hidden)) .app-header-nav-item[data-nav-page="statistics"],
+        .dark body:has(#beansPage:not(.hidden)) .app-header-nav-item[data-nav-page="beans"],
+        .dark body:has(#coffeeTypesPage:not(.hidden)) .app-header-nav-item[data-nav-page="coffees"],
+        .dark body:has(#gasPage:not(.hidden)) .app-header-nav-item[data-nav-page="gear"] {
+            background-color: #44403c;
+            color: #ffffff;
         }
 
     </style>

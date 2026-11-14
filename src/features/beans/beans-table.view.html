@@ -1,7 +1,7 @@
 <!-- Beans Management Modal -->
 <div id="beansPage" data-feature-root="beans" data-app-page="beans" class="hidden">
-    <div class="app-page-panel bg-white dark:bg-[#292524] rounded-xl shadow-lg border border-coffee-200 dark:border-[#44403c]">
-        <div class="p-5 border-b border-coffee-200 dark:border-[#44403c] flex justify-between items-center bg-coffee-50 dark:bg-[#1c1917]">
+    <div class="app-page-panel">
+        <div class="py-4 flex justify-between items-center">
             <h3 class="font-bold text-xl text-coffee-900 dark:text-white flex items-center gap-2">
                 <i class="fa-solid fa-seedling text-green-600"></i> Beans
             </h3>
@@ -23,13 +23,10 @@
                 <button data-action-click="createBeanFromModal()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded font-bold transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i> Add
                 </button>
-                <button data-action-click="closeBeans()" class="text-gray-500 hover:text-gray-700 dark:text-[#78716c] dark:hover:text-white ml-2">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
             </div>
         </div>
-        <div class="p-4 bg-white dark:bg-[#292524]">
-            <div class="rounded-lg border border-coffee-200 dark:border-[#44403c] overflow-hidden">
+        <div>
+            <div class="bg-white dark:bg-[#292524] rounded-xl shadow-lg border border-coffee-100 dark:border-[#44403c] overflow-hidden">
                 <div class="bg-coffee-100/50 dark:bg-[#1c1917] p-1.5 space-y-1.5 border-b border-coffee-200 dark:border-[#44403c]">
                     <div class="flex items-center gap-1.5">
                         <select id="beansViewSelect" aria-label="Beans view" data-action-change="beansChangeView(this.value)" class="bg-white dark:bg-[#292524] border border-coffee-100 dark:border-[#44403c] text-coffee-900 dark:text-white text-sm rounded-lg block p-2.5 shadow-sm font-bold min-w-[150px]">

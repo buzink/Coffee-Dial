@@ -1,11 +1,16 @@
 <header id="appHeader" class="app-header bg-white dark:bg-[#292524] shadow-sm border-b border-coffee-200 dark:border-[#44403c] z-[60] transition-colors duration-300">
     <div class="max-w-[95%] mx-auto px-2 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-3 cursor-pointer select-none group" data-action-dblclick="openEasterEgg()" title="Double click for a surprise!">
-            <i class="fa-solid fa-mug-hot text-coffee-700 dark:text-[#d6ccc2] text-2xl group-hover:scale-110 transition-transform duration-300"></i>
-            <h1 class="text-2xl font-bold tracking-tight text-coffee-900 dark:text-white">Coffee Dial</h1>
-        </div>
+        <h1 class="sr-only">Coffee Dial</h1>
 
-        <div class="flex items-center gap-4">
+        <nav id="headerNav" class="app-header-nav hidden" aria-label="Main sections">
+            <button type="button" data-nav-page="brews" data-action-click="openBrews()" class="app-header-nav-item"><i class="fa-solid fa-mug-saucer" aria-hidden="true"></i><span>Brews</span></button>
+            <button type="button" data-nav-page="beans" data-action-click="openBeans()" class="app-header-nav-item"><i class="fa-solid fa-seedling" aria-hidden="true"></i><span>Beans</span></button>
+            <button type="button" data-nav-page="coffees" data-action-click="openCoffeeTypes()" class="app-header-nav-item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>Coffees</span></button>
+            <button type="button" data-nav-page="gear" data-action-click="openGasList()" class="app-header-nav-item"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Gear</span></button>
+            <button type="button" data-nav-page="statistics" data-action-click="openStats()" class="app-header-nav-item"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i><span>Statistics</span></button>
+        </nav>
+
+        <div class="flex flex-shrink-0 items-center gap-4 ml-auto">
             <div class="relative">
                 <button id="menuAddBrewBtn" data-action-click="openAddBrewFromPinned(event)" class="hidden w-11 h-11 rounded-full hover:bg-coffee-50 dark:hover:bg-[#44403c] transition-colors text-coffee-600 dark:text-[#a8a29e] border border-coffee-200 dark:border-[#57534e] flex items-center justify-center leading-none" title="Add brew" aria-label="Add brew">
                     <i class="fa-solid fa-plus"></i>
@@ -35,8 +40,8 @@
                     <span id="menuBadge" class="hidden absolute top-1 right-1 block h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-[#292524] bg-red-500"></span>
                 </button>
                 <div id="mainMenuDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] py-2 z-50">
-                    <button id="menuStatsBtn" data-action-click="openStats(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie w-4 text-center"></i> <span>Statistics</span>
+                    <button id="menuBrewsBtn" data-action-click="openBrews(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
+                        <i class="fa-solid fa-mug-saucer w-4 text-center"></i> <span>Brews</span>
                     </button>
                     <button id="menuBeansBtn" data-action-click="openBeans(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
                         <i class="fa-solid fa-seedling w-4 text-center"></i> <span>Beans</span>
@@ -46,6 +51,9 @@
                     </button>
                     <button id="menuGasBtn" data-action-click="openGasList(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
                         <i class="fa-solid fa-screwdriver-wrench w-4 text-center"></i> <span>Gear</span>
+                    </button>
+                    <button id="menuStatsBtn" data-action-click="openStats(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie w-4 text-center"></i> <span>Statistics</span>
                     </button>
                     <button id="menuGalleryBtn" data-action-click="openGallery(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center justify-between">
                         <div class="flex items-center gap-2">

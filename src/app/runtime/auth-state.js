@@ -23,6 +23,8 @@ export const createAuthStateChangedHandler = ({
     const setMenuVisibility = (loggedIn) => {
         const ids = [
             'menuAddBrewBtn',
+            'headerNav',
+            'menuBrewsBtn',
             'menuStatsBtn',
             'menuBeansBtn',
             'menuCoffeesBtn',

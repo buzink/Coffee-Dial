@@ -12,6 +12,7 @@
         import { createCoffeeDisplayModule } from '../../core/coffee-display.js';
         import { PAGE_ROUTE_KEYS, getVisiblePageKey, initPages } from '../pages.js';
         import { createCardRouting } from '../card-routing.js';
+        import { initHeaderNav } from '../header-nav.js';
         import { createCoffeesController } from '../../features/coffees/coffees.controller.js';
         import {
             ensureBrewsCardMounted,
@@ -2517,6 +2518,13 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 gear: () => actions.closeGasList?.(),
                 statistics: () => actions.closeStats?.()
             };
+            // "Brews" is the view shown when no page is: going there closes the current page.
+            actions.openBrews = () => {
+                const current = getVisiblePageKey();
+                if (current) pageCloseActions[current]?.();
+            };
+            if (featureActions && typeof featureActions === 'object') featureActions.openBrews = actions.openBrews;
+
             const dispatchCardCommand = (name, payload) =>
                 appCommands?.dispatch?.(name, payload, { source: 'cardRouting' });
             const cardRouting = createCardRouting({
@@ -2585,8 +2593,10 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 syncRouteFromModalVisibility();
             });
 
+            const fitHeaderNav = initHeaderNav({ getCurrentPageKey: () => getVisiblePageKey() || 'brews' });
             initPages({
                 onPageChange: (pageKey) => {
+                    fitHeaderNav();
                     if (isApplyingRoute) return;
                     const current = getActiveRouteKeysFromLocation();
                     const others = current.filter((key) => !PAGE_ROUTE_KEY_SET.has(key));
@@ -2647,6 +2657,8 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
 
             [
                 'menuAddBrewBtn',
+                'headerNav',
+                'menuBrewsBtn',
                 'menuStatsBtn',
                 'menuBeansBtn',
                 'menuCoffeesBtn',

@@ -66,12 +66,14 @@ test('happy flow: add brew for new coffee creates coffee type, bean, and brew', 
     await openMenuItem(page, '#menuBeansBtn');
     await waitForTableReady(page, '#beansTableBody');
     await expect(page.locator('#beansTableBody tr td').filter({ hasText: farmer }).first()).toBeVisible();
-    await page.locator('#beansPage [data-action-click="closeBeans()"]').click();
+    await page.locator('#headerNav [data-nav-page="brews"]').click();
+    await expect(page.locator('#beansPage')).toBeHidden();
 
     await openMenuItem(page, '#menuCoffeesBtn');
     await waitForTableReady(page, '#coffeeTypesTableBody');
     await expect(page.locator('#coffeeTypesTableBody tr td').filter({ hasText: roaster }).first()).toBeVisible();
-    await page.locator('#coffeeTypesPage [data-action-click="closeCoffeeTypes()"]').click();
+    await page.locator('#headerNav [data-nav-page="brews"]').click();
+    await expect(page.locator('#coffeeTypesPage')).toBeHidden();
 
     const finalCounts = await page.evaluate(() => window.__coffeeDialApp?.getE2EStateSnapshot?.()?.counts || null);
     expect(finalCounts).toEqual({
