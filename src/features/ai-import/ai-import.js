@@ -1,6 +1,7 @@
 import { withDetectedDecaf } from '../../core/coffee-decaf.js';
 import { openAppPrompt } from '../../core/confirm.js';
 import { fetchPageImage } from '../../core/page-image.js';
+import { withoutDrafts } from '../../core/draft-items.js';
 import { AiNotConfiguredError, analyzeCoffeeBag, analyzeCoffeeBagUrl } from '../../core/gemini-client.js';
 
 export const createAiImportModule = ({
@@ -16,7 +17,9 @@ export const createAiImportModule = ({
     removeCoffeeImageBackground,
     openCoffeeTypeCard,
     enterCoffeeTypeEditMode,
-    functionsService = null
+    functionsService = null,
+    cancelBeanEditMode = () => {},
+    cancelCoffeeTypeEditMode = () => {}
 }) => {
     const { db, doc, setDoc, updateDoc, collection, writeBatch } = dataService || {};
     const { storage, ref, uploadBytes, getDownloadURL } = storageService || {};
@@ -179,6 +182,25 @@ export const createAiImportModule = ({
         pendingAITasteNotes = '';
     };
 
+    // While Extract runs from an Add card, that card stays open with a spinner over it
+    // (and the add buttons spin too, in case the card is closed meanwhile).
+    const showCardBusy = (busyId) => {
+        const el = document.getElementById(busyId);
+        if (el) el.hidden = false;
+        const buttons = showAiScanBusy();
+        return {
+            done: () => {
+                if (el) el.hidden = true;
+                buttons.done();
+            }
+        };
+    };
+    // True when the Add card (an unsaved draft) is still open, so it can be replaced.
+    const isAddCardOpen = (overlayId) => {
+        const overlay = document.getElementById(overlayId);
+        return !!overlay && !overlay.classList.contains('hidden') && overlay.hasAttribute('data-adding');
+    };
+
     // Spinner on the add buttons (header on desktop, floating on mobile) while a photo is scanned.
     const showAiScanBusy = () => {
         const buttons = ['menuAddBrewBtn', 'fabAddBrewBtn']
@@ -208,7 +230,7 @@ export const createAiImportModule = ({
         if (!user) return;
 
         // The add card closes when Extract is chosen, so the page's add buttons show the progress.
-        const busy = showAiScanBusy();
+        const busy = showCardBusy('beanCardBusy');
 
         try {
 
@@ -264,6 +286,10 @@ export const createAiImportModule = ({
             if (!current.find((ct) => ct.id === typeRef.id)) {
                 setCoffeeTypes([...current, { id: typeRef.id, ...typeData }]);
             }
+            // Replace the Add bag card (an unsaved draft) by the new bag, ready to check and edit.
+            busy.done();
+            if (isAddCardOpen('beanCardOverlay')) cancelBeanEditMode();
+            await dispatchCommand?.('beans.openCardForEdit', { beanId: beanRef.id, event: null });
         } catch (error) {
             console.error(error);
             alert(`Error scanning bag: ${error.message}`);
@@ -279,7 +305,7 @@ export const createAiImportModule = ({
         if (!user) return;
 
         // The add card closes when Extract is chosen, so the page's add buttons show the progress.
-        const busy = showAiScanBusy();
+        const busy = showCardBusy('coffeeTypeCardBusy');
 
         try {
 
@@ -314,16 +340,16 @@ export const createAiImportModule = ({
 
             await setDoc(typeRef, typeData);
             const newType = { id: typeRef.id, ...typeData };
-            const current = getCoffeeTypes();
-            if (!current.find((ct) => ct.id === newType.id)) {
-                setCoffeeTypes([...current, newType]);
-            }
-
+            // Replace the Add coffee card (an unsaved draft) by the new coffee, ready to check and edit.
+            busy.done();
+            if (isAddCardOpen('coffeeTypeCardOverlay')) cancelCoffeeTypeEditMode();
+            const current = withoutDrafts(getCoffeeTypes());
+            setCoffeeTypes(current.find((ct) => ct.id === newType.id) ? current : [...current, newType]);
             openCoffeeTypeCard(newType.id);
             enterCoffeeTypeEditMode();
         } catch (error) {
             console.error(error);
-            alert(`Error scanning bag: ${error.message}`);
+            alert(`Error reading this coffee: ${error.message}`);
         } finally {
             busy.done();
         }

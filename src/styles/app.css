@@ -330,6 +330,25 @@
         .app-card:has(.app-card-edit:not(.hidden)) .app-card-title-block { display: none; }
         [data-adding] .app-when-editing { display: none; }
         [data-adding] .app-when-adding { display: inline; }
+        /* Spinner over an Add card while Extract (AI) is reading a photo or page. */
+        .app-card-busy {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.85);
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+            color: #4a3b32;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .dark .app-card-busy { background-color: rgba(41, 37, 36, 0.88); color: #e7e5e4; }
+        .app-card-busy[hidden] { display: none; }
         /* Extract (fill a new bean or coffee from a photo with AI) only while adding. */
         .app-card-extract { display: none; }
         [data-adding] .app-card-extract { display: block; }

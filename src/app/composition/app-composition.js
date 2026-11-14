@@ -78,6 +78,7 @@
         import { createOpenAddBrewFromPinned } from '../runtime/open-add-brew.js';
         import { installCardNavigationHandlers } from '../runtime/card-navigation.js';
         import { ensureChartJs, ensureHtml2Canvas } from '../../core/external-libs.js';
+        import { isDraftItem } from '../../core/draft-items.js';
         
 export const createAppComposition = ({ appCommands = null, appEvents = null } = {}) => {
         const isE2ESeedMode =
@@ -164,6 +165,13 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
         const setCoffeeTypesState = (value) => coffeeTypesStore.setItems(value);
         const getGasItemsState = () => gasStore.getItems();
         const setGasItemsState = (value) => gasStore.setItems(value);
+        const keepDrafts = (incoming, current) => {
+            if (!Array.isArray(incoming) || !incoming.length) return incoming;
+            const drafts = (Array.isArray(current) ? current : []).filter(
+                (item) => isDraftItem(item) && !incoming.some((next) => next.id === item.id)
+            );
+            return drafts.length ? [...incoming, ...drafts] : incoming;
+        };
 
         // UI store
         const getPinnedBrewsPreferencesState = () => uiStore.getPinnedBrewsPreferences();
@@ -738,7 +746,9 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                         removeCoffeeImageBackground: (...args) => removeCoffeeImageBackground(...args),
                         openCoffeeTypeCard: (...args) => openCoffeeTypeCard(...args),
                         enterCoffeeTypeEditMode: (...args) => enterCoffeeTypeEditMode(...args),
-                        functionsService
+                        functionsService,
+                        cancelBeanEditMode: (...args) => cancelBeanEditMode(...args),
+                        cancelCoffeeTypeEditMode: (...args) => cancelCoffeeTypeEditMode(...args)
                     });
                 })();
             }
@@ -806,9 +816,11 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             getCurrentSort: () => getCurrentSortState(),
             setCoffees: (value) => setCoffeesState(value),
             getCoffees: () => getCoffeesState(),
-            setBeans: (value) => setBeansState(value),
-            setCoffeeTypes: (value) => setCoffeeTypesState(value),
-            setGasItems: (value) => setGasItemsState(value),
+            // The live listeners replace whole lists; keep an unsaved new item (a draft, see
+            // draft-items.js) that is open in its card. An empty list (sign-out, reset) drops it.
+            setBeans: (value) => setBeansState(keepDrafts(value, getBeansState())),
+            setCoffeeTypes: (value) => setCoffeeTypesState(keepDrafts(value, getCoffeeTypesState())),
+            setGasItems: (value) => setGasItemsState(keepDrafts(value, getGasItemsState())),
             renderPinnedTiles: (...args) => renderPinnedTiles(...args),
             renderTable: (...args) => renderTable(...args),
             updateAutocompleteLists: (...args) => updateAutocompleteLists(...args),

@@ -1,6 +1,11 @@
     <!-- Bean Card Overlay -->
     <div id="beanCardOverlay" data-feature-root="beans" class="app-card hidden fixed inset-0 z-[10050] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeBeanCard(event)">
-        <div class="bg-white dark:bg-[#292524] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col max-h-[85vh]" data-action-click="handleBeanCardOverlayClick(event)">
+        <div class="relative bg-white dark:bg-[#292524] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col max-h-[85vh]" data-action-click="handleBeanCardOverlayClick(event)">
+            <!-- While Extract reads a photo or page: the card stays open and waits here -->
+            <div id="beanCardBusy" class="app-card-busy" hidden role="status" aria-live="polite">
+                <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+                <span>Extracting bag details…</span>
+            </div>
             <div class="bg-coffee-100 dark:bg-[#1c1917] p-4 border-b border-coffee-200 dark:border-[#44403c] relative">
                 <div class="absolute top-3 right-3 flex items-center gap-1">
                     <!-- While adding: fill the new bean from a photo of the bag (AI) -->
@@ -9,13 +14,13 @@
                             <i class="fa-solid fa-wand-magic-sparkles"></i> Extract
                         </button>
                         <div id="beansAiMenuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] z-50 overflow-hidden">
-                            <button type="button" data-action-click="triggerBeansAIScan('camera'); cancelBeanEditMode()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2 border-b border-coffee-100 dark:border-[#44403c]">
+                            <button type="button" data-action-click="triggerBeansAIScan('camera')" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2 border-b border-coffee-100 dark:border-[#44403c]">
                                 <i class="fa-solid fa-camera w-4"></i> Take Photo
                             </button>
-                            <button type="button" data-action-click="triggerBeansAIScan('library'); cancelBeanEditMode()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2 border-b border-coffee-100 dark:border-[#44403c]">
+                            <button type="button" data-action-click="triggerBeansAIScan('library')" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2 border-b border-coffee-100 dark:border-[#44403c]">
                                 <i class="fa-solid fa-images w-4"></i> From Gallery
                             </button>
-                            <button type="button" data-action-click="triggerBeansAIUrl(); cancelBeanEditMode()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2">
+                            <button type="button" data-action-click="triggerBeansAIUrl()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2">
                                 <i class="fa-solid fa-link w-4"></i> From URL
                             </button>
                         </div>
