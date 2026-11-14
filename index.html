@@ -92,7 +92,7 @@
                 <h1 class="sr-only">Coffee Dial</h1>
                 <!-- Mobile: title of the current page, centred between the menu and profile buttons -->
                 <div class="app-header-title" aria-hidden="true">
-                    <span data-title-page="brews"><i class="fa-solid fa-mug-saucer"></i>Brews</span>
+                    <span data-title-page="brews"><i class="fa-solid fa-mug-hot"></i>Brews</span>
                     <span data-title-page="beans"><i class="fa-solid fa-seedling"></i>Beans</span>
                     <span data-title-page="coffees"><i class="fa-solid fa-layer-group"></i>Coffees</span>
                     <span data-title-page="gear"><i class="fa-solid fa-screwdriver-wrench"></i>Gear</span>
@@ -100,7 +100,7 @@
                 </div>
 
                 <nav id="headerNav" class="app-header-nav hidden" aria-label="Main sections">
-                    <button type="button" data-nav-page="brews" data-action-click="openBrews()" class="app-header-nav-item"><i class="fa-solid fa-mug-saucer" aria-hidden="true"></i><span>Brews</span></button>
+                    <button type="button" data-nav-page="brews" data-action-click="openBrews()" class="app-header-nav-item"><i class="fa-solid fa-mug-hot" aria-hidden="true"></i><span>Brews</span></button>
                     <button type="button" data-nav-page="beans" data-action-click="openBeans()" class="app-header-nav-item"><i class="fa-solid fa-seedling" aria-hidden="true"></i><span>Beans</span></button>
                     <button type="button" data-nav-page="coffees" data-action-click="openCoffeeTypes()" class="app-header-nav-item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>Coffees</span></button>
                     <button type="button" data-nav-page="gear" data-action-click="openGasList()" class="app-header-nav-item"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Gear</span></button>
@@ -109,7 +109,7 @@
 
                 <div class="app-header-actions flex flex-shrink-0 items-center gap-4 ml-auto">
                     <div class="app-header-add relative">
-                        <button id="menuAddBrewBtn" data-action-click="openAddBrewFromPinned(event)" class="hidden w-11 h-11 rounded-full hover:bg-coffee-50 dark:hover:bg-[#44403c] transition-colors text-coffee-600 dark:text-[#a8a29e] border border-coffee-200 dark:border-[#57534e] flex items-center justify-center leading-none" title="Add brew" aria-label="Add brew">
+                        <button id="menuAddBrewBtn" data-action-click="openAddForCurrentPage(event)" class="hidden w-11 h-11 rounded-full hover:bg-coffee-50 dark:hover:bg-[#44403c] transition-colors text-coffee-600 dark:text-[#a8a29e] border border-coffee-200 dark:border-[#57534e] flex items-center justify-center leading-none" title="Add" aria-label="Add">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -138,7 +138,7 @@
                         </button>
                         <div id="mainMenuDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] py-2 z-50">
                             <button id="menuBrewsBtn" data-action-click="openBrews(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
-                                <i class="fa-solid fa-mug-saucer w-4 text-center"></i> <span>Brews</span>
+                                <i class="fa-solid fa-mug-hot w-4 text-center"></i> <span>Brews</span>
                             </button>
                             <button id="menuBeansBtn" data-action-click="openBeans(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
                                 <i class="fa-solid fa-seedling w-4 text-center"></i> <span>Beans</span>
@@ -211,11 +211,11 @@
 
     <!-- Mobile: main sections in a bar at the bottom, and a floating add button above it -->
     <nav id="bottomNav" class="app-bottom-nav app-glass hidden" aria-label="Main sections">
-        <button type="button" data-nav-page="brews" data-action-click="openBrews()" class="app-bottom-nav-item"><i class="fa-solid fa-mug-saucer" aria-hidden="true"></i><span>Brews</span></button>
+        <button type="button" data-nav-page="brews" data-action-click="openBrews()" class="app-bottom-nav-item"><i class="fa-solid fa-mug-hot" aria-hidden="true"></i><span>Brews</span></button>
         <button type="button" data-nav-page="beans" data-action-click="openBeans()" class="app-bottom-nav-item"><i class="fa-solid fa-seedling" aria-hidden="true"></i><span>Beans</span></button>
         <button type="button" data-nav-page="coffees" data-action-click="openCoffeeTypes()" class="app-bottom-nav-item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>Coffees</span></button>
     </nav>
-    <button id="fabAddBrewBtn" type="button" data-action-click="openAddBrewFromPinned(event)" class="app-fab app-glass hidden" title="Add brew" aria-label="Add brew">
+    <button id="fabAddBrewBtn" type="button" data-action-click="openAddForCurrentPage(event)" class="app-fab app-glass hidden" title="Add" aria-label="Add">
         <i class="fa-solid fa-plus" aria-hidden="true"></i>
     </button>
 

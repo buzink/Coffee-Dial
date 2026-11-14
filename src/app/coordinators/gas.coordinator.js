@@ -1,5 +1,6 @@
 import { createGasTableModule } from '../../features/gas/gas-table.js';
 import { createGasCardModule } from '../../features/gas/gas-card.js';
+import { createDraftId, withoutDrafts } from '../../core/draft-items.js';
 
 export const createGasCoordinator = ({
     dataService,
@@ -74,24 +75,15 @@ export const createGasCoordinator = ({
             updatedAt: nowIso
         };
 
-        try {
-            const gasRef = await resolvedAddDoc(resolvedCollection(resolvedDb, 'users', user.uid, 'gear'), gasData);
-            const newGas = { id: gasRef.id, ...gasData };
-            if (!getGasItems().find((item) => item.id === newGas.id)) {
-                setGasItemsState([...getGasItems(), newGas]);
-            }
-            getRefreshBrewGearSelectors()?.();
-            notifyGasUiOpened();
-            await dispatchCommand('gas.openCardForEdit', { id: newGas.id });
-            publishEvent('gas.created', { gasId: newGas.id });
-        } catch (err) {
-            console.error('Error creating gear item:', err);
-            alert('Failed to create gear item.');
-        }
+        // A draft: it is written only when the card's Save is clicked (saveGasEdits).
+        const newGas = { id: createDraftId(), ...gasData, isDraft: true };
+        setGasItemsState([...withoutDrafts(getGasItems()), newGas]);
+        notifyGasUiOpened();
+        await dispatchCommand('gas.openCardForEdit', { id: newGas.id });
     };
 
     const gasTable = createGasTableModule({
-        getGasItems,
+        getGasItems: () => withoutDrafts(getGasItems()),
         getCoffees,
         getPinnedBrewsPreferences,
         getCurrentView,
@@ -124,7 +116,11 @@ export const createGasCoordinator = ({
         imageCompression,
         openAppConfirm,
         renderGasTable: gasTable.renderGasTable,
-        openLightbox
+        openLightbox,
+        onGasCreated: (gasId) => {
+            getRefreshBrewGearSelectors()?.();
+            publishEvent('gas.created', { gasId });
+        }
     });
     openGasCard = gasCard.openGasCard;
     enterGasEditMode = gasCard.enterGasEditMode;

@@ -281,6 +281,7 @@ export const createActionAssemblies = (deps = {}) => {
             'handleAutoArchiveToastAction',
             'handleBeanCreatedToastAction',
             'openAddBrewFromPinned',
+            'openAddForCurrentPage',
             'resolveAppConfirm',
             'submitBrewFormModal'
         ])

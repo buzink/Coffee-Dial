@@ -157,6 +157,28 @@ export const createAiImportModule = ({
         pendingAIBeanImageFile = null;
     };
 
+    // Spinner on the add buttons (header on desktop, floating on mobile) while a photo is scanned.
+    const showAiScanBusy = () => {
+        const buttons = ['menuAddBrewBtn', 'fabAddBrewBtn']
+            .map((id) => document.getElementById(id))
+            .filter(Boolean);
+        const saved = buttons.map((btn) => ({ btn, html: btn.innerHTML, title: btn.title }));
+        saved.forEach(({ btn }) => {
+            btn.disabled = true;
+            btn.title = 'Scanning...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.classList.add('ai-loading-pulse');
+        });
+        return {
+            done: () => saved.forEach(({ btn, html, title }) => {
+                btn.disabled = false;
+                btn.title = title;
+                btn.innerHTML = html;
+                btn.classList.remove('ai-loading-pulse');
+            })
+        };
+    };
+
     const handleBeansAIFile = async (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -164,13 +186,10 @@ export const createAiImportModule = ({
         const user = getCurrentUser();
         if (!user) return;
 
-        const btn = document.getElementById('beansAiScanBtn');
-        const originalContent = btn.innerHTML;
+        // The add card closes when Extract is chosen, so the page's add buttons show the progress.
+        const busy = showAiScanBusy();
 
         try {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Scanning...';
-            btn.classList.add('ai-loading-pulse');
 
             const { compressedFile, data } = await callBagAi(file);
             const uploadFile = await maybeRemoveCoffeeImageBackground(
@@ -226,9 +245,7 @@ export const createAiImportModule = ({
             console.error(error);
             alert(`Error scanning bag: ${error.message}`);
         } finally {
-            btn.disabled = false;
-            btn.innerHTML = originalContent;
-            btn.classList.remove('ai-loading-pulse');
+            busy.done();
             event.target.value = '';
         }
     };
@@ -240,13 +257,10 @@ export const createAiImportModule = ({
         const user = getCurrentUser();
         if (!user) return;
 
-        const btn = document.getElementById('coffeeTypesAiScanBtn');
-        const originalContent = btn.innerHTML;
+        // The add card closes when Extract is chosen, so the page's add buttons show the progress.
+        const busy = showAiScanBusy();
 
         try {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Scanning...';
-            btn.classList.add('ai-loading-pulse');
 
             const { compressedFile, data } = await callBagAi(file);
             const uploadFile = await maybeRemoveCoffeeImageBackground(
@@ -288,9 +302,7 @@ export const createAiImportModule = ({
             console.error(error);
             alert(`Error scanning bag: ${error.message}`);
         } finally {
-            btn.disabled = false;
-            btn.innerHTML = originalContent;
-            btn.classList.remove('ai-loading-pulse');
+            busy.done();
             event.target.value = '';
         }
     };

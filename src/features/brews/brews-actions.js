@@ -403,7 +403,7 @@ export const createBrewsActionsModule = ({
         resetSca();
         setRating(0);
         document.getElementById('formContainer').classList.remove('editing-mode');
-        document.getElementById('formTitle').innerHTML = '<span>Add new brew</span>';
+        document.getElementById('formTitle').innerHTML = '<span>Add brew</span>';
         document.getElementById('submitBtn').innerHTML = '<span>Save brew</span>';
         document.getElementById('submitBtn').className =
             'bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2';
@@ -914,6 +914,7 @@ export const createBrewsActionsModule = ({
         setTimeout(async () => {
             await openBrewFormModal?.(null, {
                 reset: false,
+                title: 'Edit brew',
                 syncTitleFromForm: false
             });
             updateBeanDropdown({ includeAll: true });

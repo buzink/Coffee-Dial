@@ -42,6 +42,10 @@ const matchesBean = (bean, brew) =>
 
 // Picks the subset of the full data that the home tiles (and the cards opened from them) use.
 export const buildHomeSnapshot = ({ coffees = [], beans = [], coffeeTypes = [], gasItems = [], pinnedPrefs = null } = {}) => {
+    // New items that are not saved yet (drafts) never go into the snapshot.
+    gasItems = gasItems.filter((item) => !item?.isDraft);
+    beans = beans.filter((bean) => !bean?.isDraft);
+    coffeeTypes = coffeeTypes.filter((type) => !type?.isDraft);
     const pinnedBrews = coffees.filter((brew) => brew?.isActive).map(slimBrew);
 
     const beanIds = new Set();

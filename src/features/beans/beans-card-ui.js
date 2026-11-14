@@ -1,4 +1,5 @@
 import { createBeansVmModule } from './beans.vm.js';
+import { setCardAddingMode } from '../../core/draft-items.js';
 
 export const createBeansCardUiModule = ({
     getBeans,
@@ -79,6 +80,7 @@ export const createBeansCardUiModule = ({
     };
 
     const openBeanCardInternal = (beanId, ev, keepNavigationOrder = false) => {
+        setCardAddingMode('beanCardOverlay', false);
         if (ev) ev.stopPropagation();
         if (!keepNavigationOrder && navigationOrderOverride?.length && !navigationOrderOverride.includes(beanId)) {
             navigationOrderOverride = null;

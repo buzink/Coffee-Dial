@@ -1,3 +1,5 @@
+import { isDraftItem, setCardAddingMode, toSavedFields, withoutDrafts } from '../../core/draft-items.js';
+
 export const createGasCardModule = ({
     getCurrentUser,
     getCurrentView,
@@ -13,7 +15,8 @@ export const createGasCardModule = ({
     imageCompression,
     openAppConfirm,
     renderGasTable,
-    openLightbox
+    openLightbox,
+    onGasCreated = () => {}
 }) => {
     const { db, doc, collection, updateDoc, deleteDoc, writeBatch } = dataService || {};
     const { storage, ref, uploadBytes, getDownloadURL, deleteObject } = storageService || {};
@@ -570,6 +573,7 @@ export const createGasCardModule = ({
     };
 
     const openGasCard = (gasId, ev) => {
+        setCardAddingMode('gasCardOverlay', false);
         if (ev) ev.stopPropagation();
         closeAllActionMenus();
         const item = getGasItems().find((entry) => entry.id === gasId);
@@ -628,6 +632,9 @@ export const createGasCardModule = ({
         closeGasMethodsDropdown();
         setGasCardHeightForMode('view');
         document.getElementById('gasCardOverlay').classList.add('hidden');
+        setCardAddingMode('gasCardOverlay', false);
+        // A new gear item that was never saved goes away with its card.
+        if (getGasItems().some(isDraftItem)) setGasItemsState(withoutDrafts(getGasItems()));
     };
 
     const enterGasEditMode = () => {
@@ -644,6 +651,7 @@ export const createGasCardModule = ({
         if (search) search.value = '';
         setGasMethodsSelection(item.methods);
 
+        setCardAddingMode('gasCardOverlay', isDraftItem(item));
         document.getElementById('gasCardView').classList.add('hidden');
         document.getElementById('gasCardEdit').classList.remove('hidden');
         document.getElementById('gasCardEditBtn').classList.add('hidden');
@@ -653,6 +661,11 @@ export const createGasCardModule = ({
     };
 
     const cancelGasEditMode = () => {
+        if (isDraftItem(getCurrentGasItem())) {
+            closeGasCard(null);
+            return;
+        }
+        setCardAddingMode('gasCardOverlay', false);
         document.getElementById('gasCardEdit').classList.add('hidden');
         document.getElementById('gasCardView').classList.remove('hidden');
         document.getElementById('gasCardEditBtn').classList.toggle('hidden', getCurrentView() !== 'mine');
@@ -682,8 +695,18 @@ export const createGasCardModule = ({
         };
 
         try {
-            await updateDoc(doc(db, 'users', user.uid, 'gear', gasId), updates);
-            setGasItemsState(getGasItems().map((item) => (item.id === gasId ? { ...item, ...updates } : item)));
+            const current = getCurrentGasItem();
+            if (isDraftItem(current)) {
+                const fields = { ...toSavedFields(current), ...updates };
+                const batch = writeBatch(db);
+                batch.set(doc(db, 'users', user.uid, 'gear', gasId), fields);
+                await batch.commit();
+                setGasItemsState(getGasItems().map((item) => (item.id === gasId ? { id: gasId, ...fields } : item)));
+                onGasCreated(gasId);
+            } else {
+                await updateDoc(doc(db, 'users', user.uid, 'gear', gasId), updates);
+                setGasItemsState(getGasItems().map((item) => (item.id === gasId ? { ...item, ...updates } : item)));
+            }
             renderGasTable();
             closeGasMethodsDropdown();
             openGasCard(gasId);

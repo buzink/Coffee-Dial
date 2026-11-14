@@ -1,4 +1,5 @@
 import { withDetectedDecaf } from '../../core/coffee-decaf.js';
+import { isDraftItem, setCardAddingMode, toSavedFields, withoutDrafts } from '../../core/draft-items.js';
 
 export const createBeansCardFormModule = ({
     getCurrentUser,
@@ -10,7 +11,9 @@ export const createBeansCardFormModule = ({
     computeBeansLeft,
     updateCoffeeTypeSelectors,
     dataService,
-    dispatchCommand
+    dispatchCommand,
+    closeBeanCard = () => {},
+    renderBeansTable = () => {}
 }) => {
     const { db, doc, collection, setDoc, updateDoc } = dataService || {};
     if (!db || !doc || !collection || !setDoc || !updateDoc) {
@@ -103,6 +106,7 @@ export const createBeansCardFormModule = ({
         document.getElementById('beanEditFrozen').checked = !!bean.frozen;
         document.getElementById('beanEditArchived').checked = !!bean.archived;
 
+        setCardAddingMode('beanCardOverlay', isDraftItem(bean));
         document.getElementById('beanCardView').classList.add('hidden');
         document.getElementById('beanCardEdit').classList.remove('hidden');
         document.getElementById('beanCardEditBtn').classList.add('hidden');
@@ -116,11 +120,30 @@ export const createBeansCardFormModule = ({
         dispatchCommand?.('coffees.openCardForEdit', { id: typeId, event: null });
     };
 
-    const cancelBeanEditMode = () => {
+    // Discard on a new bean: it was never saved, so it goes away with its card.
+    const discardDraftBeans = () => {
+        setCardAddingMode('beanCardOverlay', false);
+        if (getBeans().some(isDraftItem)) setBeansState(withoutDrafts(getBeans()));
+    };
+
+    // Back to the card's view mode (also used each time the card opens).
+    const resetBeanEditMode = () => {
+        setCardAddingMode('beanCardOverlay', false);
         document.getElementById('beanCardEdit').classList.add('hidden');
         document.getElementById('beanCardView').classList.remove('hidden');
         document.getElementById('beanCardEditBtn').classList.toggle('hidden', getCurrentView() !== 'mine');
         document.getElementById('beanCardMenuBtn').classList.toggle('hidden', getCurrentView() !== 'mine');
+    };
+
+    // Cancel / Discard button: a new bean is discarded with its card.
+    const cancelBeanEditMode = () => {
+        const current = getBeans().find((b) => b.id === getCurrentBeanCardId());
+        if (isDraftItem(current)) {
+            closeBeanCard(null);
+            discardDraftBeans();
+            return;
+        }
+        resetBeanEditMode();
     };
 
     const saveBeanCardEdits = async () => {
@@ -192,9 +215,18 @@ export const createBeansCardFormModule = ({
         }
 
         try {
-            await updateDoc(doc(db, 'users', user.uid, 'beans', beanCardId), updates);
-            setBeansState(getBeans().map((b) => (b.id === beanCardId ? { ...b, ...updates } : b)));
-            cancelBeanEditMode();
+            const isNew = isDraftItem(baseBean);
+            if (isNew) {
+                const fields = { ...toSavedFields(baseBean), ...updates };
+                await setDoc(doc(db, 'users', user.uid, 'beans', beanCardId), fields);
+                setBeansState(getBeans().map((b) => (b.id === beanCardId ? { id: beanCardId, ...fields } : b)));
+                renderBeansTable();
+                await dispatchCommand?.('pin.autoPinOpenBagsIfEnabled', {});
+            } else {
+                await updateDoc(doc(db, 'users', user.uid, 'beans', beanCardId), updates);
+                setBeansState(getBeans().map((b) => (b.id === beanCardId ? { ...b, ...updates } : b)));
+            }
+            resetBeanEditMode();
             dispatchCommand?.('beans.openCard', { beanId: beanCardId, event: null, keepNavigationOrder: false });
         } catch (err) {
             console.error('Error saving bean edits:', err);
@@ -208,6 +240,8 @@ export const createBeansCardFormModule = ({
         enterBeanEditMode,
         openCoffeeFromBeanEdit,
         cancelBeanEditMode,
+        resetBeanEditMode,
+        discardDraftBeans,
         saveBeanCardEdits
     };
 };

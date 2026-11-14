@@ -1,4 +1,4 @@
-<div id="gasCardOverlay" data-feature-root="gas" class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeGasCard(event)">
+<div id="gasCardOverlay" data-feature-root="gas" class="app-card hidden fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeGasCard(event)">
     <div id="gasCardPanel" class="bg-white dark:bg-[#292524] w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col max-h-[85vh]" data-action-click="handleGasCardOverlayClick(event)">
         <div class="bg-coffee-100 dark:bg-[#1c1917] p-4 border-b border-coffee-200 dark:border-[#44403c] relative">
             <div class="absolute top-3 right-3 flex items-center gap-1">
@@ -11,7 +11,7 @@
                     </button>
                     <div id="gasCardActionMenu" class="action-menu hidden absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] z-[10000] overflow-hidden" data-action-click="event.stopPropagation()">
                         <button data-action-click="showBrewsForGear()" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
-                            <i class="fa-solid fa-mug-saucer text-indigo-600 w-4"></i> Go to brews
+                            <i class="fa-solid fa-mug-hot text-indigo-600 w-4"></i> Go to brews
                         </button>
                         <button data-action-click="openGasBulkAddModal()" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
                             <i class="fa-solid fa-layer-group text-teal-600 w-4"></i> Bulk add to
@@ -32,7 +32,9 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            <div class="pr-36">
+            <!-- Shown instead of the title while editing or adding a gear -->
+            <h3 class="app-card-mode-title text-lg font-bold text-coffee-900 dark:text-white items-center gap-2 pr-36 py-2" hidden><i class="fa-solid fa-screwdriver-wrench text-coffee-700 dark:text-[#d6ccc2]"></i> <span class="app-when-editing">Edit gear</span><span class="app-when-adding" hidden>Add gear</span></h3>
+            <div class="app-card-title-block pr-36">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-screwdriver-wrench text-coffee-600 dark:text-[#d6ccc2]"></i>
                     <h3 id="gasCardTitle" class="text-lg font-bold text-coffee-900 dark:text-white leading-tight mb-1"></h3>
@@ -100,7 +102,7 @@
             </div>
         </div>
 
-        <div id="gasCardEdit" class="hidden flex-1 flex flex-col min-h-0">
+        <div id="gasCardEdit" class="app-card-edit hidden flex-1 flex flex-col min-h-0">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 content-start flex-1 overflow-y-auto ios-scroll p-4">
                 <div class="sm:col-span-2">
                     <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Name</label>
@@ -141,8 +143,8 @@
                 </div>
             </div>
             <div class="flex justify-end gap-2 pt-3 border-t border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
-                <button data-action-click="cancelGasEditMode()" class="px-3 py-1.5 text-xs font-bold rounded border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e]">Cancel</button>
-                <button data-action-click="saveGasEdits()" class="px-3 py-1.5 text-xs font-bold rounded bg-indigo-600 hover:bg-indigo-700 text-white">Save</button>
+                <button data-action-click="cancelGasEditMode()" class="px-3 py-1.5 text-xs font-bold rounded border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e]"><span class="app-when-editing">Cancel</span><span class="app-when-adding" hidden>Discard</span></button>
+                <button data-action-click="saveGasEdits()" class="px-3 py-1.5 text-xs font-bold rounded bg-indigo-600 hover:bg-indigo-700 text-white"><span class="app-when-editing">Save</span><span class="app-when-adding" hidden>Save gear</span></button>
             </div>
         </div>
     </div>

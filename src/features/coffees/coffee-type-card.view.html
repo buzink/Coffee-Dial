@@ -1,8 +1,23 @@
     <!-- Coffee Card Overlay -->
-    <div id="coffeeTypeCardOverlay" data-feature-root="coffees" class="hidden fixed inset-0 z-[10060] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeCoffeeTypeCard(event)">
+    <div id="coffeeTypeCardOverlay" data-feature-root="coffees" class="app-card hidden fixed inset-0 z-[10060] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeCoffeeTypeCard(event)">
         <div class="bg-white dark:bg-[#292524] w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col max-h-[85vh]" data-action-click="handleCoffeeTypeCardOverlayClick(event)">
             <div class="bg-coffee-100 dark:bg-[#1c1917] p-4 border-b border-coffee-200 dark:border-[#44403c] relative">
                 <div class="absolute top-3 right-3 flex items-center gap-1">
+                    <!-- While adding: fill the new coffee from a photo of the bag (AI) -->
+                    <div class="app-card-extract relative" hidden>
+                        <button type="button" data-action-click="toggleCoffeeTypesAiMenu(event)" id="coffeeTypesAiScanBtn" class="h-9 px-3 flex items-center gap-2 rounded-lg border border-coffee-200 dark:border-[#57534e] text-xs font-bold text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Extract
+                        </button>
+                        <div id="coffeeTypesAiMenuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] z-50 overflow-hidden">
+                            <button type="button" data-action-click="triggerCoffeeTypesAIScan('camera'); cancelCoffeeTypeEditMode()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2 border-b border-coffee-100 dark:border-[#44403c]">
+                                <i class="fa-solid fa-camera w-4"></i> Take Photo
+                            </button>
+                            <button type="button" data-action-click="triggerCoffeeTypesAIScan('library'); cancelCoffeeTypeEditMode()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2">
+                                <i class="fa-solid fa-images w-4"></i> From Gallery
+                            </button>
+                        </div>
+                        <input type="file" id="coffeeTypesAiFileInput" accept="image/*" class="hidden" data-action-change="handleCoffeeTypesAIFile(event)">
+                    </div>
                     <button id="coffeeTypeCardEditBtn" data-action-click="enterCoffeeTypeEditMode()" class="w-11 h-11 flex items-center justify-center text-coffee-400 hover:text-coffee-800 dark:text-[#57534e] dark:hover:text-white transition-colors" title="Edit">
                         <i class="fa-solid fa-pen-to-square text-lg"></i>
                     </button>
@@ -21,7 +36,7 @@
                                 <i class="fa-solid fa-seedling text-green-600 w-4"></i> Go to beans
                             </button>
                             <button data-action-click="showBrewsForCoffeeType()" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
-                                <i class="fa-solid fa-mug-saucer text-indigo-600 w-4"></i> Go to brews
+                                <i class="fa-solid fa-mug-hot text-indigo-600 w-4"></i> Go to brews
                             </button>
                             <hr class="border-coffee-100 dark:border-[#44403c]">
                             <button data-action-click="deleteCoffeeType()" class="w-full text-left px-4 py-2 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-3">
@@ -33,7 +48,9 @@
                         <i class="fa-solid fa-xmark text-xl"></i>
                     </button>
                 </div>
-                <div class="pr-36">
+                <!-- Shown instead of the title while editing or adding a coffee -->
+                <h3 class="app-card-mode-title text-lg font-bold text-coffee-900 dark:text-white items-center gap-2 pr-36 py-2" hidden><i class="fa-solid fa-layer-group text-coffee-700 dark:text-[#d6ccc2]"></i> <span class="app-when-editing">Edit coffee</span><span class="app-when-adding" hidden>Add coffee</span></h3>
+                <div class="app-card-title-block pr-36">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-layer-group text-coffee-600"></i>
                         <h3 id="coffeeTypeCardTitle" class="text-lg font-bold text-coffee-900 dark:text-white leading-tight mb-1"></h3>
@@ -122,7 +139,7 @@
                     </div>
                 </div>
             </div>
-            <div id="coffeeTypeCardEdit" class="hidden flex-1 flex flex-col min-h-0">
+            <div id="coffeeTypeCardEdit" class="app-card-edit hidden flex-1 flex flex-col min-h-0">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 overflow-y-auto ios-scroll p-4">
                     <div>
                         <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Farmer</label>
@@ -173,8 +190,8 @@
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
-                    <button data-action-click="cancelCoffeeTypeEditMode()" class="px-3 py-1.5 text-xs font-bold rounded border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e]">Cancel</button>
-                    <button data-action-click="saveCoffeeTypeEdits()" class="px-3 py-1.5 text-xs font-bold rounded bg-indigo-600 hover:bg-indigo-700 text-white">Save</button>
+                    <button data-action-click="cancelCoffeeTypeEditMode()" class="px-3 py-1.5 text-xs font-bold rounded border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e]"><span class="app-when-editing">Cancel</span><span class="app-when-adding" hidden>Discard</span></button>
+                    <button data-action-click="saveCoffeeTypeEdits()" class="px-3 py-1.5 text-xs font-bold rounded bg-indigo-600 hover:bg-indigo-700 text-white"><span class="app-when-editing">Save</span><span class="app-when-adding" hidden>Save coffee</span></button>
                 </div>
             </div>
         </div>

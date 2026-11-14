@@ -321,6 +321,19 @@
         }
         .dark .app-fab { color: #ffffff; }
 
+        /* Cards in edit mode show "Edit <type>" with the type's icon instead of the item's
+           name. Adding a new bean, coffee or gear item ([data-adding], see draft-items.js)
+           shows "Add <type>", Discard and "Save <type>" instead. */
+        .app-card-mode-title,
+        .app-when-adding { display: none; }
+        .app-card:has(.app-card-edit:not(.hidden)) .app-card-mode-title { display: flex; }
+        .app-card:has(.app-card-edit:not(.hidden)) .app-card-title-block { display: none; }
+        [data-adding] .app-when-editing { display: none; }
+        [data-adding] .app-when-adding { display: inline; }
+        /* Extract (fill a new bean or coffee from a photo with AI) only while adding. */
+        .app-card-extract { display: none; }
+        [data-adding] .app-card-extract { display: block; }
+
         /* Page titles are not shown in the page: on mobile the header shows the current
            page's title, on desktop the highlighted header link does. They stay for screen readers. */
         .app-page-title {

@@ -1833,6 +1833,17 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             openBrewFormModal
         });
 
+        // The add button (header on desktop, floating on mobile) adds what the visible
+        // page is about; pages without anything to add (statistics) and brews add a brew.
+        const openAddForCurrentPage = (event = null) => {
+            const visiblePage = document.querySelector('[data-app-page]:not(.hidden)');
+            const pageKey = visiblePage?.getAttribute('data-app-page') || '';
+            if (pageKey === 'beans') return createBeanFromModal();
+            if (pageKey === 'coffees') return createCoffeeTypeFromModal();
+            if (pageKey === 'gear') return createGasItemFromModal();
+            return openAddBrewFromPinned(event);
+        };
+
         registerBrewsFilterCommands({
             appCommands,
             clearSearch,
@@ -2036,6 +2047,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             navigateGasCard,
             openAbout,
             openAddBrewFromPinned,
+            openAddForCurrentPage,
             openBeanPhoto,
             openBeans,
             openBeansQuickFilterValues,

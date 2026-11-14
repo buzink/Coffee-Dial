@@ -896,7 +896,7 @@ export const createBrewsTableModule = ({
         if (imageUrl) {
             return `<img src="${imageUrl}" alt="Coffee image" class="w-12 h-12 rounded-lg object-cover border border-coffee-200 dark:border-[#44403c]" loading="lazy">`;
         }
-        return '<div class="w-12 h-12 rounded-lg bg-coffee-100 dark:bg-[#34302e] border border-coffee-200 dark:border-[#44403c] flex items-center justify-center text-coffee-400 dark:text-[#78716c]"><i class="fa-solid fa-mug-saucer text-sm"></i></div>';
+        return '<div class="w-12 h-12 rounded-lg bg-coffee-100 dark:bg-[#34302e] border border-coffee-200 dark:border-[#44403c] flex items-center justify-center text-coffee-400 dark:text-[#78716c]"><i class="fa-solid fa-mug-hot text-sm"></i></div>';
     };
 
     const generateMobileAccordionRow = (brew) => {

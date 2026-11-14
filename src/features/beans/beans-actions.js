@@ -1,3 +1,4 @@
+import { createDraftId, withoutDrafts } from '../../core/draft-items.js';
 import { createBeansRepoModule } from './beans.repo.js';
 
 export const createBeansActionsModule = ({
@@ -221,17 +222,10 @@ export const createBeansActionsModule = ({
             updatedAt: nowIso
         };
 
-        try {
-            const refObj = await repo.createBean({ uid: user.uid, data: beanData });
-            const newBean = { id: refObj.id, ...beanData };
-            setBeansState([...getBeans(), newBean]);
-            renderBeansTable?.();
-            await dispatchCommand?.('pin.autoPinOpenBagsIfEnabled', {});
-            dispatchCommand?.('beans.openCardForEdit', { beanId: refObj.id, event: null });
-        } catch (err) {
-            console.error('Error creating bean:', err);
-            alert('Failed to create bean.');
-        }
+        // A draft: it is written only when the card's Save is clicked (saveBeanCardEdits).
+        const newBean = { id: createDraftId(), ...beanData, isDraft: true };
+        setBeansState([...withoutDrafts(getBeans()), newBean]);
+        dispatchCommand?.('beans.openCardForEdit', { beanId: newBean.id, event: null });
     };
 
     return {

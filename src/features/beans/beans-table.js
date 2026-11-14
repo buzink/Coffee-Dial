@@ -610,7 +610,7 @@ export const createBeansTableModule = ({
                             <i class="fa-solid fa-pen-to-square text-blue-500 w-4"></i> Edit
                         </button>` : ''}
                         ${isMine ? `<button data-action-click="openBrewWithBean('${bean.id}');" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
-                            <i class="fa-solid fa-mug-saucer text-coffee-600 w-4"></i> Brew
+                            <i class="fa-solid fa-mug-hot text-coffee-600 w-4"></i> Brew
                         </button>` : ''}
                         ${isMine ? `<button data-action-click="toggleBeanFrozen('${bean.id}', ${bean.frozen ? 'true' : 'false'});" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
                             <i class="fa-solid ${freezeIcon} w-4"></i> ${freezeLabel}
@@ -619,7 +619,7 @@ export const createBeansTableModule = ({
                             <i class="fa-solid ${archiveIcon} w-4"></i> ${archiveLabel}
                         </button>` : ''}
                         <button data-action-click="showBrewsForBean('${bean.id}');" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
-                            <i class="fa-solid fa-mug-saucer text-indigo-600 w-4"></i> Go to brews
+                            <i class="fa-solid fa-mug-hot text-indigo-600 w-4"></i> Go to brews
                         </button>
                         ${goToCoffeeBtn}
                         ${isMine ? `<hr class="border-coffee-100 dark:border-[#44403c]">

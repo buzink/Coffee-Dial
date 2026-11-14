@@ -9,6 +9,7 @@ import { createBeansCardFormModule } from '../../features/beans/beans-card-form.
 import { createBeansCardPhotoModule } from '../../features/beans/beans-card-photo.js';
 import { createBeansCardUiModule } from '../../features/beans/beans-card-ui.js';
 import { selectBeanTableOrderIds } from '../stores/beans-table.selectors.js';
+import { withoutDrafts } from '../../core/draft-items.js';
 
 export const createBeansCoordinator = ({
     dataService,
@@ -124,7 +125,9 @@ export const createBeansCoordinator = ({
         setBeansState: (value) => setBeansState(value),
         computeBeansLeft: (...args) => computeBeansLeft(...args),
         updateCoffeeTypeSelectors: (...args) => updateCoffeeTypeSelectors(...args),
-        dispatchCommand
+        dispatchCommand,
+        closeBeanCard: (...args) => closeBeanCard(...args),
+        renderBeansTable: () => renderBeansTable()
     });
     enterBeanEditMode = beansCardForm.enterBeanEditMode;
     cancelBeanEditMode = beansCardForm.cancelBeanEditMode;
@@ -139,7 +142,7 @@ export const createBeansCoordinator = ({
         getBeanCoffeeTypeDisplay: (...args) => getBeanCoffeeTypeDisplay(...args),
         getBeanTableOrder: () =>
             selectBeanTableOrderIds({
-                beans: getBeans(),
+                beans: withoutDrafts(getBeans()),
                 getBeanCalculatedStock
             }),
         openBrewWithBean: (...args) => openBrewWithBean(...args),
@@ -147,14 +150,20 @@ export const createBeansCoordinator = ({
         showBrewsForBean: (...args) => showBrewsForBean(...args),
         showCoffeeForBean: (...args) => showCoffeeForBean(...args),
         enterBeanEditMode: (...args) => enterBeanEditMode(...args),
-        cancelBeanEditMode: (...args) => cancelBeanEditMode(...args),
+        cancelBeanEditMode: () => beansCardForm.resetBeanEditMode(),
         toggleBeanFrozen: (...args) => toggleBeanFrozen(...args),
         toggleBeanArchive: (...args) => toggleBeanArchive(...args),
         dispatchCommand,
         publishEvent
     });
     openCard = beansCardUi.openCard;
-    closeBeanCard = beansCardUi.closeBeanCard;
+    // Closing the card of a new, unsaved bean discards it.
+    closeBeanCard = (...args) => {
+        beansCardUi.closeBeanCard(...args);
+        if (document.getElementById('beanCardOverlay')?.classList.contains('hidden')) {
+            beansCardForm.discardDraftBeans();
+        }
+    };
 
     const { triggerBeanPhoto, openBeanPhoto, removeBeanPhoto, handleBeanPhoto } = createBeansCardPhotoModule({
         dataService,
@@ -172,7 +181,7 @@ export const createBeansCoordinator = ({
     const beansTable = createBeansTableModule({
         getCurrentUser: () => getCurrentUser(),
         getCurrentView: () => getCurrentView(),
-        getBeans: () => getBeans(),
+        getBeans: () => withoutDrafts(getBeans()),
         getCoffees: () => getCoffees(),
         getCoffeeTypes: () => getCoffeeTypes(),
         getPinnedBrewsPreferences: () => getPinnedBrewsPreferences?.(),
@@ -213,7 +222,7 @@ export const createBeansCoordinator = ({
     const beansMaintenance = createBeansMaintenanceModule({
         dataService,
         getCurrentUser: () => getCurrentUser(),
-        getBeans: () => getBeans(),
+        getBeans: () => withoutDrafts(getBeans()),
         setBeansState: (value) => setBeansState(value),
         getCoffees: () => getCoffees(),
         dispatchCommand
@@ -248,7 +257,7 @@ export const createBeansCoordinator = ({
         openCard: beansCardUi.openCard,
         openCardWithOrder: beansCardUi.openCardWithOrder,
         navigateBeanCard: beansCardUi.navigateBeanCard,
-        closeBeanCard: beansCardUi.closeBeanCard,
+        closeBeanCard: (...args) => closeBeanCard(...args),
         closeBeanCardMenu: beansCardUi.closeBeanCardMenu,
         triggerBeanPhoto,
         openBeanPhoto,

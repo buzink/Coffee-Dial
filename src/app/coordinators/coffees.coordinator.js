@@ -2,6 +2,7 @@ import { createCoffeeTypeCardModule } from '../../features/coffees/coffee-type-c
 import { createCoffeeTypesTableModule } from '../../features/coffees/coffee-types-table.js';
 import { createCoffeesRepoModule } from '../../features/coffees/coffees.repo.js';
 import { withDetectedDecaf } from '../../core/coffee-decaf.js';
+import { createDraftId, withoutDrafts } from '../../core/draft-items.js';
 
 export const createCoffeesCoordinator = ({
     dataService,
@@ -87,17 +88,11 @@ export const createCoffeesCoordinator = ({
             updatedAt: nowIso
         });
 
-        try {
-            const typeRef = await repo.createCoffeeType({ uid: user.uid, data: typeData });
-            const newType = { id: typeRef.id, ...typeData };
-            if (!getCoffeeTypes().find((ct) => ct.id === newType.id)) setCoffeeTypesState([...getCoffeeTypes(), newType]);
-            dispatchOnly('coffees.openCard', { id: newType.id, event: null });
-            enterCoffeeTypeEditMode();
-            publishEvent('coffees.created', { coffeeTypeId: newType.id });
-        } catch (err) {
-            console.error('Error creating coffee:', err);
-            alert('Failed to create coffee.');
-        }
+        // A draft: it is written only when the card's Save is clicked (saveCoffeeTypeEdits).
+        const newType = { id: createDraftId(), ...typeData, isDraft: true };
+        setCoffeeTypesState([...withoutDrafts(getCoffeeTypes()), newType]);
+        // The card mounts lazily, so open it for edit in one command (open, then edit mode).
+        await dispatchOnly('coffees.openCardForEdit', { id: newType.id, event: null });
     };
 
     const openCoffeeTypeShopUrl = (typeId, ev) => {
@@ -246,14 +241,15 @@ export const createCoffeesCoordinator = ({
         openCoffeeTypeShopUrl,
         openNewBagForCoffeeType,
         updateCoffeeTypeCardNav,
-        openLightbox
+        openLightbox,
+        publishEvent
     });
     openCoffeeTypeCard = coffeeTypeCard.openCoffeeTypeCard;
     closeCoffeeTypeCard = coffeeTypeCard.closeCoffeeTypeCard;
     const enterCoffeeTypeEditMode = coffeeTypeCard.enterCoffeeTypeEditMode;
 
     const coffeeTypesTable = createCoffeeTypesTableModule({
-        getCoffeeTypes,
+        getCoffeeTypes: () => withoutDrafts(getCoffeeTypes()),
         getBeans,
         getCoffees,
         getPinnedBrewsPreferences,

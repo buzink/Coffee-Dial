@@ -73,16 +73,16 @@ export const createBrewsFormModalModule = ({
     const setModalTitleFromForm = () => {
         const modalTitle = getModalTitle();
         if (!modalTitle) return;
-        const iconHtml = '<i class="fa-solid fa-plus-circle text-coffee-700 dark:text-[#d6ccc2]"></i>';
-        const titleText = (getFormTitle()?.textContent || 'Add new brew').trim();
+        const iconHtml = '<i class="fa-solid fa-mug-hot text-coffee-700 dark:text-[#d6ccc2]"></i>';
+        const titleText = (getFormTitle()?.textContent || 'Add brew').trim();
         modalTitle.innerHTML = `${iconHtml} ${titleText}`;
     };
 
     const setModalTitle = (title) => {
         const modalTitle = getModalTitle();
         if (!modalTitle) return;
-        const iconHtml = '<i class="fa-solid fa-plus-circle text-coffee-700 dark:text-[#d6ccc2]"></i>';
-        const titleText = (title || 'Add new brew').toString().trim();
+        const iconHtml = '<i class="fa-solid fa-mug-hot text-coffee-700 dark:text-[#d6ccc2]"></i>';
+        const titleText = (title || 'Add brew').toString().trim();
         modalTitle.innerHTML = `${iconHtml} ${titleText}`;
     };
 
@@ -109,7 +109,7 @@ export const createBrewsFormModalModule = ({
         if (typeof onBeforeShow === 'function') onBeforeShow();
         if (syncTitleFromForm) setModalTitleFromForm();
         else if (title !== null) setModalTitle(title);
-        else if (reset) setModalTitle('Add new brew');
+        else if (reset) setModalTitle('Add brew');
         initialSnapshot = snapshotFormState();
         attachBeforeUnload();
 

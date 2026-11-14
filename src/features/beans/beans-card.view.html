@@ -1,8 +1,23 @@
     <!-- Bean Card Overlay -->
-    <div id="beanCardOverlay" data-feature-root="beans" class="hidden fixed inset-0 z-[10050] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeBeanCard(event)">
+    <div id="beanCardOverlay" data-feature-root="beans" class="app-card hidden fixed inset-0 z-[10050] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeBeanCard(event)">
         <div class="bg-white dark:bg-[#292524] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col max-h-[85vh]" data-action-click="handleBeanCardOverlayClick(event)">
             <div class="bg-coffee-100 dark:bg-[#1c1917] p-4 border-b border-coffee-200 dark:border-[#44403c] relative">
                 <div class="absolute top-3 right-3 flex items-center gap-1">
+                    <!-- While adding: fill the new bean from a photo of the bag (AI) -->
+                    <div class="app-card-extract relative" hidden>
+                        <button type="button" data-action-click="toggleBeansAiMenu(event)" id="beansAiScanBtn" class="h-9 px-3 flex items-center gap-2 rounded-lg border border-coffee-200 dark:border-[#57534e] text-xs font-bold text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Extract
+                        </button>
+                        <div id="beansAiMenuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] z-50 overflow-hidden">
+                            <button type="button" data-action-click="triggerBeansAIScan('camera'); cancelBeanEditMode()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2 border-b border-coffee-100 dark:border-[#44403c]">
+                                <i class="fa-solid fa-camera w-4"></i> Take Photo
+                            </button>
+                            <button type="button" data-action-click="triggerBeansAIScan('library'); cancelBeanEditMode()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2">
+                                <i class="fa-solid fa-images w-4"></i> From Gallery
+                            </button>
+                        </div>
+                        <input type="file" id="beansAiFileInput" accept="image/*" class="hidden" data-action-change="handleBeansAIFile(event)">
+                    </div>
                     <button id="beanCardEditBtn" data-action-click="enterBeanEditMode()" class="w-11 h-11 flex items-center justify-center text-coffee-400 hover:text-coffee-800 dark:text-[#57534e] dark:hover:text-white transition-colors" title="Edit">
                         <i class="fa-solid fa-pen-to-square text-lg"></i>
                     </button>
@@ -12,12 +27,12 @@
                         </button>
                         <div id="beanCardActionMenu" class="action-menu hidden absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] z-[10000] overflow-hidden" data-action-click="event.stopPropagation()">
                             <button id="beanCardActionBrew" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
-                                <i class="fa-solid fa-mug-saucer text-coffee-700 w-4"></i> Brew
+                                <i class="fa-solid fa-mug-hot text-coffee-700 w-4"></i> Brew
                             </button>
                             <button id="beanCardActionFreeze" aria-label="Toggle frozen status" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3"></button>
                             <button id="beanCardActionArchive" aria-label="Toggle archived status" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3"></button>
                             <button id="beanCardActionBrews" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
-                                <i class="fa-solid fa-mug-saucer text-indigo-600 w-4"></i> Go to brews
+                                <i class="fa-solid fa-mug-hot text-indigo-600 w-4"></i> Go to brews
                             </button>
                             <button id="beanCardActionCoffee" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
                                 <i class="fa-solid fa-layer-group text-coffee-600 w-4"></i> Go to coffee
@@ -32,9 +47,11 @@
                         <i class="fa-solid fa-xmark text-xl"></i>
                     </button>
                 </div>
-                <div class="pr-36">
+                <!-- Shown instead of the title while editing or adding a bean -->
+                <h3 class="app-card-mode-title text-lg font-bold text-coffee-900 dark:text-white items-center gap-2 pr-36 py-2" hidden><i class="fa-solid fa-seedling text-coffee-700 dark:text-[#d6ccc2]"></i> <span class="app-when-editing">Edit bean</span><span class="app-when-adding" hidden>Add bean</span></h3>
+                <div class="app-card-title-block pr-36">
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-seedling text-green-600"></i>
+                        <i class="fa-solid fa-seedling text-coffee-900 dark:text-white"></i>
                         <h3 id="beanCardTitle" class="text-lg font-bold text-coffee-900 dark:text-white leading-tight mb-1"></h3>
                     </div>
                     <p id="beanCardSubtitle" class="text-xs text-coffee-500 dark:text-[#a8a29e]"></p>
@@ -105,7 +122,7 @@
                 <div class="pt-3 border-t border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
                     <div class="flex flex-wrap gap-2">
                         <button id="beanCardBrewBtn" class="px-3 py-1.5 text-xs font-bold rounded bg-coffee-700 hover:bg-coffee-800 text-white flex items-center gap-2">
-                            <i class="fa-solid fa-mug-saucer"></i> Brew
+                            <i class="fa-solid fa-mug-hot"></i> Brew
                         </button>
                         <button id="beanCardFreezeBtn" aria-label="Toggle frozen status" class="px-3 py-1.5 text-xs font-bold rounded bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-2"></button>
                         <button id="beanCardArchiveBtn" aria-label="Toggle archived status" class="px-3 py-1.5 text-xs font-bold rounded bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"></button>
@@ -120,7 +137,7 @@
                     </div>
                 </div>
             </div>
-            <div id="beanCardEdit" class="hidden flex-1 flex flex-col min-h-0">
+            <div id="beanCardEdit" class="app-card-edit hidden flex-1 flex flex-col min-h-0">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 overflow-y-auto ios-scroll p-4">
                     <div class="sm:col-span-2">
                         <div class="flex items-center gap-2 mb-1">
@@ -191,8 +208,8 @@
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
-                    <button data-action-click="cancelBeanEditMode()" class="px-3 py-1.5 text-xs font-bold rounded border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e]">Cancel</button>
-                    <button data-action-click="saveBeanCardEdits()" class="px-3 py-1.5 text-xs font-bold rounded bg-indigo-600 hover:bg-indigo-700 text-white">Save</button>
+                    <button data-action-click="cancelBeanEditMode()" class="px-3 py-1.5 text-xs font-bold rounded border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e]"><span class="app-when-editing">Cancel</span><span class="app-when-adding" hidden>Discard</span></button>
+                    <button data-action-click="saveBeanCardEdits()" class="px-3 py-1.5 text-xs font-bold rounded bg-indigo-600 hover:bg-indigo-700 text-white"><span class="app-when-editing">Save</span><span class="app-when-adding" hidden>Save bean</span></button>
                 </div>
             </div>
         </div>

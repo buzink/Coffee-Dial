@@ -1,4 +1,5 @@
 import { createCoffeesVmModule } from './coffees.vm.js';
+import { isDraftItem, setCardAddingMode, toSavedFields, withoutDrafts } from '../../core/draft-items.js';
 
 export const createCoffeeTypeCardModule = ({
     getCurrentUser,
@@ -22,7 +23,8 @@ export const createCoffeeTypeCardModule = ({
     openCoffeeTypeShopUrl,
     openNewBagForCoffeeType,
     updateCoffeeTypeCardNav,
-    openLightbox
+    openLightbox,
+    publishEvent = () => {}
 }) => {
     const { db, doc, updateDoc, writeBatch } = dataService || {};
     const { storage, ref, uploadBytes, getDownloadURL, deleteObject } = storageService || {};
@@ -281,6 +283,7 @@ export const createCoffeeTypeCardModule = ({
     };
 
     const openCoffeeTypeCard = (typeId, ev) => {
+        setCardAddingMode('coffeeTypeCardOverlay', false);
         if (ev) ev.stopPropagation();
         const type = getCoffeeTypes().find((ct) => ct.id === typeId);
         if (!type) return;
@@ -364,6 +367,9 @@ export const createCoffeeTypeCardModule = ({
         document.getElementById('coffeeTypeCardEditBtn').classList.toggle('hidden', getCurrentView() !== 'mine');
         document.getElementById('coffeeTypeCardMenuBtn').classList.toggle('hidden', getCurrentView() !== 'mine');
         document.getElementById('coffeeTypeCardOverlay').classList.add('hidden');
+        setCardAddingMode('coffeeTypeCardOverlay', false);
+        // A new coffee that was never saved goes away with its card.
+        if (getCoffeeTypes().some(isDraftItem)) setCoffeeTypesState(withoutDrafts(getCoffeeTypes()));
     };
 
     const enterCoffeeTypeEditMode = () => {
@@ -381,6 +387,7 @@ export const createCoffeeTypeCardModule = ({
         document.getElementById('coffeeTypeEditShopUrl').value = type.webshopUrl || type.shopUrl || '';
         document.getElementById('coffeeTypeEditTasteNotes').value = type.tasteNotes || '';
 
+        setCardAddingMode('coffeeTypeCardOverlay', isDraftItem(type));
         document.getElementById('coffeeTypeCardView').classList.add('hidden');
         document.getElementById('coffeeTypeCardEdit').classList.remove('hidden');
         document.getElementById('coffeeTypeCardEditBtn').classList.add('hidden');
@@ -389,6 +396,11 @@ export const createCoffeeTypeCardModule = ({
     };
 
     const cancelCoffeeTypeEditMode = () => {
+        if (isDraftItem(getCurrentType())) {
+            closeCoffeeTypeCard(null);
+            return;
+        }
+        setCardAddingMode('coffeeTypeCardOverlay', false);
         document.getElementById('coffeeTypeCardEdit').classList.add('hidden');
         document.getElementById('coffeeTypeCardView').classList.remove('hidden');
         document.getElementById('coffeeTypeCardEditBtn').classList.toggle('hidden', getCurrentView() !== 'mine');
@@ -416,8 +428,19 @@ export const createCoffeeTypeCardModule = ({
         };
 
         try {
-            await updateDoc(doc(db, 'users', user.uid, 'coffeeTypes', typeId), updates);
-            setCoffeeTypesState(getCoffeeTypes().map((ct) => (ct.id === typeId ? { ...ct, ...updates } : ct)));
+            const current = getCoffeeTypes().find((ct) => ct.id === typeId);
+            if (isDraftItem(current)) {
+                const fields = { ...toSavedFields(current), ...updates };
+                const batch = writeBatch(db);
+                batch.set(doc(db, 'users', user.uid, 'coffeeTypes', typeId), fields);
+                await batch.commit();
+                setCoffeeTypesState(getCoffeeTypes().map((ct) => (ct.id === typeId ? { id: typeId, ...fields } : ct)));
+                updateCoffeeTypeSelectors?.();
+                publishEvent('coffees.created', { coffeeTypeId: typeId });
+            } else {
+                await updateDoc(doc(db, 'users', user.uid, 'coffeeTypes', typeId), updates);
+                setCoffeeTypesState(getCoffeeTypes().map((ct) => (ct.id === typeId ? { ...ct, ...updates } : ct)));
+            }
             renderCoffeeTypesTable();
             openCoffeeTypeCard(typeId);
         } catch (err) {
