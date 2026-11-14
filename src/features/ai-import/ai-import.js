@@ -1,5 +1,7 @@
 import { withDetectedDecaf } from '../../core/coffee-decaf.js';
-import { AiNotConfiguredError, analyzeCoffeeBag } from '../../core/gemini-client.js';
+import { openAppPrompt } from '../../core/confirm.js';
+import { fetchPageImage } from '../../core/page-image.js';
+import { AiNotConfiguredError, analyzeCoffeeBag, analyzeCoffeeBagUrl } from '../../core/gemini-client.js';
 
 export const createAiImportModule = ({
     aiSettings,
@@ -13,7 +15,8 @@ export const createAiImportModule = ({
     setCoffeeTypes,
     removeCoffeeImageBackground,
     openCoffeeTypeCard,
-    enterCoffeeTypeEditMode
+    enterCoffeeTypeEditMode,
+    functionsService = null
 }) => {
     const { db, doc, setDoc, updateDoc, collection, writeBatch } = dataService || {};
     const { storage, ref, uploadBytes, getDownloadURL } = storageService || {};
@@ -24,6 +27,12 @@ export const createAiImportModule = ({
         throw new Error('createAiImportModule requires storageService { storage, ref, uploadBytes, getDownloadURL }');
     }
     let pendingAIBeanImageFile = null;
+    // The page an Extract From URL in the brew form came from; saved as the coffee's web shop URL.
+    let pendingAIWebshopUrl = '';
+    let pendingAITasteNotes = '';
+    const callFetchShopImage = functionsService?.httpsCallable
+        ? functionsService.httpsCallable(functionsService.functions, 'fetchShopImage')
+        : null;
     const maybeRemoveCoffeeImageBackground = async (file, context = 'unknown') => {
         if (typeof removeCoffeeImageBackground !== 'function') return file;
         return removeCoffeeImageBackground(file, { source: context });
@@ -92,9 +101,8 @@ export const createAiImportModule = ({
         input.click();
     };
 
-    const handleAIFile = async (event) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
+    // Applies what the AI extracted; getResult returns { data, compressedFile } (no file for a URL).
+    const runBrewFormExtract = async (getResult) => {
         const btn = document.getElementById('aiScanBtn');
         const originalContent = btn.innerHTML;
 
@@ -103,7 +111,7 @@ export const createAiImportModule = ({
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
             btn.classList.add('ai-loading-pulse');
 
-            const { compressedFile, data } = await callBagAi(file);
+            const { compressedFile, data, sourceUrl = '' } = await getResult();
             const fieldsToFill = ['roaster', 'farmer', 'origin', 'variety', 'processing', 'roastType'];
             fieldsToFill.forEach((id) => {
                 const el = document.getElementById(id);
@@ -116,7 +124,9 @@ export const createAiImportModule = ({
                 }
             });
 
-            pendingAIBeanImageFile = compressedFile;
+            pendingAIBeanImageFile = compressedFile || null;
+            pendingAIWebshopUrl = sourceUrl || '';
+            pendingAITasteNotes = data.tasteNotes || '';
             toggleForm(true);
         } catch (error) {
             console.error(error);
@@ -125,36 +135,48 @@ export const createAiImportModule = ({
             btn.disabled = false;
             btn.innerHTML = originalContent;
             btn.classList.remove('ai-loading-pulse');
-            event.target.value = '';
         }
     };
 
+    // After the brew form saved and the coffee is known: give it the photo and the web shop
+    // URL and taste notes from the last Extract. An existing web shop URL or taste notes are kept.
     const uploadPendingCoffeeTypeImage = async (coffeeTypeId) => {
         const user = getCurrentUser();
-        if (!pendingAIBeanImageFile || !coffeeTypeId || !user) return null;
+        if ((!pendingAIBeanImageFile && !pendingAIWebshopUrl && !pendingAITasteNotes) || !coffeeTypeId || !user) return null;
 
-        const processedFile = await maybeRemoveCoffeeImageBackground(
-            pendingAIBeanImageFile,
-            'ai-import.uploadPendingCoffeeTypeImage'
-        );
-        const storageRef = ref(storage, `photos/${user.uid}/coffee_type_${coffeeTypeId}_${Date.now()}`);
-        const snapshot = await uploadBytes(storageRef, processedFile);
-        const imageURL = await getDownloadURL(snapshot.ref);
-        await updateDoc(doc(db, 'users', user.uid, 'coffeeTypes', coffeeTypeId), {
-            imageUrl: imageURL,
-            updatedAt: new Date().toISOString()
-        });
-        const nextCoffeeTypes = getCoffeeTypes().map((type) =>
-            type.id === coffeeTypeId ? { ...type, imageUrl: imageURL, updatedAt: new Date().toISOString() } : type
-        );
-        setCoffeeTypes(nextCoffeeTypes);
-
+        const nowIso = new Date().toISOString();
+        const updates = {};
+        if (pendingAIBeanImageFile) {
+            const processedFile = await maybeRemoveCoffeeImageBackground(
+                pendingAIBeanImageFile,
+                'ai-import.uploadPendingCoffeeTypeImage'
+            );
+            const storageRef = ref(storage, `photos/${user.uid}/coffee_type_${coffeeTypeId}_${Date.now()}`);
+            const snapshot = await uploadBytes(storageRef, processedFile);
+            updates.imageUrl = await getDownloadURL(snapshot.ref);
+        }
+        const currentType = getCoffeeTypes().find((type) => type.id === coffeeTypeId);
+        if (pendingAIWebshopUrl && !(currentType?.webshopUrl || currentType?.shopUrl)) {
+            updates.webshopUrl = pendingAIWebshopUrl;
+        }
+        if (pendingAITasteNotes && !`${currentType?.tasteNotes || ''}`.trim()) {
+            updates.tasteNotes = pendingAITasteNotes;
+        }
         pendingAIBeanImageFile = null;
-        return imageURL;
+        pendingAIWebshopUrl = '';
+        pendingAITasteNotes = '';
+        if (!Object.keys(updates).length) return null;
+
+        updates.updatedAt = nowIso;
+        await updateDoc(doc(db, 'users', user.uid, 'coffeeTypes', coffeeTypeId), updates);
+        setCoffeeTypes(getCoffeeTypes().map((type) => (type.id === coffeeTypeId ? { ...type, ...updates } : type)));
+        return updates.imageUrl || null;
     };
 
     const clearPendingAIBeanImageFile = () => {
         pendingAIBeanImageFile = null;
+        pendingAIWebshopUrl = '';
+        pendingAITasteNotes = '';
     };
 
     // Spinner on the add buttons (header on desktop, floating on mobile) while a photo is scanned.
@@ -179,9 +201,8 @@ export const createAiImportModule = ({
         };
     };
 
-    const handleBeansAIFile = async (event) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
+    // Applies what the AI extracted; getResult returns { data, compressedFile } (no file for a URL).
+    const runBagExtract = async (getResult) => {
 
         const user = getCurrentUser();
         if (!user) return;
@@ -191,17 +212,19 @@ export const createAiImportModule = ({
 
         try {
 
-            const { compressedFile, data } = await callBagAi(file);
-            const uploadFile = await maybeRemoveCoffeeImageBackground(
-                compressedFile,
-                'ai-import.handleBeansAIFile'
-            );
+            const { compressedFile, data, sourceUrl = '' } = await getResult();
+            const uploadFile = compressedFile
+                ? await maybeRemoveCoffeeImageBackground(compressedFile, 'ai-import.handleBeansAIFile')
+                : null;
             const nowIso = new Date().toISOString();
             const beanRef = doc(collection(db, 'users', user.uid, 'beans'));
             const typeRef = doc(collection(db, 'users', user.uid, 'coffeeTypes'));
-            const storageRef = ref(storage, `photos/${user.uid}/coffee_type_${typeRef.id}_${Date.now()}`);
-            const snapshot = await uploadBytes(storageRef, uploadFile);
-            const imageURL = await getDownloadURL(snapshot.ref);
+            let imageURL = '';
+            if (uploadFile) {
+                const storageRef = ref(storage, `photos/${user.uid}/coffee_type_${typeRef.id}_${Date.now()}`);
+                const snapshot = await uploadBytes(storageRef, uploadFile);
+                imageURL = await getDownloadURL(snapshot.ref);
+            }
 
             const typeData = withDetectedDecaf({
                 uid: user.uid,
@@ -212,8 +235,8 @@ export const createAiImportModule = ({
                 variety: data.variety || '',
                 roast: data.roastType || data.roast || '',
                 rating: 0,
-                tasteNotes: '',
-                webshopUrl: '',
+                tasteNotes: data.tasteNotes || '',
+                webshopUrl: sourceUrl || '',
                 imageUrl: imageURL,
                 createdAt: nowIso,
                 updatedAt: nowIso
@@ -246,13 +269,11 @@ export const createAiImportModule = ({
             alert(`Error scanning bag: ${error.message}`);
         } finally {
             busy.done();
-            event.target.value = '';
         }
     };
 
-    const handleCoffeeTypesAIFile = async (event) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
+    // Applies what the AI extracted; getResult returns { data, compressedFile } (no file for a URL).
+    const runCoffeeExtract = async (getResult) => {
 
         const user = getCurrentUser();
         if (!user) return;
@@ -262,16 +283,18 @@ export const createAiImportModule = ({
 
         try {
 
-            const { compressedFile, data } = await callBagAi(file);
-            const uploadFile = await maybeRemoveCoffeeImageBackground(
-                compressedFile,
-                'ai-import.handleCoffeeTypesAIFile'
-            );
+            const { compressedFile, data, sourceUrl = '' } = await getResult();
+            const uploadFile = compressedFile
+                ? await maybeRemoveCoffeeImageBackground(compressedFile, 'ai-import.handleCoffeeTypesAIFile')
+                : null;
             const nowIso = new Date().toISOString();
             const typeRef = doc(collection(db, 'users', user.uid, 'coffeeTypes'));
-            const storageRef = ref(storage, `photos/${user.uid}/coffee_type_${typeRef.id}_${Date.now()}`);
-            const snapshot = await uploadBytes(storageRef, uploadFile);
-            const imageURL = await getDownloadURL(snapshot.ref);
+            let imageURL = '';
+            if (uploadFile) {
+                const storageRef = ref(storage, `photos/${user.uid}/coffee_type_${typeRef.id}_${Date.now()}`);
+                const snapshot = await uploadBytes(storageRef, uploadFile);
+                imageURL = await getDownloadURL(snapshot.ref);
+            }
 
             const typeData = withDetectedDecaf({
                 uid: user.uid,
@@ -282,8 +305,8 @@ export const createAiImportModule = ({
                 variety: data.variety || '',
                 roast: data.roastType || data.roast || '',
                 rating: 0,
-                tasteNotes: '',
-                webshopUrl: '',
+                tasteNotes: data.tasteNotes || '',
+                webshopUrl: sourceUrl || '',
                 imageUrl: imageURL,
                 createdAt: nowIso,
                 updatedAt: nowIso
@@ -303,12 +326,76 @@ export const createAiImportModule = ({
             alert(`Error scanning bag: ${error.message}`);
         } finally {
             busy.done();
-            event.target.value = '';
         }
     };
 
+    const fromFile = (runner) => async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+            await runner(() => callBagAi(file));
+        } finally {
+            event.target.value = '';
+        }
+    };
+    const handleAIFile = fromFile(runBrewFormExtract);
+    const handleBeansAIFile = fromFile(runBagExtract);
+    const handleCoffeeTypesAIFile = fromFile(runCoffeeExtract);
+
+    // Extract from a web page: ask for the URL, let Gemini read the page.
+    const askForUrl = async () => {
+        const url = await openAppPrompt({
+            title: 'Extract from a web page',
+            message: 'Paste the address of a page about this coffee, for example the roaster\'s shop page. AI reads the page and fills in the details.',
+            placeholder: 'https://',
+            inputType: 'url',
+            confirmLabel: 'Extract'
+        });
+        if (!url) return '';
+        return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    };
+    const fromUrl = (runner, menuId) => async () => {
+        if (!getCurrentUser()) return alert('Please sign in to use AI extraction.');
+        document.getElementById(menuId)?.classList.add('hidden');
+        const url = await askForUrl();
+        if (!url) return;
+        await runner(async () => {
+            const { geminiApiKey, geminiModel } = await aiSettings.load();
+            if (!geminiApiKey) throw new AiNotConfiguredError();
+            // Details from Gemini and the page's photo at the same time; the photo is optional.
+            // The photo address Gemini read on the page is a fallback for shops that block the page.
+            const details = analyzeCoffeeBagUrl({ apiKey: geminiApiKey, model: geminiModel, url });
+            const [data, photo] = await Promise.all([
+                details,
+                fetchPageImage(url, {
+                    callFetchShopImage,
+                    imageUrlHint: details.then((result) => result.imageUrl).catch(() => '')
+                })
+            ]);
+            return { data, compressedFile: await compressPagePhoto(photo), sourceUrl: url };
+        });
+    };
+    // Same size limits as a scanned photo; if compressing fails, the photo is used as it is.
+    const compressPagePhoto = async (blob) => {
+        if (!blob) return null;
+        const extension = (blob.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+        const file = new File([blob], `shop-photo.${extension}`, { type: blob.type });
+        try {
+            return await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1024, useWebWorker: true });
+        } catch (error) {
+            console.warn('[Extract] Could not compress the shop photo', error);
+            return file;
+        }
+    };
+    const triggerAIUrl = fromUrl(runBrewFormExtract, 'aiMenuDropdown');
+    const triggerBeansAIUrl = fromUrl(runBagExtract, 'beansAiMenuDropdown');
+    const triggerCoffeeTypesAIUrl = fromUrl(runCoffeeExtract, 'coffeeTypesAiMenuDropdown');
+
     return {
         triggerAIScan,
+        triggerAIUrl,
+        triggerBeansAIUrl,
+        triggerCoffeeTypesAIUrl,
         toggleAiMenu,
         toggleBeansAiMenu,
         toggleCoffeeTypesAiMenu,

@@ -26,16 +26,19 @@
                             <!-- AI & Saved Beans Controls -->
                             <div data-action-click="event.stopPropagation()" class="flex items-center gap-2">
                                  <div class="relative">
-                                    <button type="button" data-action-click="toggleAiMenu(event)" id="aiScanBtn" class="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Add
+                                    <button type="button" data-action-click="toggleAiMenu(event)" id="aiScanBtn" class="h-9 px-3 flex items-center gap-2 rounded-lg border border-coffee-200 dark:border-[#57534e] text-xs font-bold text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Extract
                                     </button>
                                     <!-- AI Menu -->
                                     <div id="aiMenuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white dark:bg-[#292524] rounded-lg shadow-xl border border-coffee-200 dark:border-[#57534e] z-50 overflow-hidden">
                                         <button type="button" data-action-click="triggerAIScan('camera')" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2 border-b border-coffee-100 dark:border-[#44403c]">
                                             <i class="fa-solid fa-camera w-4"></i> Take Photo
                                         </button>
-                                        <button type="button" data-action-click="triggerAIScan('library')" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2">
+                                        <button type="button" data-action-click="triggerAIScan('library')" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2 border-b border-coffee-100 dark:border-[#44403c]">
                                             <i class="fa-solid fa-images w-4"></i> From Gallery
+                                        </button>
+                                        <button type="button" data-action-click="triggerAIUrl()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2">
+                                            <i class="fa-solid fa-link w-4"></i> From URL
                                         </button>
                                     </div>
                                     <input type="file" id="aiFileInput" accept="image/*" class="hidden" data-action-change="handleAIFile(event)">

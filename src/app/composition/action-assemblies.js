@@ -140,8 +140,10 @@ export const createActionAssemblies = (deps = {}) => {
             'toggleQuickFilter',
             'toggleStatsUniqueTable',
             'triggerAIScan',
+            'triggerAIUrl',
             'triggerAIProfile',
             'triggerBeansAIScan',
+            'triggerBeansAIUrl',
             'triggerCardPhoto',
             'unfollowUser',
             'updateBeanMeter'
@@ -224,7 +226,8 @@ export const createActionAssemblies = (deps = {}) => {
             'toggleCoffeeTypesAiMenu',
             'toggleCoffeeTypesQuickFilter',
             'triggerCoffeeTypePhoto',
-            'triggerCoffeeTypesAIScan'
+            'triggerCoffeeTypesAIScan',
+            'triggerCoffeeTypesAIUrl'
         ]),
         gasActions: pick(deps, [
             'applyGasFilterFromQuick',
@@ -323,7 +326,8 @@ export const createActionAssemblies = (deps = {}) => {
                 'toggleBeansAiMenu',
                 'toggleBeansQuickFilter',
                 'triggerBeanPhoto',
-                'triggerBeansAIScan'
+                'triggerBeansAIScan',
+                'triggerBeansAIUrl'
             ]),
             beansChangeView: deps.changeView,
             beansOpenCard: deps.beansOpenCard,
@@ -365,7 +369,8 @@ export const createActionAssemblies = (deps = {}) => {
                 'toggleCoffeeTypesAiMenu',
                 'toggleCoffeeTypesQuickFilter',
                 'triggerCoffeeTypePhoto',
-                'triggerCoffeeTypesAIScan'
+                'triggerCoffeeTypesAIScan',
+                'triggerCoffeeTypesAIUrl'
             ]),
             coffeesChangeView: deps.changeView,
             coffeesToggleActionMenu: deps.toggleActionMenu
@@ -452,6 +457,7 @@ export const createActionAssemblies = (deps = {}) => {
                 'toggleMethodOther',
                 'toggleQuickFilter',
                 'triggerAIScan',
+                'triggerAIUrl',
                 'triggerCardPhoto'
             ]),
             brewsChangeView: deps.changeView,

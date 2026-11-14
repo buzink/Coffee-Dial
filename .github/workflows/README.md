@@ -25,6 +25,17 @@ It runs:
 2. `node scripts/check-command-ownership.mjs`
 3. `node scripts/check-command-dispatch-coverage.mjs`
 
+## deploy-fetch-shop-image.yml
+
+This workflow deploys the `fetchShopImage` Cloud Function (Gen2) from:
+- `cloud/google-cloud-functions/fetchShopImage-function-source`
+
+It runs on pushes to `main` that touch the function folder, and on manual dispatch. It runs lint and the unit tests first, then deploys. It uses the same secrets and deployer permissions as `deploy-get-photo-signed-url.yml`. The function needs no extra runtime roles: it only fetches public web pages.
+
+## lint-fetch-shop-image.yml
+
+Runs lint and the unit tests for the `fetchShopImage` function source on pushes and pull requests that touch it, and on manual dispatch.
+
 ## deploy-get-photo-signed-url.yml
 
 This workflow deploys the `getPhotoSignedUrl` Cloud Function (Gen2) from:

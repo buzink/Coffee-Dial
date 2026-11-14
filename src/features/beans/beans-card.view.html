@@ -12,8 +12,11 @@
                             <button type="button" data-action-click="triggerBeansAIScan('camera'); cancelBeanEditMode()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2 border-b border-coffee-100 dark:border-[#44403c]">
                                 <i class="fa-solid fa-camera w-4"></i> Take Photo
                             </button>
-                            <button type="button" data-action-click="triggerBeansAIScan('library'); cancelBeanEditMode()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2">
+                            <button type="button" data-action-click="triggerBeansAIScan('library'); cancelBeanEditMode()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2 border-b border-coffee-100 dark:border-[#44403c]">
                                 <i class="fa-solid fa-images w-4"></i> From Gallery
+                            </button>
+                            <button type="button" data-action-click="triggerBeansAIUrl(); cancelBeanEditMode()" class="w-full text-left px-4 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-2">
+                                <i class="fa-solid fa-link w-4"></i> From URL
                             </button>
                         </div>
                         <input type="file" id="beansAiFileInput" accept="image/*" class="hidden" data-action-change="handleBeansAIFile(event)">

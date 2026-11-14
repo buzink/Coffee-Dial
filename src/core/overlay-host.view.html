@@ -78,6 +78,8 @@
             <div class="p-5 border-b border-coffee-200 dark:border-[#44403c]">
                 <h3 id="appConfirmTitle" class="font-bold text-lg text-coffee-900 dark:text-white">Confirm action</h3>
                 <p id="appConfirmMessage" class="mt-2 text-sm text-coffee-700 dark:text-[#d6ccc2]"></p>
+                <!-- Only shown by openAppPrompt (the browser's own prompt is turned off in this app) -->
+                <input id="appConfirmInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" class="hidden mt-3 w-full text-sm border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 bg-white dark:bg-[#1c1917] text-coffee-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-coffee-500">
             </div>
             <div class="p-4 flex justify-end gap-2 bg-coffee-50 dark:bg-[#1c1917]">
                 <button id="appConfirmCancelBtn" type="button" data-action-click="resolveAppConfirm(false)" class="px-3 py-1.5 text-sm font-semibold rounded border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e]">Cancel</button>

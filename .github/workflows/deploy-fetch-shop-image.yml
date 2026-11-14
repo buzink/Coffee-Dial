@@ -1,0 +1,80 @@
+name: Deploy fetchShopImage Function
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "cloud/google-cloud-functions/fetchShopImage-function-source/**"
+      - ".github/workflows/deploy-fetch-shop-image.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloud/google-cloud-functions/fetchShopImage-function-source
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+  deploy:
+    needs: lint
+    runs-on: ubuntu-latest
+    env:
+      FUNCTION_NAME: fetchShopImage
+      FUNCTION_REGION: us-central1
+      FUNCTION_RUNTIME: nodejs22
+      FUNCTION_SOURCE: cloud/google-cloud-functions/fetchShopImage-function-source
+      FUNCTION_ENTRY_POINT: fetchShopImage
+      FUNCTION_SERVICE_ACCOUNT: coffee-dial-buzink@appspot.gserviceaccount.com
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      # A callable: anyone may reach the endpoint, the code itself requires a
+      # signed-in Firebase user (request.auth) and refuses private addresses.
+      - name: Deploy function (Gen2)
+        run: |
+          gcloud functions deploy "${FUNCTION_NAME}" \
+            --gen2 \
+            --project="${{ secrets.GCP_PROJECT_ID }}" \
+            --region="${FUNCTION_REGION}" \
+            --runtime="${FUNCTION_RUNTIME}" \
+            --source="${FUNCTION_SOURCE}" \
+            --entry-point="${FUNCTION_ENTRY_POINT}" \
+            --service-account="${FUNCTION_SERVICE_ACCOUNT}" \
+            --memory=256Mi \
+            --timeout=30s \
+            --max-instances=5 \
+            --trigger-http \
+            --allow-unauthenticated

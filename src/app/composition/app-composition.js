@@ -737,7 +737,8 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                         setCoffeeTypes: (value) => setCoffeeTypesState(value),
                         removeCoffeeImageBackground: (...args) => removeCoffeeImageBackground(...args),
                         openCoffeeTypeCard: (...args) => openCoffeeTypeCard(...args),
-                        enterCoffeeTypeEditMode: (...args) => enterCoffeeTypeEditMode(...args)
+                        enterCoffeeTypeEditMode: (...args) => enterCoffeeTypeEditMode(...args),
+                        functionsService
                     });
                 })();
             }
@@ -750,6 +751,9 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
         const toggleCoffeeTypesAiMenu = (...args) => ensureAiImportModule().then((module) => module.toggleCoffeeTypesAiMenu(...args));
         const triggerBeansAIScan = (...args) => ensureAiImportModule().then((module) => module.triggerBeansAIScan(...args));
         const triggerCoffeeTypesAIScan = (...args) => ensureAiImportModule().then((module) => module.triggerCoffeeTypesAIScan(...args));
+        const triggerAIUrl = (...args) => ensureAiImportModule().then((module) => module.triggerAIUrl(...args));
+        const triggerBeansAIUrl = (...args) => ensureAiImportModule().then((module) => module.triggerBeansAIUrl(...args));
+        const triggerCoffeeTypesAIUrl = (...args) => ensureAiImportModule().then((module) => module.triggerCoffeeTypesAIUrl(...args));
         const handleAIFile = (...args) => ensureAiImportModule().then((module) => module.handleAIFile(...args));
         const uploadPendingCoffeeTypeImage = (...args) =>
             ensureAiImportModule().then((module) => module.uploadPendingCoffeeTypeImage(...args));
@@ -2189,12 +2193,15 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             toggleQuickFilter,
             toggleStatsUniqueTable,
             triggerAIScan,
+            triggerAIUrl,
             triggerAIProfile,
             triggerBeanPhoto,
             triggerBeansAIScan,
+            triggerBeansAIUrl,
             triggerCardPhoto,
             triggerCoffeeTypePhoto,
             triggerCoffeeTypesAIScan,
+            triggerCoffeeTypesAIUrl,
             triggerGasPhoto,
             unfollowUser,
             updateBeanMeter

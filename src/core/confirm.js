@@ -25,6 +25,7 @@ export const openAppConfirm = ({
     showCancel = true
 } = {}) => {
     const overlay = document.getElementById('appConfirmOverlay');
+    document.getElementById('appConfirmInput')?.classList.add('hidden');
     const titleEl = document.getElementById('appConfirmTitle');
     const messageEl = document.getElementById('appConfirmMessage');
     const confirmBtn = document.getElementById('appConfirmConfirmBtn');
@@ -43,6 +44,42 @@ export const openAppConfirm = ({
     overlay.classList.remove('hidden');
     return new Promise((resolve) => {
         appConfirmResolver = resolve;
+    });
+};
+
+// Ask the user for a line of text in the app's own dialog (window.prompt is turned off
+// below). Resolves with the trimmed text, or null when cancelled or left empty.
+export const openAppPrompt = ({
+    title = 'Enter a value',
+    message = '',
+    placeholder = '',
+    value = '',
+    inputType = 'text',
+    confirmLabel = 'OK',
+    cancelLabel = 'Cancel'
+} = {}) => {
+    const input = document.getElementById('appConfirmInput');
+    if (!input) return Promise.resolve(null);
+    const result = openAppConfirm({ title, message, confirmLabel, cancelLabel, danger: false });
+    input.type = inputType;
+    input.placeholder = placeholder;
+    input.value = value;
+    input.classList.remove('hidden');
+    input.onkeydown = (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            resolveAppConfirm(true);
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            resolveAppConfirm(false);
+        }
+    };
+    setTimeout(() => input.focus(), 50);
+    return result.then((confirmed) => {
+        const text = `${input.value || ''}`.trim();
+        input.onkeydown = null;
+        input.classList.add('hidden');
+        return confirmed && text ? text : null;
     });
 };
 

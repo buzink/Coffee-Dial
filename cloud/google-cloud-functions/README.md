@@ -3,10 +3,15 @@
 This folder contains Cloud Function source code that is deployed automatically from GitHub Actions.
 
 Workflows:
+- `deploy-fetch-shop-image.yml`
 - `deploy-get-photo-signed-url.yml`
 - `deploy-notifications-function.yml`
+- `lint-fetch-shop-image.yml`
 - `lint-get-photo-signed-url.yml`
 - `lint-notifications-function.yml`
+
+Functions:
+- `fetchShopImage-function-source`: callable `fetchShopImage` for Extract From URL. Returns the product photo of a shop page (og:image, twitter:image, schema.org Product image or WooCommerce gallery image) as base64. The app first tries this in the browser, which works for Shopify shops; this function covers shops without CORS headers. Signed-in users only; refuses private and internal addresses, follows at most 4 redirects, 10 s per request, pages up to 3 MB, images up to 6 MB.
 
 For workflow details and required IAM roles, see:
 - `.github/workflows/README.md`
