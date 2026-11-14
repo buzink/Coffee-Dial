@@ -375,6 +375,7 @@ async function syncRobert({oldDb, newDb, apply, since}) {
     group.coffee = {...group.coffee, ...Object.fromEntries(Object.entries(coffee).filter(([, v]) => v))};
     group.brews.push(brew);
     if (bean) group.beanIds.add(bean.id);
+    if (bean && !bean.archived) group.inUse = true;
   }
 
   const writer = new Writer(oldDb, apply);
@@ -409,7 +410,9 @@ async function syncRobert({oldDb, newDb, apply, since}) {
       farmer: existing?.farmer ?? "",
       name: [blend, roaster].filter(Boolean).join(" - ") || "Unknown coffee",
       createdAt: existing?.createdAt ?? toIso(toMs(firstAt)),
-      isOpen: existing?.isOpen ?? false,
+      // Tieme's app shows only open coffees on its home screen: open the ones whose bean is
+      // still in use in Coffee Dial, leave the rest as they were.
+      isOpen: group.inUse ? true : (existing?.isOpen ?? false),
       methodOrder,
       drinkOrder,
       methods,
