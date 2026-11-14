@@ -62,7 +62,7 @@ const BAG_PROMPT = [
     'You are a coffee expert.',
     'Look at this image of a coffee bag and extract the following information.',
     `Return ONLY a JSON object with these keys: ${BAG_FIELDS.join(', ')}.`,
-    "For roastType, choose only from: 'Light', 'Medium', 'Medium-Dark', 'Dark'.",
+    "For roastType, choose only from: 'Ultralight', 'Light', 'Medium', 'Medium-Dark', 'Dark' (Ultralight for very light, Nordic-style or 'ultra light' roasts).",
     TASTE_NOTES_RULE,
     'If a field is not found, use an empty string.'
 ].join(' ');
@@ -110,7 +110,7 @@ const URL_PROMPT = [
     'and extract the information about that coffee.',
     `Return ONLY a JSON object with these keys: ${[...BAG_FIELDS, 'imageUrl'].join(', ')}.`,
     'roaster is the roasting company, farmer is the farm, producer, washing station or blend name.',
-    "For roastType, choose only from: 'Light', 'Medium', 'Medium-Dark', 'Dark'.",
+    "For roastType, choose only from: 'Ultralight', 'Light', 'Medium', 'Medium-Dark', 'Dark' (Ultralight for very light, Nordic-style or 'ultra light' roasts).",
     TASTE_NOTES_RULE,
     'imageUrl is the full address of the main product photo of this coffee on the page (for example its og:image).',
     'If a field is not found, use an empty string.'
