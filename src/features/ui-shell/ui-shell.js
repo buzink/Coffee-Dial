@@ -411,7 +411,6 @@ export const createUiShellModule = ({
             closeIfVisible('graphModal', () => closeGraphModal()) ||
             closeIfVisible('coffeeCardOverlay', () => closeCoffeeCard(null)) ||
             closeIfVisible('easterEggModal', () => closeEasterEgg(null)) ||
-            closeIfVisible('statsModal', () => closeStats()) ||
             closeIfVisible('helpModal', () => closeHelp()) ||
             closeIfVisible('aboutModal', () => closeAbout()) ||
             closeIfVisible('importExportModal', () => closeImportExportModal()) ||
@@ -423,9 +422,6 @@ export const createUiShellModule = ({
             closeIfVisible('galleryModal', () => document.getElementById('galleryModal')?.classList.add('hidden')) ||
             closeIfVisible('gasCardOverlay', () => closeGasCard(null)) ||
             closeIfVisible('beanCardOverlay', () => closeBeanCard(null)) ||
-            closeIfVisible('coffeeTypesModal', () => closeCoffeeTypes()) ||
-            closeIfVisible('gasModal', () => closeGasList()) ||
-            closeIfVisible('beansModal', () => closeBeans()) ||
             closeIfVisible('modalOverlay', () => closeModal());
 
         if (closed) event.preventDefault();

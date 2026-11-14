@@ -189,4 +189,19 @@
                 grid-template-columns: 1fr;
             }
         }
+        /* Main sections as pages: while a page is visible it replaces the brews view. */
+        main:has(> div > [data-app-page]:not(.hidden)) > #signedInContent,
+        main:has(> div > [data-app-page]:not(.hidden)) > #authCardMount,
+        main:has(> div > [data-app-page]:not(.hidden)) > #appBootstrapLoading {
+            display: none !important;
+        }
+
+        .app-page-panel {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
     </style>
+

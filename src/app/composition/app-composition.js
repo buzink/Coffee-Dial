@@ -10,6 +10,7 @@
         import { closeAppConfirm, openAppConfirm, resolveAppConfirm, installDialogAdapters } from '../../core/confirm.js';
         import { getStarDisplay, formatBeanOpenedDate, formatTime, getRoastBadge } from '../../core/format.js';
         import { createCoffeeDisplayModule } from '../../core/coffee-display.js';
+        import { PAGE_ROUTE_KEYS, initPages } from '../pages.js';
         import { createCoffeesController } from '../../features/coffees/coffees.controller.js';
         import {
             ensureBrewsCardMounted,
@@ -2236,15 +2237,19 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 return ROUTE_KEY_SET.has(key) ? key : '';
             };
 
+            const PAGE_ROUTE_KEY_SET = new Set(PAGE_ROUTE_KEYS);
             const normalizeRouteKeys = (values = []) => {
                 const seen = new Set();
-                return values
+                const keys = values
                     .map((value) => normalizeRouteKey(value))
                     .filter((value) => {
                         if (!value || seen.has(value)) return false;
                         seen.add(value);
                         return true;
                     });
+                // Pages replace each other: keep only the last page key.
+                const lastPageKey = [...keys].reverse().find((key) => PAGE_ROUTE_KEY_SET.has(key));
+                return keys.filter((key) => !PAGE_ROUTE_KEY_SET.has(key) || key === lastPageKey);
             };
 
             const getRouteKeysFromSearch = (search = window.location.search || '') => {
@@ -2286,6 +2291,14 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             };
 
             let isApplyingRoute = false;
+            let pendingPageKey = '';
+            let pendingPageTimer = null;
+            const markPendingPage = (routeKey) => {
+                if (!PAGE_ROUTE_KEY_SET.has(routeKey)) return;
+                pendingPageKey = routeKey;
+                if (pendingPageTimer) clearTimeout(pendingPageTimer);
+                pendingPageTimer = setTimeout(() => { pendingPageKey = ''; }, 5000);
+            };
 
             const setRoute = (routeKeys, { replace = false } = {}) => {
                 const normalized = normalizeRouteKeys(routeKeys);
@@ -2302,10 +2315,14 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 const original = obj?.[actionName];
                 if (typeof original !== 'function') return;
                 obj[actionName] = (...args) => {
+                    markPendingPage(routeKey);
                     const result = original(...args);
                     if (!isApplyingRoute) {
                         const current = getActiveRouteKeysFromLocation();
-                        const next = normalizeRouteKeys([...current, routeKey]);
+                        const base = PAGE_ROUTE_KEY_SET.has(routeKey)
+                            ? current.filter((key) => !PAGE_ROUTE_KEY_SET.has(key))
+                            : current;
+                        const next = normalizeRouteKeys([...base, routeKey]);
                         setRoute(next);
                     }
                     return result;
@@ -2366,6 +2383,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 const key = normalizeRouteKey(routeKey);
                 if (!key) return;
                 if (isAuthDeferredRouteKey(key)) return;
+                markPendingPage(key);
                 if (key === 'moments') return actions.openGallery?.();
                 if (key === 'beans') return actions.openBeans?.();
                 if (key === 'gear') return actions.openGasList?.();
@@ -2406,6 +2424,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 if (!current.length) return;
                 const visible = current.filter((key) => {
                     if (isAuthDeferredRouteKey(key)) return true;
+                    if (PAGE_ROUTE_KEY_SET.has(key)) return true;
                     const modalId = routeModalIdByKey.get(key);
                     if (!modalId) return false;
                     return isModalVisible(modalId);
@@ -2501,6 +2520,25 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
 
             const modalObserver = new MutationObserver(() => {
                 syncRouteFromModalVisibility();
+            });
+
+            initPages({
+                onPageChange: (pageKey) => {
+                    if (isApplyingRoute) return;
+                    const current = getActiveRouteKeysFromLocation();
+                    const others = current.filter((key) => !PAGE_ROUTE_KEY_SET.has(key));
+                    if (pageKey) {
+                        if (pageKey === pendingPageKey) pendingPageKey = '';
+                        if (current.includes(pageKey)) return;
+                        setRoute(normalizeRouteKeys([...others, pageKey]));
+                        return;
+                    }
+                    // No page visible: drop page keys, unless a page is still on its way.
+                    if (pendingPageKey && current.includes(pendingPageKey)) return;
+                    const routedPage = current.find((key) => PAGE_ROUTE_KEY_SET.has(key));
+                    if (!routedPage || isAuthDeferredRouteKey(routedPage)) return;
+                    setRoute(others);
+                }
             });
             routeModalIdByKey.forEach((modalId) => {
                 const modalEl = document.getElementById(modalId);
