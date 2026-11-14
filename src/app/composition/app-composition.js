@@ -10,7 +10,8 @@
         import { closeAppConfirm, openAppConfirm, resolveAppConfirm, installDialogAdapters } from '../../core/confirm.js';
         import { getStarDisplay, formatBeanOpenedDate, formatTime, getRoastBadge } from '../../core/format.js';
         import { createCoffeeDisplayModule } from '../../core/coffee-display.js';
-        import { PAGE_ROUTE_KEYS, initPages } from '../pages.js';
+        import { PAGE_ROUTE_KEYS, getVisiblePageKey, initPages } from '../pages.js';
+        import { createCardRouting } from '../card-routing.js';
         import { createCoffeesController } from '../../features/coffees/coffees.controller.js';
         import {
             ensureBrewsCardMounted,
@@ -2305,7 +2306,8 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 const current = getActiveRouteKeysFromLocation();
                 if (routeKeysToStateKey(current) === routeKeysToStateKey(normalized)) return;
                 const fullPath = buildRouteUrl(normalized, window.location.search || '');
-                const state = { ...(window.history.state || {}), appRouteKeys: normalized };
+                const { appCard: _leftCard, ...currentState } = window.history.state || {};
+                const state = { ...(replace ? (window.history.state || {}) : currentState), appRouteKeys: normalized };
                 if (replace) window.history.replaceState(state, document.title, fullPath);
                 else window.history.pushState(state, document.title, fullPath);
                 trackVirtualPageView(normalized);
@@ -2503,8 +2505,69 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 }
             }
 
+            const pageOpenActions = {
+                beans: () => actions.openBeans?.(),
+                coffees: () => actions.openCoffeeTypes?.(),
+                gear: () => actions.openGasList?.(),
+                statistics: () => actions.openStats?.()
+            };
+            const pageCloseActions = {
+                beans: () => actions.closeBeans?.(),
+                coffees: () => actions.closeCoffeeTypes?.(),
+                gear: () => actions.closeGasList?.(),
+                statistics: () => actions.closeStats?.()
+            };
+            const dispatchCardCommand = (name, payload) =>
+                appCommands?.dispatch?.(name, payload, { source: 'cardRouting' });
+            const cardRouting = createCardRouting({
+                cards: [
+                    {
+                        type: 'brew',
+                        overlayId: 'coffeeCardOverlay',
+                        pageKey: 'brews',
+                        getId: () => getCurrentCoffeeCardIdState(),
+                        open: (id) => dispatchCardCommand('brews.openCard', { id, event: null, options: {} }),
+                        close: () => actions.closeCoffeeCard?.(null)
+                    },
+                    {
+                        type: 'bean',
+                        overlayId: 'beanCardOverlay',
+                        pageKey: 'beans',
+                        getId: () => getCurrentBeanCardIdState(),
+                        open: (id) => dispatchCardCommand('beans.openCard', { beanId: id, event: null, keepNavigationOrder: false }),
+                        close: () => actions.closeBeanCard?.(null)
+                    },
+                    {
+                        type: 'coffee',
+                        overlayId: 'coffeeTypeCardOverlay',
+                        pageKey: 'coffees',
+                        getId: () => getCurrentCoffeeTypeIdState(),
+                        open: (id) => dispatchCardCommand('coffees.openCard', { id, event: null }),
+                        close: () => actions.closeCoffeeTypeCard?.(null)
+                    },
+                    {
+                        type: 'gear',
+                        overlayId: 'gasCardOverlay',
+                        pageKey: 'gear',
+                        getId: () => getCurrentGasIdState(),
+                        open: (id) => dispatchCardCommand('gas.openCard', { id, event: null }),
+                        close: () => actions.closeGasCard?.(null)
+                    }
+                ],
+                getCurrentPageKey: () => getVisiblePageKey() || 'brews',
+                goToPage: (pageKey) => {
+                    if (pageKey === 'brews') {
+                        const current = getVisiblePageKey();
+                        if (current) pageCloseActions[current]?.();
+                        return;
+                    }
+                    pageOpenActions[pageKey]?.();
+                }
+            });
+
             window.addEventListener('popstate', () => {
                 applyRoute(getActiveRouteKeysFromLocation(), { track: true });
+                cardRouting.restoreCard();
             });
             window.addEventListener('coffee-dial-auth-ready', () => {
                 applyRoute(getActiveRouteKeysFromLocation(), { track: false });
