@@ -122,3 +122,12 @@ Examples:
 node scripts/sync-legacy-beans.mjs --project coffee-dial-buzink --uid <USER_UID>
 node scripts/recalculate-all-beans-left.mjs --apply --project coffee-dial-buzink --limit-users 100
 ```
+
+## Sync brews with Tieme's app (simpleRecipes)
+
+Copies Tieme's recipes from his app (`coffee-dial-app-9db38`, `users/{tieme}/simpleRecipes`) into Coffee Dial as brews, beans and coffee types, and Robert's Coffee Dial brews into Robert's `simpleRecipes` there (one document per coffee, newest brew per method and drink). Each run starts from the newest date the target already has, and written documents have fixed ids, so runs can overlap. It writes nowhere else.
+
+- Script: `scripts/sync-simple-recipes.mjs`
+- Dry run: `npm run sync:simple-recipes:dry`
+- Apply: `npm run sync:simple-recipes:apply`
+- Options: `--only tieme|robert`, `--since <ISO date>` (override the start date), `--adc` (use ADC instead of the active gcloud account)
