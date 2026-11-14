@@ -334,6 +334,19 @@
         .app-card-extract { display: none; }
         [data-adding] .app-card-extract { display: block; }
 
+        /* Coffee bag icon for Bags (Font Awesome 6.0 has none). Use it like a Font Awesome
+           icon: <i class="fa-solid fa-coffee-bag"></i>; it takes the text colour and size. */
+        .fa-coffee-bag {
+            display: inline-block;
+            width: 0.8em;
+            height: 1em;
+            flex-shrink: 0;
+            vertical-align: -0.125em;
+            background-color: currentColor;
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='3.6 1.5 16.8 21'%3E%3Cpath fill='%23000' fill-rule='evenodd' d='M5.5 2h13a.5.5 0 0 1 .5.5V5H5V2.5a.5.5 0 0 1 .5-.5z M5.2 6.2h13.6l1 13.6a2 2 0 0 1-2 2.2H6.2a2 2 0 0 1-2-2.2z M12 9.6a2.9 4.3 0 1 0 .001 0z'/%3E%3Cpath d='M12.7 10.3c-1.6 1.5-1.6 5.3 0 7' fill='none' stroke='%23000' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='3.6 1.5 16.8 21'%3E%3Cpath fill='%23000' fill-rule='evenodd' d='M5.5 2h13a.5.5 0 0 1 .5.5V5H5V2.5a.5.5 0 0 1 .5-.5z M5.2 6.2h13.6l1 13.6a2 2 0 0 1-2 2.2H6.2a2 2 0 0 1-2-2.2z M12 9.6a2.9 4.3 0 1 0 .001 0z'/%3E%3Cpath d='M12.7 10.3c-1.6 1.5-1.6 5.3 0 7' fill='none' stroke='%23000' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+        }
+
         /* Page titles are not shown in the page: on mobile the header shows the current
            page's title, on desktop the highlighted header link does. They stay for screen readers. */
         .app-page-title {

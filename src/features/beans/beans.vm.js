@@ -11,7 +11,7 @@ export const createBeansVmModule = () => {
 
     const buildBeanCardViewModel = ({ bean, coffeeDisplay, stockLeft }) => {
         const statusParts = [];
-        if (bean.archived) statusParts.push('Archived');
+        if (bean.archived) statusParts.push('Finished');
         if (bean.frozen) statusParts.push('Frozen');
         if (!statusParts.length) statusParts.push('Active');
 

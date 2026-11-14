@@ -21,7 +21,7 @@
                     <div class="bg-coffee-50 dark:bg-[#1c1917]/50 p-4 rounded-lg border border-coffee-100 dark:border-[#44403c] relative">
                          <div id="coffeeDetailsHeader" data-action-click="toggleCoffeeDetails(event)" class="flex justify-between items-center mb-4 pb-2 border-b border-coffee-200 dark:border-[#44403c] cursor-pointer select-none" title="Collapse or expand coffee details">
                                       <h3 class="text-sm font-bold text-coffee-800 dark:text-white uppercase tracking-wide flex items-center gap-2">
-                                          <i class="fa-solid fa-seedling text-coffee-600 dark:text-[#a8a29e]"></i> <span id="coffeeDetailsTitle">Bean</span>
+                                          <i class="fa-solid fa-coffee-bag text-coffee-600 dark:text-[#a8a29e]"></i> <span id="coffeeDetailsTitle">Bag</span>
                                       </h3>
                             <!-- AI & Saved Beans Controls -->
                             <div data-action-click="event.stopPropagation()" class="flex items-center gap-2">
@@ -50,13 +50,13 @@
                              <!-- Saved beans dropdown -->
                              <div class="mb-4">
                                  <div class="flex items-center justify-between mb-1">
-                                     <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] uppercase tracking-wide">Select saved bean</label>
-                                     <button type="button" id="savedBeanEditBtn" data-action-click="openSelectedBeanForEdit()" class="p-2 text-coffee-500 hover:text-coffee-800 dark:text-[#a8a29e] dark:hover:text-white rounded-md hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Edit bean" disabled>
+                                     <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] uppercase tracking-wide">Select saved bag</label>
+                                     <button type="button" id="savedBeanEditBtn" data-action-click="openSelectedBeanForEdit()" class="p-2 text-coffee-500 hover:text-coffee-800 dark:text-[#a8a29e] dark:hover:text-white rounded-md hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Edit bag" disabled>
                                          <i class="fa-solid fa-pen-to-square"></i>
                                      </button>
                                  </div>
-                                 <select id="savedBeanSelect" aria-label="Select saved bean" data-action-change="fillBeanDetails(this.value)" class="w-full bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:ring-1 focus:ring-coffee-500 cursor-pointer shadow-sm">
-                                     <option value="">-- create new bean and coffee --</option>
+                                 <select id="savedBeanSelect" aria-label="Select saved bag" data-action-change="fillBeanDetails(this.value)" class="w-full bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:ring-1 focus:ring-coffee-500 cursor-pointer shadow-sm">
+                                     <option value="">-- create new bag and coffee --</option>
                                  </select>
                              </div>
 

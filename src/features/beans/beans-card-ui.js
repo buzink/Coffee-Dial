@@ -40,7 +40,7 @@ export const createBeansCardUiModule = ({
         }
 
         if (archiveBtn) {
-            const archiveLabel = bean.archived ? 'Unarchive' : 'Archive';
+            const archiveLabel = bean.archived ? 'Reopen' : 'Finish';
             const archiveIcon = bean.archived ? 'fa-box-open' : 'fa-box-archive';
             archiveBtn.innerHTML = `<i class="fa-solid ${archiveIcon}"></i> ${archiveLabel}`;
             archiveBtn.onclick = () => toggleBeanArchive(bean.id, !!bean.archived);
@@ -54,7 +54,7 @@ export const createBeansCardUiModule = ({
         }
 
         if (archiveActionBtn) {
-            const archiveLabel = bean.archived ? 'Unarchive' : 'Archive';
+            const archiveLabel = bean.archived ? 'Reopen' : 'Finish';
             const archiveIcon = bean.archived ? 'fa-box-open' : 'fa-box-archive';
             archiveActionBtn.innerHTML = `<i class="fa-solid ${archiveIcon} text-amber-600 w-4"></i> ${archiveLabel}`;
             archiveActionBtn.onclick = () => toggleBeanArchive(bean.id, !!bean.archived);

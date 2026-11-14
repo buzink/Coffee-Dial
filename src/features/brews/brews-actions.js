@@ -754,7 +754,7 @@ export const createBrewsActionsModule = ({
             return Number.isFinite(ms) ? ms : Number.NEGATIVE_INFINITY;
         };
         const beans = getBeans();
-        let options = '<option value="">-- no bean --</option>';
+        let options = '<option value="">-- no bag --</option>';
         const beanOptions = [...beans]
             .sort((a, b) => {
                 const openedDelta = getOpenedAtMs(b) - getOpenedAtMs(a);

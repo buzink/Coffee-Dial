@@ -75,6 +75,6 @@ test('go to brews/go to beans table actions close menu+modal and navigate', asyn
     await coffeeRowForBeans.locator('button[data-action-click^="coffeesToggleActionMenu"]').click();
     const coffeeMenuForBeans = coffeeRowForBeans.locator('.action-menu').first();
     await expect(coffeeMenuForBeans).toBeVisible();
-    await coffeeMenuForBeans.getByRole('button', { name: 'Go to beans' }).click();
+    await coffeeMenuForBeans.getByRole('button', { name: 'Go to bags' }).click();
     await assertNavigatedToBeans(page, '#coffeeTypesPage');
 });

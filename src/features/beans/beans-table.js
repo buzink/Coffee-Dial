@@ -85,7 +85,7 @@ export const createBeansTableModule = ({
         { key: 'roastDate', label: 'Roast date' },
         { key: 'frozenDate', label: 'Frozen date' },
         { key: 'openedDate', label: 'Opened date' },
-        { key: 'archivedDate', label: 'Archived date' },
+        { key: 'archivedDate', label: 'Finished date' },
         { key: 'createdAt', label: 'Created' }
     ]);
     const isCompactMobileTableMode = () => {
@@ -118,7 +118,7 @@ export const createBeansTableModule = ({
         if (imageUrl) {
             return `<img src="${imageUrl}" alt="Coffee image" class="w-12 h-12 rounded-lg object-cover border border-coffee-200 dark:border-[#44403c]" loading="lazy">`;
         }
-        return '<div class="w-12 h-12 rounded-lg bg-coffee-100 dark:bg-[#34302e] border border-coffee-200 dark:border-[#44403c] flex items-center justify-center text-coffee-400 dark:text-[#78716c]"><i class="fa-solid fa-seedling text-sm"></i></div>';
+        return '<div class="w-12 h-12 rounded-lg bg-coffee-100 dark:bg-[#34302e] border border-coffee-200 dark:border-[#44403c] flex items-center justify-center text-coffee-400 dark:text-[#78716c]"><i class="fa-solid fa-coffee-bag text-sm"></i></div>';
     };
     const formatBeanDateLabel = (value) => {
         if (!value) return '-';
@@ -206,7 +206,7 @@ export const createBeansTableModule = ({
         html += '</div>';
         const availableToAdd = sortOptions.filter((option) => !sortChain.some((item) => item.key === option.key));
         html += '<div class="col-span-2 grid grid-cols-[1fr_auto] gap-1.5 pt-1">';
-        html += '<select id="beansQuickSortAddSelect" aria-label="Add beans sort field" class="w-full px-2 py-1.5 rounded border border-coffee-200 dark:border-[#44403c] bg-white dark:bg-[#1c1917] text-xs text-coffee-900 dark:text-white">';
+        html += '<select id="beansQuickSortAddSelect" aria-label="Add bags sort field" class="w-full px-2 py-1.5 rounded border border-coffee-200 dark:border-[#44403c] bg-white dark:bg-[#1c1917] text-xs text-coffee-900 dark:text-white">';
         html += '<option value="">Add field...</option>';
         availableToAdd.forEach((option) => {
             html += `<option value="${escapeHtml(option.key)}">${escapeHtml(option.label)}</option>`;
@@ -590,11 +590,11 @@ export const createBeansTableModule = ({
             const menuId = `beans-action-menu-${bean.id}`;
             const freezeLabel = bean.frozen ? 'Unfreeze' : 'Freeze';
             const freezeIcon = bean.frozen ? 'fa-sun text-amber-500' : 'fa-snowflake text-sky-500';
-            const archiveLabel = bean.archived ? 'Unarchive' : 'Archive';
+            const archiveLabel = bean.archived ? 'Reopen' : 'Finish';
             const archiveIcon = bean.archived ? 'fa-box-open text-amber-600' : 'fa-box-archive text-amber-600';
             const goToCoffeeBtn = bean.coffeeTypeId
                 ? `<button data-action-click="showCoffeeForBean('${bean.coffeeTypeId}');" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
-                    <i class="fa-solid fa-layer-group text-coffee-600 w-4"></i> Go to coffee
+                    <i class="fa-solid fa-seedling text-coffee-600 w-4"></i> Go to coffee
                 </button>`
                 : '';
             const actionsHtml = `
@@ -667,7 +667,7 @@ export const createBeansTableModule = ({
                             <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Roast date</div><div class="font-mono text-xs font-bold text-coffee-700 dark:text-[#d6ccc2]">${roastDateLabel}</div></div>
                             <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Opened date</div><div class="font-mono text-xs font-bold text-coffee-700 dark:text-[#d6ccc2]">${openedDateLabel}</div></div>
                             <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Frozen date</div><div class="font-mono text-xs font-bold text-coffee-700 dark:text-[#d6ccc2]">${frozenDateLabel}</div></div>
-                            <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Archived date</div><div class="font-mono text-xs font-bold text-coffee-700 dark:text-[#d6ccc2]">${archivedDateLabel}</div></div>
+                            <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Finished date</div><div class="font-mono text-xs font-bold text-coffee-700 dark:text-[#d6ccc2]">${archivedDateLabel}</div></div>
                         </div>
                     </div>
                 `;
@@ -774,7 +774,7 @@ export const createBeansTableModule = ({
         if (inStockBeans.length > 0) {
             const headerRow = document.createElement('tr');
             headerRow.className = 'bg-green-50 dark:bg-green-900/20';
-            headerRow.innerHTML = '<td colspan="99" class="px-4 py-2 text-xs font-bold text-green-700 dark:text-green-300 uppercase tracking-wide"><i class="fa-solid fa-box-open mr-2"></i>Open Bags</td>';
+            headerRow.innerHTML = '<td colspan="99" class="px-4 py-2 text-xs font-bold text-green-700 dark:text-green-300 uppercase tracking-wide"><i class="fa-solid fa-box-open mr-2"></i>Open</td>';
             tbody.appendChild(headerRow);
             inStockBeans.forEach((bean) => tbody.appendChild(createRow(bean, 'open')));
         }
@@ -790,7 +790,7 @@ export const createBeansTableModule = ({
         if (otherBeans.length > 0) {
             const headerRow = document.createElement('tr');
             headerRow.className = 'bg-gray-50 dark:bg-[#34302e]';
-            headerRow.innerHTML = '<td colspan="99" class="px-4 py-2 text-xs font-bold text-gray-500 dark:text-[#a8a29e] uppercase tracking-wide"><i class="fa-solid fa-archive mr-2"></i>Finished / Archive</td>';
+            headerRow.innerHTML = '<td colspan="99" class="px-4 py-2 text-xs font-bold text-gray-500 dark:text-[#a8a29e] uppercase tracking-wide"><i class="fa-solid fa-archive mr-2"></i>Finished</td>';
             tbody.appendChild(headerRow);
             otherBeans.forEach((bean) => tbody.appendChild(createRow(bean, 'finished')));
         }

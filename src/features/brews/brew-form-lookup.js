@@ -31,7 +31,7 @@ export const createBrewFormLookupModule = ({
         };
 
         const currentValue = select.value;
-        select.innerHTML = '<option value="">-- create new bean and coffee --</option>';
+        select.innerHTML = '<option value="">-- create new bag and coffee --</option>';
         const getOpenedAtMs = (bean) => {
             const raw = bean?.openedDate;
             if (!raw) return Number.NEGATIVE_INFINITY;

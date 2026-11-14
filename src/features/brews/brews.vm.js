@@ -34,10 +34,10 @@ export const createBrewsVmModule = () => {
     };
 
     const buildBeanLabel = (bean, beanDisplay) => {
-        if (!bean) return 'Unknown bean';
+        if (!bean) return 'Unknown bag';
         const farmer = beanDisplay?.farmer && beanDisplay.farmer !== '-' ? beanDisplay.farmer : '';
         const roaster = beanDisplay?.roaster && beanDisplay.roaster !== '-' ? beanDisplay.roaster : '';
-        const baseLabel = farmer && roaster ? `${farmer} - ${roaster}` : farmer || roaster || 'Unknown bean';
+        const baseLabel = farmer && roaster ? `${farmer} - ${roaster}` : farmer || roaster || 'Unknown bag';
         const opened = formatOpenedDate(bean.openedDate);
         return opened ? `${baseLabel} (${opened})` : baseLabel;
     };

@@ -4,16 +4,16 @@
         <!-- Mobile: title of the current page, centred between the menu and profile buttons -->
         <div class="app-header-title" aria-hidden="true">
             <span data-title-page="brews"><i class="fa-solid fa-mug-hot"></i>Brews</span>
-            <span data-title-page="beans"><i class="fa-solid fa-seedling"></i>Beans</span>
-            <span data-title-page="coffees"><i class="fa-solid fa-layer-group"></i>Coffees</span>
+            <span data-title-page="beans"><i class="fa-solid fa-coffee-bag"></i>Bags</span>
+            <span data-title-page="coffees"><i class="fa-solid fa-seedling"></i>Coffees</span>
             <span data-title-page="gear"><i class="fa-solid fa-screwdriver-wrench"></i>Gear</span>
             <span data-title-page="statistics"><i class="fa-solid fa-chart-pie"></i>Statistics</span>
         </div>
 
         <nav id="headerNav" class="app-header-nav hidden" aria-label="Main sections">
             <button type="button" data-nav-page="brews" data-action-click="openBrews()" class="app-header-nav-item"><i class="fa-solid fa-mug-hot" aria-hidden="true"></i><span>Brews</span></button>
-            <button type="button" data-nav-page="beans" data-action-click="openBeans()" class="app-header-nav-item"><i class="fa-solid fa-seedling" aria-hidden="true"></i><span>Beans</span></button>
-            <button type="button" data-nav-page="coffees" data-action-click="openCoffeeTypes()" class="app-header-nav-item"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>Coffees</span></button>
+            <button type="button" data-nav-page="beans" data-action-click="openBeans()" class="app-header-nav-item"><i class="fa-solid fa-coffee-bag" aria-hidden="true"></i><span>Bags</span></button>
+            <button type="button" data-nav-page="coffees" data-action-click="openCoffeeTypes()" class="app-header-nav-item"><i class="fa-solid fa-seedling" aria-hidden="true"></i><span>Coffees</span></button>
             <button type="button" data-nav-page="gear" data-action-click="openGasList()" class="app-header-nav-item"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Gear</span></button>
             <button type="button" data-nav-page="statistics" data-action-click="openStats()" class="app-header-nav-item"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i><span>Statistics</span></button>
         </nav>
@@ -52,10 +52,10 @@
                         <i class="fa-solid fa-mug-hot w-4 text-center"></i> <span>Brews</span>
                     </button>
                     <button id="menuBeansBtn" data-action-click="openBeans(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
-                        <i class="fa-solid fa-seedling w-4 text-center"></i> <span>Beans</span>
+                        <i class="fa-solid fa-coffee-bag w-4 text-center"></i> <span>Bags</span>
                     </button>
                     <button id="menuCoffeesBtn" data-action-click="openCoffeeTypes(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
-                        <i class="fa-solid fa-layer-group w-4 text-center"></i> <span>Coffees</span>
+                        <i class="fa-solid fa-seedling w-4 text-center"></i> <span>Coffees</span>
                     </button>
                     <button id="menuGasBtn" data-action-click="openGasList(); toggleMainMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#44403c] text-coffee-900 dark:text-[#d6ccc2] flex items-center gap-2">
                         <i class="fa-solid fa-screwdriver-wrench w-4 text-center"></i> <span>Gear</span>

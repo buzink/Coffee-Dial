@@ -179,7 +179,7 @@ export const createBrewFormUiModule = ({
         const roasterEl = document.getElementById('roaster');
         const roasterValue = (roasterEl?.value || '').trim();
         if (isCollapsed && (farmerValue || roasterValue)) titleEl.textContent = farmerValue || roasterValue;
-        else titleEl.textContent = 'Bean';
+        else titleEl.textContent = 'Bag';
     };
 
     const setCoffeeDetailsCollapsed = (collapsed) => {

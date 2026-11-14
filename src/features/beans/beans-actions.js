@@ -86,7 +86,7 @@ export const createBeansActionsModule = ({
             }
         } catch (err) {
             console.error('Error updating archive state:', err);
-            alert('Failed to update archive state.');
+            alert('Failed to update finished state.');
         }
     };
 
@@ -178,8 +178,8 @@ export const createBeansActionsModule = ({
         if (!user) return;
 
         const shouldDelete = await openAppConfirm({
-            title: 'Delete bean?',
-            message: 'This will not delete brews, but it will unlink them from this bean.',
+            title: 'Delete bag?',
+            message: 'This will not delete brews, but it will unlink them from this bag.',
             confirmLabel: 'Delete',
             cancelLabel: 'Cancel',
             danger: true

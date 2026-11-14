@@ -169,7 +169,7 @@ export const createStatsModule = ({
         const beanName = (bean) => {
             const roaster = (bean?.roaster || '').toString().trim();
             const farmer = (bean?.farmer || '').toString().trim();
-            return farmer && roaster ? `${farmer} - ${roaster}` : farmer || roaster || 'Unnamed bean';
+            return farmer && roaster ? `${farmer} - ${roaster}` : farmer || roaster || 'Unnamed bag';
         };
         const setText = (id, text) => {
             const el = document.getElementById(id);
@@ -222,7 +222,7 @@ export const createStatsModule = ({
 
         if (!shortestCandidates.length) {
             setText('statBeanShortestName', '-');
-            setText('statBeanShortestTime', 'No archived beans with opened date and bag weight');
+            setText('statBeanShortestTime', 'No finished bags with an opened date and weight');
             wireCard(shortestCardEl, null);
         } else {
             const shortest = [...shortestCandidates].sort((a, b) => a.durationMsPerGram - b.durationMsPerGram)[0];

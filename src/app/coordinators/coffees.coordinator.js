@@ -144,7 +144,7 @@ export const createCoffeesCoordinator = ({
             publishEvent('coffees.beanOpened', { beanId: newBeanRef.id, coffeeTypeId: typeId });
         } catch (err) {
             console.error('Error creating bean from coffee type:', err);
-            alert('Failed to create bean.');
+            alert('Failed to create bag.');
         }
     };
 
