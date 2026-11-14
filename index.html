@@ -90,6 +90,14 @@
         <header id="appHeader" class="app-header bg-white dark:bg-[#292524] shadow-sm border-b border-coffee-200 dark:border-[#44403c] z-[60] transition-colors duration-300">
             <div class="max-w-[95%] mx-auto px-2 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <h1 class="sr-only">Coffee Dial</h1>
+                <!-- Mobile: title of the current page, centred between the menu and profile buttons -->
+                <div class="app-header-title" aria-hidden="true">
+                    <span data-title-page="brews"><i class="fa-solid fa-mug-saucer"></i>Brews</span>
+                    <span data-title-page="beans"><i class="fa-solid fa-seedling"></i>Beans</span>
+                    <span data-title-page="coffees"><i class="fa-solid fa-layer-group"></i>Coffees</span>
+                    <span data-title-page="gear"><i class="fa-solid fa-screwdriver-wrench"></i>Gear</span>
+                    <span data-title-page="statistics"><i class="fa-solid fa-chart-pie"></i>Statistics</span>
+                </div>
 
                 <nav id="headerNav" class="app-header-nav hidden" aria-label="Main sections">
                     <button type="button" data-nav-page="brews" data-action-click="openBrews()" class="app-header-nav-item"><i class="fa-solid fa-mug-saucer" aria-hidden="true"></i><span>Brews</span></button>

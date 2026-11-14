@@ -321,6 +321,34 @@
         }
         .dark .app-fab { color: #ffffff; }
 
+        /* Page titles are not shown in the page: on mobile the header shows the current
+           page's title, on desktop the highlighted header link does. They stay for screen readers. */
+        .app-page-title {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        .app-page-title + * { margin-left: auto; }
+        .app-header-title { display: none; }
+        .app-header-title > span {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        body:not(:has([data-app-page]:not(.hidden))) .app-header-title > [data-title-page="brews"],
+        body:has(#statsPage:not(.hidden)) .app-header-title > [data-title-page="statistics"],
+        body:has(#beansPage:not(.hidden)) .app-header-title > [data-title-page="beans"],
+        body:has(#coffeeTypesPage:not(.hidden)) .app-header-title > [data-title-page="coffees"],
+        body:has(#gasPage:not(.hidden)) .app-header-title > [data-title-page="gear"] {
+            display: inline-flex;
+        }
+
         @media (max-width: 639px) {
             body { padding-bottom: calc(10rem + env(safe-area-inset-bottom, 0px)); }
             .app-header {
@@ -365,6 +393,31 @@
             .app-fab:not(.hidden) {
                 display: flex;
             }
+            #appHeader > div { position: relative; }
+            body:has(#bottomNav:not(.hidden)) .app-header-title {
+                display: block;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                max-width: calc(100% - 8rem);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 1.125rem;
+                font-weight: 700;
+                pointer-events: none;
+            }
+            .app-header-title { color: #2b211b; }
+            .app-header-title i { color: #7f5539; }
+            .dark .app-header-title { color: #ffffff; }
+            .dark .app-header-title i { color: #d6ccc2; }
+            /* Move the page up: the gap between the menu button and the first element on
+               the page equals the vertical gap between the cards on the statistics page
+               (1.5rem): the button ends 0.625rem above the header's bottom (4rem header,
+               2.75rem button, centred), so main starts 1.5rem - 0.625rem below the header. */
+            main { padding-top: 0.875rem !important; }
+            .app-page-head { padding-top: 0 !important; }
         }
 
     </style>
