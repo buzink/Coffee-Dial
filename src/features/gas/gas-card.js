@@ -617,6 +617,8 @@ export const createGasCardModule = ({
 
     const closeGasCard = (event) => {
         if (event && event.target !== event.currentTarget) return;
+        // The card mounts lazily; before its first open there is nothing to close.
+        if (!document.getElementById('gasCardOverlay')) return;
         closeGasMergeModal();
         closeGasBulkAddModal();
         document.getElementById('gasCardEdit').classList.add('hidden');

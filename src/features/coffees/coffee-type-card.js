@@ -357,6 +357,8 @@ export const createCoffeeTypeCardModule = ({
 
     const closeCoffeeTypeCard = (event) => {
         if (event && event.target !== event.currentTarget) return;
+        // The card mounts lazily; before its first open there is nothing to close.
+        if (!document.getElementById('coffeeTypeCardOverlay')) return;
         document.getElementById('coffeeTypeCardEdit').classList.add('hidden');
         document.getElementById('coffeeTypeCardView').classList.remove('hidden');
         document.getElementById('coffeeTypeCardEditBtn').classList.toggle('hidden', getCurrentView() !== 'mine');

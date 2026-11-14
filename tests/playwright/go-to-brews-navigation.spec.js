@@ -6,11 +6,11 @@ const openMenuItem = async (page, itemSelector) => {
     await page.locator(itemSelector).click();
 };
 
-const assertNavigatedToBrews = async (page, sourceModalSelector, options = {}) => {
-    const { expectSourceHidden = true } = options;
-    if (expectSourceHidden) {
-        await expect(page.locator(sourceModalSelector)).toBeHidden();
-    }
+const assertNavigatedToBrews = async (page, sourcePageSelector) => {
+    await expect(page.locator(sourcePageSelector)).toBeHidden();
+    // Pages replace each other: back on brews, no page key left in the URL.
+    await expect(page.locator('#signedInContent')).toBeVisible();
+    await expect(page).not.toHaveURL(/[?&](beans|coffees|gear|statistics)(&|$)/);
     await page.waitForFunction(() => {
         const activeFiltersContainer = document.getElementById('activeFiltersContainer');
         const activeFiltersList = document.getElementById('activeFiltersList');
@@ -21,9 +21,12 @@ const assertNavigatedToBrews = async (page, sourceModalSelector, options = {}) =
     });
 };
 
-const assertNavigatedToBeans = async (page, sourceModalSelector) => {
-    await expect(page.locator(sourceModalSelector)).toBeHidden();
+const assertNavigatedToBeans = async (page, sourcePageSelector) => {
+    await expect(page.locator(sourcePageSelector)).toBeHidden();
     await expect(page.locator('#beansPage')).toBeVisible();
+    await expect(page.locator('#signedInContent')).toBeHidden();
+    await expect(page).toHaveURL(/[?&]beans(&|$)/);
+    await expect(page).not.toHaveURL(/[?&]coffees(&|$)/);
     await expect(page.locator('#beansTableBody tr[data-id]').first()).toBeVisible();
 };
 
@@ -64,15 +67,7 @@ test('go to brews/go to beans table actions close menu+modal and navigate', asyn
     const gasMenu = gasRow.locator('.action-menu').first();
     await expect(gasMenu).toBeVisible();
     await gasMenu.getByRole('button', { name: 'Go to brews' }).click({ force: true });
-    await assertNavigatedToBrews(page, '#gasPage', { expectSourceHidden: false });
-    const gasPage = page.locator('#gasPage');
-    if (await gasPage.isVisible()) {
-        const gasCloseBtn = gasPage.locator('[data-action-click="closeGasList()"]').first();
-        if (await gasCloseBtn.isVisible()) {
-            await gasCloseBtn.click({ force: true });
-        }
-        await expect(gasPage).toBeHidden();
-    }
+    await assertNavigatedToBrews(page, '#gasPage');
 
     await openMenuItem(page, '#menuCoffeesBtn');
     const coffeeRowForBeans = page.locator('#coffeeTypesTableBody tr[data-id]').first();

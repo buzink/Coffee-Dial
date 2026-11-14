@@ -285,7 +285,10 @@ export const createBeansCardUiModule = ({
     const closeBeanCard = (e) => {
         if (!e || e.target.id === 'beanCardOverlay') {
             navigationOrderOverride = null;
-            document.getElementById('beanCardOverlay').classList.add('hidden');
+            // The card mounts lazily; before its first open there is nothing to close.
+            const overlay = document.getElementById('beanCardOverlay');
+            if (!overlay) return;
+            overlay.classList.add('hidden');
             publishEvent?.('beans.cardClosed', { beanId: getCurrentBeanCardId() });
         }
     };
