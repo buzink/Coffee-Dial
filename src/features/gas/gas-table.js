@@ -127,12 +127,12 @@ export const createGasTableModule = ({
         return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
     };
     const openGasList = () => {
-        document.getElementById('gasModal')?.classList.remove('hidden');
+        document.getElementById('gasPage')?.classList.remove('hidden');
         renderGasTable();
     };
 
     const closeGasList = () => {
-        document.getElementById('gasModal')?.classList.add('hidden');
+        document.getElementById('gasPage')?.classList.add('hidden');
     };
 
     const setGasSearch = (value) => {
@@ -509,7 +509,7 @@ export const createGasTableModule = ({
         const items = getGasItems();
         const mobileAccordionMode = isCompactMobileTableMode();
         lastCompactMobileMode = mobileAccordionMode;
-        const tableHead = document.querySelector('#gasModal thead');
+        const tableHead = document.querySelector('#gasPage thead');
         if (tableHead) tableHead.classList.toggle('hidden', mobileAccordionMode);
         if (!items.length) {
             empty.classList.remove('hidden');

@@ -58,12 +58,12 @@ export const createCoffeesCoordinator = ({
 
     const openCoffeeTypes = () => {
         if (!getCurrentUser()) return alert('Please sign in.');
-        document.getElementById('coffeeTypesModal').classList.remove('hidden');
+        document.getElementById('coffeeTypesPage').classList.remove('hidden');
         renderCoffeeTypesTable();
     };
 
     const closeCoffeeTypes = () => {
-        document.getElementById('coffeeTypesModal').classList.add('hidden');
+        document.getElementById('coffeeTypesPage').classList.add('hidden');
     };
 
     const createCoffeeTypeFromModal = async () => {

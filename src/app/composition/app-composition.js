@@ -2400,10 +2400,10 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
 
             const routeModalIdByKey = new Map([
                 ['moments', 'galleryModal'],
-                ['beans', 'beansModal'],
-                ['gear', 'gasModal'],
-                ['coffees', 'coffeeTypesModal'],
-                ['statistics', 'statsModal'],
+                ['beans', 'beansPage'],
+                ['gear', 'gasPage'],
+                ['coffees', 'coffeeTypesPage'],
+                ['statistics', 'statsPage'],
                 ['preferences', 'preferencesModal'],
                 ['import-export', 'importExportModal'],
                 ['help', 'helpModal'],

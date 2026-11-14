@@ -132,13 +132,13 @@ export const createBeansTableModule = ({
     };
     const openBeans = () => {
         if (!getCurrentUser()) return alert('Please sign in.');
-        document.getElementById('beansModal')?.classList.remove('hidden');
+        document.getElementById('beansPage')?.classList.remove('hidden');
         renderBeansTable();
         updateCoffeeTypeSelectors();
     };
 
     const closeBeans = () => {
-        document.getElementById('beansModal')?.classList.add('hidden');
+        document.getElementById('beansPage')?.classList.add('hidden');
     };
 
     const setBeansSearch = (value) => {
@@ -542,7 +542,7 @@ export const createBeansTableModule = ({
         const finalBeans = getFilteredSortedBeans();
         const mobileAccordionMode = isCompactMobileTableMode();
         lastCompactMobileMode = mobileAccordionMode;
-        const tableHead = document.querySelector('#beansModal thead');
+        const tableHead = document.querySelector('#beansPage thead');
         if (tableHead) tableHead.classList.toggle('hidden', mobileAccordionMode);
 
         if (finalBeans.length === 0) {

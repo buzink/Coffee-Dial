@@ -11,5 +11,5 @@ const mountView = async (mountId, viewPath) => {
 };
 
 export const mountStatsView = async () => {
-    await mountView('statsModalMount', './src/features/stats/stats.view.html');
+    await mountView('statsPageMount', './src/features/stats/stats.view.html');
 };

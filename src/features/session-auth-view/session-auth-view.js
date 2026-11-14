@@ -256,7 +256,7 @@ export const createSessionAuthViewModule = ({
                     scheduleHomeSnapshotSave({ isMine, requestId });
 
                     if (isMine) updateBeanDropdown();
-                    if (!document.getElementById('beansModal').classList.contains('hidden')) {
+                    if (!document.getElementById('beansPage').classList.contains('hidden')) {
                         renderBeansTable();
                     }
                     renderPinnedTiles();
@@ -285,7 +285,7 @@ export const createSessionAuthViewModule = ({
                     scheduleHomeSnapshotSave({ isMine, requestId });
                     updateCoffeeTypeSelectors();
                     if (isMine) updateBeanDropdown();
-                    if (!document.getElementById('coffeeTypesModal').classList.contains('hidden')) {
+                    if (!document.getElementById('coffeeTypesPage').classList.contains('hidden')) {
                         renderCoffeeTypesTable();
                     }
                     renderPinnedTiles();
@@ -296,7 +296,7 @@ export const createSessionAuthViewModule = ({
                     setCoffeeTypes([]);
                     updateCoffeeTypeSelectors();
                     if (isMine) updateBeanDropdown();
-                    if (!document.getElementById('coffeeTypesModal').classList.contains('hidden')) {
+                    if (!document.getElementById('coffeeTypesPage').classList.contains('hidden')) {
                         renderCoffeeTypesTable();
                     }
                     renderPinnedTiles();
@@ -325,7 +325,7 @@ export const createSessionAuthViewModule = ({
                     live.gasItems = nextGasItems;
                     scheduleHomeSnapshotSave({ isMine, requestId });
                     if (refreshBrewGearSelectors) refreshBrewGearSelectors();
-                    if (!getModal('gasModal')?.classList.contains('hidden')) {
+                    if (!getModal('gasPage')?.classList.contains('hidden')) {
                         renderGasTable();
                     }
                 },
@@ -333,7 +333,7 @@ export const createSessionAuthViewModule = ({
                     console.error('Error loading gas list:', error);
                     setGasItems([]);
                     if (refreshBrewGearSelectors) refreshBrewGearSelectors();
-                    if (!getModal('gasModal')?.classList.contains('hidden')) {
+                    if (!getModal('gasPage')?.classList.contains('hidden')) {
                         renderGasTable();
                     }
                 }
@@ -587,7 +587,7 @@ export const createSessionAuthViewModule = ({
 
             setBeans(nextActiveBeans);
             if (isMine) updateBeanDropdown();
-            if (!getModal('beansModal')?.classList.contains('hidden')) {
+            if (!getModal('beansPage')?.classList.contains('hidden')) {
                 renderBeansTable();
             }
             setHasLoadedBeans(true);
@@ -686,7 +686,7 @@ export const createSessionAuthViewModule = ({
 
                 setBeans(nextBeans);
                 if (isMine) updateBeanDropdown();
-                if (!getModal('beansModal')?.classList.contains('hidden')) {
+                if (!getModal('beansPage')?.classList.contains('hidden')) {
                     renderBeansTable();
                 }
                 setHasLoadedBeans(true);
@@ -718,7 +718,7 @@ export const createSessionAuthViewModule = ({
                 setCoffeeTypes(nextCoffeeTypes);
                 updateCoffeeTypeSelectors();
                 if (isMine) updateBeanDropdown();
-                if (!getModal('coffeeTypesModal')?.classList.contains('hidden')) {
+                if (!getModal('coffeeTypesPage')?.classList.contains('hidden')) {
                     renderCoffeeTypesTable();
                 }
 
@@ -733,7 +733,7 @@ export const createSessionAuthViewModule = ({
                 const navStart = performance.timing?.navigationStart || performance.timeOrigin || 0;
                 console.log(`[PERF-ABSOLUTE] Full data loaded and rendered: ${Date.now() - navStart}ms from navigation start`);
                 scheduleLiveViewListeners({ targetUid, isMine, requestId });
-                if (!getModal('gasModal')?.classList.contains('hidden')) {
+                if (!getModal('gasPage')?.classList.contains('hidden')) {
                     ensureGasListenerForCurrentView();
                 }
             } catch (error) {

@@ -49,7 +49,7 @@ const cleanupSmokeUiState = (actions = {}) => {
     // without this, the lazy-mounted modal is never observed by the MutationObserver route-sync, so
     // the 'brew' route key persists and a subsequent pageshow/visibilitychange re-opens the form.
     try { actions.closeBrewFormModal?.(null); } catch (_) {}
-    document.getElementById('beansModal')?.classList.add('hidden');
+    document.getElementById('beansPage')?.classList.add('hidden');
     document.getElementById('coffeeTypeCardOverlay')?.classList.add('hidden');
     document.getElementById('beanCardOverlay')?.classList.add('hidden');
     document.getElementById('brewFormModal')?.classList.add('hidden');
@@ -100,7 +100,7 @@ const findRowsMissingDataId = () => {
 
 const normalizeBeansTableState = async (actions = {}) => {
     actions.openBeans?.();
-    await waitFor(() => isVisible('beansModal'), 2500);
+    await waitFor(() => isVisible('beansPage'), 2500);
     actions.beansChangeView?.('mine');
     actions.clearBeansSearch?.();
     actions.clearBeansFilters?.();
@@ -165,7 +165,7 @@ const runCommandFlowSmoke = async ({ actions = {}, appCommands = null } = {}) =>
             }
 
             actions.showBeansForCoffeeType();
-            await waitFor(() => isVisible('beansModal'), 3000);
+            await waitFor(() => isVisible('beansPage'), 3000);
             actions.beansChangeView?.('mine');
             actions.clearBeansSearch?.();
             actions.clearBeansFilters?.();

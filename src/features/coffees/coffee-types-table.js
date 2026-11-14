@@ -545,7 +545,7 @@ export const createCoffeeTypesTableModule = ({
         const isMine = getCurrentView() === 'mine';
         const mobileAccordionMode = isCompactMobileTableMode();
         lastCompactMobileMode = mobileAccordionMode;
-        const tableHead = document.querySelector('#coffeeTypesModal thead');
+        const tableHead = document.querySelector('#coffeeTypesPage thead');
         if (tableHead) tableHead.classList.toggle('hidden', mobileAccordionMode);
         const coffeeTypes = getCoffeeTypes();
 

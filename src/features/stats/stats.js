@@ -50,7 +50,7 @@ export const createStatsModule = ({
     };
 
     const closeStats = () => {
-        document.getElementById('statsModal')?.classList.add('hidden');
+        document.getElementById('statsPage')?.classList.add('hidden');
         document.getElementById('aiProfileContainer')?.classList.add('hidden');
     };
 
@@ -70,7 +70,7 @@ export const createStatsModule = ({
     const openStats = () => {
         const user = getCurrentUser();
         if (!user) return alert('Please sign in first.');
-        document.getElementById('statsModal')?.classList.remove('hidden');
+        document.getElementById('statsPage')?.classList.remove('hidden');
         const sl = document.getElementById('statsViewSelect');
         if (!sl) return;
         const following = Array.isArray(getFollowing?.()) ? getFollowing() : [];

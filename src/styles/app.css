@@ -60,7 +60,7 @@
         th.filterable { position: relative; cursor: context-menu; touch-action: manipulation; }
         
         #filterDropdown, #mainMenuDropdown, #aiMenuDropdown, .action-menu { z-index: 50; animation: fadeIn 0.1s ease-out; }
-        #modalOverlay, #statsModal, #imageModalOverlay, #coffeeCardOverlay, #uploadPhotoModal, #galleryModal, #easterEggModal, #preferencesModal, #coffeeScaleModal, #connectScaleModal, #exportModal, #helpModal, #aboutModal, #beansModal, #beanCardOverlay { animation: fadeIn 0.2s ease-out; }
+        #modalOverlay, #statsPage, #imageModalOverlay, #coffeeCardOverlay, #uploadPhotoModal, #galleryModal, #easterEggModal, #preferencesModal, #coffeeScaleModal, #connectScaleModal, #exportModal, #helpModal, #aboutModal, #beansPage, #beanCardOverlay { animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         .chevron-rotate { transition: transform 0.3s ease; }
         .group[aria-expanded="true"] .chevron-rotate { transform: rotate(180deg); }
