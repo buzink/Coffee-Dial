@@ -90,7 +90,6 @@ export const createStatsModule = ({
 
     const changeStatsView = async (uid) => {
         currentStatsUid = uid;
-        document.getElementById('aiProfileContainer')?.classList.add('hidden');
         const user = getCurrentUser();
         let dataToUse = [];
         let gearToUse = [];

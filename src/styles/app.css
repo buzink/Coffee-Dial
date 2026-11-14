@@ -361,6 +361,8 @@
             border: 0;
         }
         .app-page-title + * { margin-left: auto; }
+        /* A page head with no visible controls left (only the hidden title) takes no space. */
+        .app-page-head:not(:has(select:not(.hidden), button:not(.hidden))) { padding: 0 !important; }
         .app-header-title { display: none; }
         .app-header-title > span {
             display: none;

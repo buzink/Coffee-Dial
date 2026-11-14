@@ -10,22 +10,10 @@
                     <select id="statsViewSelect" aria-label="Statistics view" data-action-change="changeStatsView(this.value)" class="bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] text-coffee-900 dark:text-white text-sm rounded-lg block p-2.5 shadow-sm font-bold min-w-[140px]">
                         <option value="mine">My brews</option>
                     </select>
-                    <button type="button" data-action-click="triggerAIProfile()" id="statsAIBtn" class="flex justify-center items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm whitespace-nowrap">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI Profile
-                    </button>
                 </div>
             </div>
             
             <div id="statsPageContent">
-                <div id="aiProfileContainer" class="hidden relative mb-8 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/30 p-5 rounded-2xl shadow-inner typewriter">
-                    <button data-action-click="hideAiProfile()" class="absolute top-3 right-3 text-indigo-400 hover:text-indigo-600 dark:hover:text-white transition-colors">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                    <div class="flex items-center gap-2 mb-2 text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase tracking-widest">
-                        <i class="fa-solid fa-sparkles"></i> AI Brew Sommelier
-                    </div>
-                    <p id="aiProfileText" class="text-sm text-coffee-800 dark:text-indigo-100 italic leading-relaxed"></p>
-                </div>
 
                 <div id="statsGeneralView" class="space-y-8">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -105,66 +93,96 @@
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm">
-                        <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase border-b border-coffee-100 dark:border-[#44403c] pb-2"><i class="fa-solid fa-grip text-amber-600 mr-2"></i>Grinders</h4>
-                        <div id="grinderStatsList" class="space-y-2"></div>
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm">
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase border-b border-coffee-100 dark:border-[#44403c] pb-2"><i class="fa-solid fa-grip text-amber-600 mr-2"></i>Grinders</h4>
+                            <div id="grinderStatsList" class="space-y-2"></div>
+                        </div>
 
-                    <div class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm">
-                        <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-3 uppercase border-b border-coffee-100 dark:border-[#44403c] pb-2 flex items-center gap-2">
-                            <i class="fa-solid fa-hourglass-half text-amber-500"></i>
-                            <span>Open bag time</span>
-                        </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div id="statBeanShortestCard" class="rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/70 dark:bg-emerald-900/10 p-3">
-                                <div class="text-[11px] uppercase font-bold text-emerald-700 dark:text-emerald-300 mb-1">Shortest</div>
-                                <div id="statBeanShortestName" class="text-sm font-semibold text-coffee-800 dark:text-white truncate">-</div>
-                                <div id="statBeanShortestTime" class="text-xs text-emerald-700 dark:text-emerald-300">-</div>
+                        <div class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm">
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-3 uppercase border-b border-coffee-100 dark:border-[#44403c] pb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-hourglass-half text-amber-500"></i>
+                                <span>Open bag time</span>
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div id="statBeanShortestCard" class="rounded-lg border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/70 dark:bg-emerald-900/10 p-3">
+                                    <div class="text-[11px] uppercase font-bold text-emerald-700 dark:text-emerald-300 mb-1">Shortest</div>
+                                    <div id="statBeanShortestName" class="text-sm font-semibold text-coffee-800 dark:text-white truncate">-</div>
+                                    <div id="statBeanShortestTime" class="text-xs text-emerald-700 dark:text-emerald-300">-</div>
+                                </div>
+                                <div id="statBeanLongestCard" class="rounded-lg border border-rose-200 dark:border-rose-900/40 bg-rose-50/70 dark:bg-rose-900/10 p-3">
+                                    <div class="text-[11px] uppercase font-bold text-rose-700 dark:text-rose-300 mb-1">Longest</div>
+                                    <div id="statBeanLongestName" class="text-sm font-semibold text-coffee-800 dark:text-white truncate">-</div>
+                                    <div id="statBeanLongestTime" class="text-xs text-rose-700 dark:text-rose-300">-</div>
+                                </div>
                             </div>
-                            <div id="statBeanLongestCard" class="rounded-lg border border-rose-200 dark:border-rose-900/40 bg-rose-50/70 dark:bg-rose-900/10 p-3">
-                                <div class="text-[11px] uppercase font-bold text-rose-700 dark:text-rose-300 mb-1">Longest</div>
-                                <div id="statBeanLongestName" class="text-sm font-semibold text-coffee-800 dark:text-white truncate">-</div>
-                                <div id="statBeanLongestTime" class="text-xs text-rose-700 dark:text-rose-300">-</div>
+                        </div>
+
+                        <div class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm">
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-3 uppercase border-b border-coffee-100 dark:border-[#44403c] pb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-wallet text-rose-500"></i>
+                                <span>GAS Alert</span>
+                            </h4>
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <div class="text-xs text-coffee-500 dark:text-[#78716c] uppercase font-bold mb-1">Total spent on gear</div>
+                                    <div id="statGasTotal" class="text-2xl font-bold text-rose-600 dark:text-rose-400">EUR 0.00</div>
+                                </div>
+                                <div class="text-xl text-rose-400">
+                                    <i class="fa-solid fa-face-laugh-squint"></i>
+                                </div>
+                            </div>
+                            <p id="statGasFunny" class="mt-3 text-sm text-coffee-700 dark:text-[#d6ccc2] italic">Your wallet is still in pre-infusion mode.</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div>
+                                    <h4 class="text-sm font-bold text-coffee-800 dark:text-white uppercase flex items-center gap-2">
+                                        <i class="fa-solid fa-flask text-coffee-600 dark:text-[#d6ccc2]"></i>
+                                        <span>Lab results</span>
+                                    </h4>
+                                    <p class="mt-2 text-sm text-coffee-600 dark:text-[#a8a29e]">
+                                        Open Lab results to explore filtered brews with custom graph axes and capture overlays.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    data-action-click="openLabResultsModal(event)"
+                                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white text-sm font-medium transition-colors"
+                                >
+                                    <i class="fa-solid fa-flask"></i>
+                                    <span>Open lab results</span>
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm">
-                        <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-3 uppercase border-b border-coffee-100 dark:border-[#44403c] pb-2 flex items-center gap-2">
-                            <i class="fa-solid fa-wallet text-rose-500"></i>
-                            <span>GAS Alert</span>
-                        </h4>
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <div class="text-xs text-coffee-500 dark:text-[#78716c] uppercase font-bold mb-1">Total spent on gear</div>
-                                <div id="statGasTotal" class="text-2xl font-bold text-rose-600 dark:text-rose-400">EUR 0.00</div>
-                            </div>
-                            <div class="text-xl text-rose-400">
-                                <i class="fa-solid fa-face-laugh-squint"></i>
-                            </div>
-                        </div>
-                        <p id="statGasFunny" class="mt-3 text-sm text-coffee-700 dark:text-[#d6ccc2] italic">Your wallet is still in pre-infusion mode.</p>
-                    </div>
-
-                    <div class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm">
+                    <!-- AI profile: generated on request and saved per view (own brews or a friend's) -->
+                    <div id="aiProfileCard" class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div>
                                 <h4 class="text-sm font-bold text-coffee-800 dark:text-white uppercase flex items-center gap-2">
-                                    <i class="fa-solid fa-flask text-coffee-600 dark:text-[#d6ccc2]"></i>
-                                    <span>Lab results</span>
+                                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i>
+                                    <span>AI profile</span>
                                 </h4>
-                                <p class="mt-2 text-sm text-coffee-600 dark:text-[#a8a29e]">
-                                    Open Lab results to explore filtered brews with custom graph axes and capture overlays.
+                                <p id="aiProfileIntro" class="mt-2 text-sm text-coffee-600 dark:text-[#a8a29e]">
+                                    Let AI describe the coffee habits behind these brews.
                                 </p>
                             </div>
                             <button
                                 type="button"
-                                data-action-click="openLabResultsModal(event)"
+                                id="statsAIBtn"
+                                data-action-click="triggerAIProfile()"
                                 class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white text-sm font-medium transition-colors"
                             >
-                                <i class="fa-solid fa-flask"></i>
-                                <span>Open lab results</span>
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span id="statsAIBtnLabel">Generate AI Profile</span>
                             </button>
+                        </div>
+                        <div id="aiProfileContainer" class="hidden mt-4 pt-4 border-t border-coffee-100 dark:border-[#44403c]">
+                            <p id="aiProfileText" class="text-sm text-coffee-800 dark:text-[#e7e5e4] italic leading-relaxed"></p>
+                            <p id="aiProfileDate" class="mt-3 text-xs text-coffee-500 dark:text-[#78716c]"></p>
                         </div>
                     </div>
                 </div>

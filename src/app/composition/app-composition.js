@@ -760,8 +760,9 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
         const handleCoffeeTypesAIFile = (...args) =>
             ensureAiImportModule().then((module) => module.handleCoffeeTypesAIFile(...args));
 
-        const { triggerAIProfile } = createStatsAiProfileModule({
+        const { triggerAIProfile, showSavedAIProfile } = createStatsAiProfileModule({
             aiSettings,
+            dataService,
             getCurrentStatsData: () => getCurrentStatsDataState(),
             getCurrentUser: () => getCurrentUserState()
         });
@@ -1338,12 +1339,17 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             return statsModulePromise;
         };
 
-        const openStats = (...args) => 
+        // Both show the saved AI profile of the view that is selected afterwards.
+        const openStats = (...args) =>
             Promise.all([ensureStatsMounted(), ensureStatsModule()])
-                .then(([, module]) => module.openStats(...args));
+                .then(([, module]) => module.openStats(...args))
+                .then(() => showSavedAIProfile());
         const closeStats = (...args) => ensureStatsModule().then((module) => module.closeStats(...args));
         const toggleStatsUniqueTable = (...args) => ensureStatsModule().then((module) => module.toggleStatsUniqueTable(...args));
-        const changeStatsView = (...args) => ensureStatsModule().then((module) => module.changeStatsView(...args));
+        const changeStatsView = (...args) => {
+            void showSavedAIProfile();
+            return ensureStatsModule().then((module) => module.changeStatsView(...args));
+        };
         const calculateStats = (...args) => ensureStatsModule().then((module) => module.calculateStats(...args));
         const updateBeanMeter = (...args) => ensureStatsModule().then((module) => module.updateBeanMeter(...args));
         const renderCharts = (...args) => ensureStatsModule().then((module) => module.renderCharts(...args));
