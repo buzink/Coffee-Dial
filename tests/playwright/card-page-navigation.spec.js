@@ -47,3 +47,43 @@ test('card of another type opens on its own page and Back restores the previous 
     await expect(page.locator('#coffeeTypesPage')).toBeVisible();
     await expect(page).toHaveURL(/[?&]coffees(&|$)/);
 });
+
+// A chain of cross-links: brew → "Go to bag" → bag card → "Go to coffee" → coffee card.
+// Back walks the chain in reverse: coffee → bag → brew, then closes the brew card.
+test('back button walks back through a chain of cards: coffee → bag → brew', async ({ page }) => {
+    await page.goto('/index.html?e2eSeed=1');
+
+    const brewRow = page.locator('#brewsTableMount [data-action-click^="brewsOpenCard("]').first();
+    await expect(brewRow).toBeAttached({ timeout: 30_000 });
+    const brewId = (await brewRow.getAttribute('data-action-click')).match(/'([^']+)'/)[1];
+    await page.evaluate((id) => window.__coffeeDialApp.actions.brewsOpenCard(id), brewId);
+
+    const brewCard = page.locator('#coffeeCardOverlay');
+    const bagCard = page.locator('#beanCardOverlay');
+    const coffeeCard = page.locator('#coffeeTypeCardOverlay');
+    await expect(brewCard).toBeVisible();
+
+    await page.locator('#coffeeCardMenuBtn').click();
+    await page.locator('#coffeeCardActionMenu').getByRole('button', { name: 'Go to bag' }).click();
+    await expect(bagCard).toBeVisible();
+    await expect(page.locator('#beansPage')).toBeVisible();
+
+    await page.locator('#beanCardMenuBtn').click();
+    await page.locator('#beanCardActionCoffee').click();
+    await expect(coffeeCard).toBeVisible();
+    await expect(page.locator('#coffeeTypesPage')).toBeVisible();
+
+    await coffeeCard.locator('[data-card-back]').click();
+    await expect(coffeeCard).toBeHidden();
+    await expect(bagCard).toBeVisible();
+    await expect(page.locator('#beansPage')).toBeVisible();
+
+    await bagCard.locator('[data-card-back]').click();
+    await expect(bagCard).toBeHidden();
+    await expect(brewCard).toBeVisible();
+    await expect(page.locator('#signedInContent')).toBeVisible();
+
+    await brewCard.locator('[data-card-back]').click();
+    await expect(brewCard).toBeHidden();
+    await expect(page.locator('#signedInContent')).toBeVisible();
+});

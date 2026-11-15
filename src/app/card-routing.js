@@ -29,13 +29,20 @@ export const createCardRouting = ({
         window.history.replaceState(state, document.title, window.location.href);
     };
 
+    // Rewriting the card already in this entry keeps its `pushed` mark, so Back still
+    // returns to where that card came from (e.g. brew → bag → coffee: the bag entry is
+    // rewritten when the coffee opens, and must still lead back to the brew).
+    const withPushedMark = (stateCard) => {
+        const current = getStateCard();
+        const same = current?.pushed && current.type === stateCard.type && current.id === stateCard.id;
+        return same ? { ...stateCard, pushed: true } : stateCard;
+    };
+
     const onCardShown = (card) => {
         const id = card.getId();
         if (!id) return;
         if (isRestoring || card.pageKey === getCurrentPageKey()) {
-            const current = getStateCard();
-            const pushed = current?.type === card.type && current?.id === id && current?.pushed;
-            writeStateCard(pushed ? { type: card.type, id, pushed: true } : { type: card.type, id });
+            writeStateCard(withPushedMark({ type: card.type, id }));
             return;
         }
         // The card opened on another page. Keep the card it was opened from (open,
@@ -44,7 +51,7 @@ export const createCardRouting = ({
         const fromCard = openOther
             ? { type: openOther.type, id: openOther.getId() }
             : (lastClosed && Date.now() - lastClosed.at < RECENT_CLOSE_MS && lastClosed.href === window.location.href ? lastClosed.card : null);
-        if (fromCard?.id) writeStateCard(fromCard);
+        if (fromCard?.id) writeStateCard(withPushedMark(fromCard));
         lastClosed = null;
         goToPage(card.pageKey);
         writeStateCard({ type: card.type, id, pushed: true });
