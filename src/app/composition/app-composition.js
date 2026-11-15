@@ -1329,6 +1329,14 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 coffeeScale?.syncGraphFormFields?.();
                 coffeeScale?.applyGraphTogglePrefsForMethod?.();
             },
+            promptScaleConnectIfEmpty: async () => {
+                await ensureScalesFeature();
+                if (coffeeScale?.getCaptureData?.()) return;
+                if (coffeeScale?.isConnected?.()) return;
+                const { DeviceManager } = await import('../../features/devices/device-manager.js');
+                if (DeviceManager.isConnected('scale') || DeviceManager.isConnected('scale2')) return;
+                await openConnectDevicesModal();
+            },
             dispatchCommand: (commandName, payload) =>
                 appCommands?.dispatch?.(commandName, payload, { source: 'media.modals' })
         });

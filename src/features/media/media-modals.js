@@ -3,7 +3,8 @@ export const createMediaModalsModule = ({
     ensureMediaModalsMounted = null,
     ensureGraphModalsMounted = null,
     ensureGraphScaleBindings = null,
-    syncDeviceIndicators = null
+    syncDeviceIndicators = null,
+    promptScaleConnectIfEmpty = null
 }) => {
     let lightboxListenersInitialized = false;
     let lightboxItems = [];
@@ -48,6 +49,14 @@ export const createMediaModalsModule = ({
                 console.error('Graph modal render command failed:', error);
             }
         });
+        // An empty graph with no scale connected cannot show anything: offer the scale connect card on top.
+        if (typeof promptScaleConnectIfEmpty === 'function') {
+            try {
+                await promptScaleConnectIfEmpty();
+            } catch (error) {
+                console.error('Scale connect prompt failed:', error);
+            }
+        }
     };
 
     const closeGraphModal = () => {
