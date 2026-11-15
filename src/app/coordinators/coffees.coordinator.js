@@ -81,6 +81,7 @@ export const createCoffeesCoordinator = ({
             originMicroRegion: '',
             processing: '',
             variety: '',
+            altitude: '',
             roast: '',
             decaf: false,
             rating: 0,
@@ -101,7 +102,7 @@ export const createCoffeesCoordinator = ({
     // Copies a friend's coffee into the user's own coffees. The rating stays behind (it is the
     // friend's opinion). The photo is copied into the user's own storage, never linked: photos
     // are deleted by their URL, so a shared link would let the copy delete the friend's file.
-    const COPIED_COFFEE_FIELDS = ['name', 'farmer', 'roaster', 'origin', 'originMicroRegion', 'processing', 'variety', 'roast', 'decaf', 'tasteNotes', 'webshopUrl'];
+    const COPIED_COFFEE_FIELDS = ['name', 'farmer', 'roaster', 'origin', 'originMicroRegion', 'processing', 'variety', 'altitude', 'roast', 'decaf', 'tasteNotes', 'webshopUrl'];
     const copyCoffeePhoto = async ({ uid, typeId, sourceUrl }) => {
         const { storage, ref, uploadBytes, getDownloadURL } = storageService || {};
         const { db, doc, updateDoc } = dataService || {};

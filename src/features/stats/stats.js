@@ -1,6 +1,7 @@
 import { createCoffeeDisplayModule, formatCoffeeWithRoaster } from '../../core/coffee-display.js';
 import { getBrewGrinderName } from '../../core/brew-fields.js';
 import { renderOriginsMap } from './stats-origins-map.js';
+import { altitudeBand } from '../../core/altitude.js';
 
 export const createStatsModule = ({
     getCurrentUser,
@@ -164,6 +165,31 @@ export const createStatsModule = ({
     };
 
     // The most common value as a word; Unknown only when nothing else was recorded.
+    // Share of the coffees (with an altitude) that grew low, middle or high.
+    const renderAltitude = (brews, getCoffeeTypeDisplay, getCoffeeTypeForBrew) => {
+        const bandByCoffee = new Map();
+        brews.forEach((brew) => {
+            const key = getCoffeeTypeForBrew(brew)?.id || brew.beanId;
+            if (!key || bandByCoffee.has(key)) return;
+            bandByCoffee.set(key, altitudeBand(getCoffeeTypeDisplay(brew)?.altitude));
+        });
+        const bands = [...bandByCoffee.values()];
+        const known = bands.filter(Boolean);
+        const share = (band) => (known.length ? `${Math.round((known.filter((b) => b === band).length / known.length) * 100)}%` : '-');
+        const setText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+        setText('statAltitudeHigh', share('high'));
+        setText('statAltitudeMiddle', share('middle'));
+        setText('statAltitudeLow', share('low'));
+        setText('statAltitudeNote', known.length
+            ? `${known.length} of ${bands.length} ${bands.length === 1 ? 'coffee has' : 'coffees have'} an altitude`
+            : 'No coffees with an altitude yet');
+        document.getElementById('statsAltitudeChart')?.setAttribute('aria-label', known.length
+            ? `Coffees by altitude: high ${share('high')}, middle ${share('middle')}, low ${share('low')}`
+            : 'Coffees by altitude: none yet');
+    };
     const renderTopShare = (id, dataObj = {}) => {
         const wordEl = document.getElementById(id);
         const shareEl = document.getElementById(`${id}Share`);
@@ -191,7 +217,7 @@ export const createStatsModule = ({
             });
         });
     };
-    const renderCharts = async (roast, method, drink, stars, brewTimes = { weekday: Array(7).fill(0), hour: Array(24).fill(0) }) => {
+    const renderCharts = async (roast, method, drink, stars, brewTimes = { weekday: Array(7).fill(0), hour: Array(24).fill(0) }, processing = {}, variety = {}) => {
         const chartCtor = await getChartCtor();
         if (!chartCtor) return;
         const isDark = document.documentElement.classList.contains('dark');
@@ -214,9 +240,13 @@ export const createStatsModule = ({
         createPie('chartRoast', roast, roastColors);
         createPie('chartMethod', method, methodColors);
         createPie('chartDrink', drink, drinkColors);
+        createPie('chartProcessing', processing, ['#34d399', '#fbbf24', '#f472b6', '#a78bfa', '#60a5fa', '#fb923c', '#9ca3af']);
+        createPie('chartVariety', variety, ['#f87171', '#60a5fa', '#facc15', '#4ade80', '#c084fc', '#2dd4bf', '#fb923c', '#e879f9', '#9ca3af']);
         renderTopShare('statTopRoast', roast);
         renderTopShare('statTopMethod', method);
         renderTopShare('statTopDrink', drink);
+        renderTopShare('statTopProcessing', processing);
+        renderTopShare('statTopVariety', variety);
         wireFlipCards();
 
         if (chartInstances.chartStars) chartInstances.chartStars.destroy();
@@ -393,6 +423,7 @@ export const createStatsModule = ({
             document.getElementById('uniqueLeaderboardBody').innerHTML = "<tr><td colspan='3' class='text-center py-4 italic text-coffee-400'>No data.</td></tr>";
             document.getElementById('grinderStatsList').innerHTML = '<p class="text-sm text-gray-400 italic">No grinder data.</p>';
             renderOriginsMap({ brews: [], getCoffeeTypeDisplay, getCoffeeTypeForBrew });
+            renderAltitude([], getCoffeeTypeDisplay, getCoffeeTypeForBrew);
             await renderCharts({}, {}, {}, {});
             await updateBeanMeterInternal();
             return;
@@ -416,7 +447,14 @@ export const createStatsModule = ({
             return acc;
         }, {});
 
-        const roastData = agg(null, (c) => getCoffeeTypeDisplay(c).roastType);
+        // The coffee display uses '-' for an empty field; count it as Unknown.
+        const coffeeField = (field) => (c) => {
+            const value = (getCoffeeTypeDisplay(c)[field] || '').toString().trim();
+            return value && value !== '-' ? value : 'Unknown';
+        };
+        const roastData = agg(null, coffeeField('roastType'));
+        const processingData = agg(null, coffeeField('processing'));
+        const varietyData = agg(null, coffeeField('variety'));
         const methodData = agg('method');
         const drinkData = agg('drink');
         const ratingData = dataToUse.reduce((acc, c) => {
@@ -433,7 +471,8 @@ export const createStatsModule = ({
             brewTimes.hour[date.getHours()]++;
         });
         renderOriginsMap({ brews: dataToUse, getCoffeeTypeDisplay, getCoffeeTypeForBrew });
-        await renderCharts(roastData, methodData, drinkData, ratingData, brewTimes);
+        renderAltitude(dataToUse, getCoffeeTypeDisplay, getCoffeeTypeForBrew);
+        await renderCharts(roastData, methodData, drinkData, ratingData, brewTimes, processingData, varietyData);
         await updateBeanMeterInternal('day');
 
         const uniqueMap = {};

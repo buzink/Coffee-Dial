@@ -60,6 +60,7 @@ export const createCoffeeDisplayModule = ({ getBeans, getCoffeeTypes }) => {
         originMacroRegion: getOriginMacroRegion(type?.origin),
         processing: type?.processing || '-',
         variety: type?.variety || '-',
+        altitude: type?.altitude || '',
         roastType: type?.roast || type?.roastType || '-',
         imageUrl: type?.imageUrl || type?.imageURL || '',
         imageURL: type?.imageURL || type?.imageUrl || '',

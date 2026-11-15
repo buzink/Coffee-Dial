@@ -301,6 +301,7 @@ export const createCoffeeTypeCardModule = ({
         document.getElementById('coffeeTypeCardRoast').textContent = cardVm.roast;
         document.getElementById('coffeeTypeCardProcess').textContent = cardVm.processing;
         document.getElementById('coffeeTypeCardVariety').textContent = cardVm.variety;
+        document.getElementById('coffeeTypeCardAltitude').textContent = cardVm.altitude;
         document.getElementById('coffeeTypeCardCreated').textContent = cardVm.createdAt;
         document.getElementById('coffeeTypeCardTasteNotes').textContent = cardVm.tasteNotes || '-';
         document.getElementById('coffeeTypeCardDecafIcon')?.classList.toggle('hidden', !cardVm.decaf);
@@ -385,6 +386,7 @@ export const createCoffeeTypeCardModule = ({
         document.getElementById('coffeeTypeEditOriginMicroRegion').value = type.originMicroRegion || '';
         document.getElementById('coffeeTypeEditProcessing').value = type.processing || '';
         document.getElementById('coffeeTypeEditVariety').value = type.variety || '';
+        document.getElementById('coffeeTypeEditAltitude').value = type.altitude || '';
         document.getElementById('coffeeTypeEditRoast').value = type.roast || type.roastType || '';
         document.getElementById('coffeeTypeEditRating').value = parseInt(type.rating, 10) || '';
         document.getElementById('coffeeTypeEditDecaf').checked = !!type.decaf;
@@ -425,6 +427,7 @@ export const createCoffeeTypeCardModule = ({
             originMicroRegion: document.getElementById('coffeeTypeEditOriginMicroRegion').value || '',
             processing: document.getElementById('coffeeTypeEditProcessing').value || '',
             variety: document.getElementById('coffeeTypeEditVariety').value || '',
+            altitude: (document.getElementById('coffeeTypeEditAltitude').value || '').trim(),
             roast: document.getElementById('coffeeTypeEditRoast').value || '',
             rating: parseInt(document.getElementById('coffeeTypeEditRating').value, 10) || 0,
             decaf: !!document.getElementById('coffeeTypeEditDecaf').checked,

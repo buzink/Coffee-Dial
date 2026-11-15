@@ -1,5 +1,6 @@
 import { formatCoffeeLabel } from '../../core/coffee-display.js';
 import { getOriginMacroRegion } from '../../core/origin-regions.js';
+import { formatAltitude } from '../../core/altitude.js';
 
 export const createCoffeesVmModule = () => {
     const toTableRow = (type = {}) => {
@@ -35,7 +36,8 @@ export const createCoffeesVmModule = () => {
             decaf: !!type.decaf,
             shopUrl: type.webshopUrl || type.shopUrl || '',
             tasteNotes: (type.tasteNotes || '').trim(),
-            variety: type.variety || '-'
+            variety: type.variety || '-',
+            altitude: formatAltitude(type.altitude)
         };
     };
 

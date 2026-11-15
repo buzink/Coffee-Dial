@@ -61,6 +61,55 @@
                             </div>
                         </div>
                         <div class="stats-flip-card bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Processing</h4>
+                            <button type="button" class="stats-flip-btn" data-stats-flip aria-pressed="false" aria-label="Show full processing distribution" title="Show distribution"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i></button>
+                            <div class="stats-flip w-full h-48">
+                                <div class="stats-flip-face stats-flip-front">
+                                    <div id="statTopProcessing" class="stats-flip-word">-</div>
+                                    <div id="statTopProcessingShare" class="stats-flip-share"></div>
+                                </div>
+                                <div class="stats-flip-face stats-flip-back" aria-hidden="true"><div class="stats-flip-chart"><canvas id="chartProcessing"></canvas></div></div>
+                            </div>
+                        </div>
+                        <div class="origins-card bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm md:col-span-2">
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white uppercase flex items-center gap-2 mb-4"><i class="fa-solid fa-earth-americas text-coffee-600 dark:text-[#d6ccc2]"></i>Origins</h4>
+                            <ul id="statsOriginsMacro" class="origins-map-macro" aria-label="Coffees per region" hidden></ul>
+                            <div id="statsOriginsMap" class="w-full"></div>
+                            <p id="statsOriginsCaption" class="text-sm text-coffee-600 dark:text-[#a8a29e] mt-3 min-h-[1.25rem]" aria-live="polite"></p>
+                            <ul id="statsOriginsRegions" class="origins-map-list origins-map-regions" aria-label="Micro-regions of the selected country" hidden></ul>
+                            <ul id="statsOriginsList" class="origins-map-list"></ul>
+                        </div>
+                        <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Altitude</h4>
+                            <div class="w-full h-48">
+                                <svg id="statsAltitudeChart" class="altitude-chart" viewBox="0 0 300 180" role="img" aria-label="Share of coffees by altitude">
+                                    <path class="altitude-mountain" d="M8 175 L50 122 L64 131 L100 60 L112 71 L138 14 L160 52 L172 44 L206 175 Z"></path>
+                                    <line class="altitude-divider" x1="0" y1="72" x2="300" y2="72"></line>
+                                    <line class="altitude-divider" x1="0" y1="112" x2="300" y2="112"></line>
+                                    <text class="altitude-mark" x="2" y="67">1200 m</text>
+                                    <text class="altitude-mark" x="2" y="107">900 m</text>
+                                    <text class="altitude-pct" x="294" y="46" text-anchor="end" id="statAltitudeHigh">-</text>
+                                    <text class="altitude-name" x="294" y="61" text-anchor="end">High</text>
+                                    <text class="altitude-pct" x="294" y="95" text-anchor="end" id="statAltitudeMiddle">-</text>
+                                    <text class="altitude-name" x="294" y="107" text-anchor="end">Middle</text>
+                                    <text class="altitude-pct" x="294" y="146" text-anchor="end" id="statAltitudeLow">-</text>
+                                    <text class="altitude-name" x="294" y="161" text-anchor="end">Low</text>
+                                </svg>
+                            </div>
+                            <p id="statAltitudeNote" class="text-xs text-coffee-500 dark:text-[#a8a29e] mt-2 text-center"></p>
+                        </div>
+                        <div class="stats-flip-card bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Variety</h4>
+                            <button type="button" class="stats-flip-btn" data-stats-flip aria-pressed="false" aria-label="Show full variety distribution" title="Show distribution"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i></button>
+                            <div class="stats-flip w-full h-48">
+                                <div class="stats-flip-face stats-flip-front">
+                                    <div id="statTopVariety" class="stats-flip-word">-</div>
+                                    <div id="statTopVarietyShare" class="stats-flip-share"></div>
+                                </div>
+                                <div class="stats-flip-face stats-flip-back" aria-hidden="true"><div class="stats-flip-chart"><canvas id="chartVariety"></canvas></div></div>
+                            </div>
+                        </div>
+                        <div class="stats-flip-card bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
                             <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Brew Method</h4>
                             <button type="button" class="stats-flip-btn" data-stats-flip aria-pressed="false" aria-label="Show full brew method distribution" title="Show distribution"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i></button>
                             <div class="stats-flip w-full h-48">
@@ -94,7 +143,6 @@
                             <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Brews per Hour</h4>
                             <div class="relative w-full h-48"><canvas id="chartHour"></canvas></div>
                         </div>
-
                         <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm md:col-span-2">
                             <div class="flex justify-between items-center mb-4">
                                 <h4 class="text-sm font-bold text-coffee-800 dark:text-white uppercase flex items-center gap-2"><i class="fa-solid fa-coffee-bag text-green-500"></i>Bean-o-meter</h4>
@@ -106,15 +154,6 @@
                                 </div>
                             </div>
                             <div class="relative w-full h-64"><canvas id="chartBeanMeter"></canvas></div>
-                        </div>
-
-                        <div class="origins-card bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm md:col-span-2">
-                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white uppercase flex items-center gap-2 mb-4"><i class="fa-solid fa-earth-americas text-coffee-600 dark:text-[#d6ccc2]"></i>Origins</h4>
-                            <ul id="statsOriginsMacro" class="origins-map-macro" aria-label="Coffees per region" hidden></ul>
-                            <div id="statsOriginsMap" class="w-full"></div>
-                            <p id="statsOriginsCaption" class="text-sm text-coffee-600 dark:text-[#a8a29e] mt-3 min-h-[1.25rem]" aria-live="polite"></p>
-                            <ul id="statsOriginsRegions" class="origins-map-list origins-map-regions" aria-label="Micro-regions of the selected country" hidden></ul>
-                            <ul id="statsOriginsList" class="origins-map-list"></ul>
                         </div>
                     </div>
 
