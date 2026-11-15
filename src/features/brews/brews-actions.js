@@ -33,6 +33,7 @@ export const createBrewsActionsModule = ({
     dispatchCommand,
     getFirstBrewDateForBean,
     uploadPendingCoffeeTypeImage,
+    takePendingAIBagPrice = async () => null,
     clearPendingAIBeanImageFile,
     getCoffeeScale,
     showToast,
@@ -616,7 +617,7 @@ export const createBrewsActionsModule = ({
                         beanData.updatedAt = nowIso;
                         beanData.archived = false;
                         beanData.frozen = false;
-                        beanData.price = null;
+                        beanData.price = (await takePendingAIBagPrice()) ?? null;
                         beanData.stock = 250;
                         beanData.beansLeft = 250;
                         beanData.openedDate = nowIso;

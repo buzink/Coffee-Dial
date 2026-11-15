@@ -292,10 +292,12 @@ export const createCoffeeTypeCardModule = ({
         const isMine = getCurrentView() === 'mine';
         const cardVm = coffeesVm.toCardView(type);
 
-        document.getElementById('coffeeTypeCardTitle').textContent = cardVm.farmer;
+        document.getElementById('coffeeTypeCardTitle').textContent = cardVm.title;
         document.getElementById('coffeeTypeCardSubtitle').textContent = cardVm.roaster;
         document.getElementById('coffeeTypeCardRating').innerHTML = cardVm.rating > 0 ? getStarDisplay(cardVm.rating) : '';
         document.getElementById('coffeeTypeCardOrigin').textContent = cardVm.origin;
+        document.getElementById('coffeeTypeCardOriginMicroRegion').textContent = cardVm.originMicroRegion;
+        document.getElementById('coffeeTypeCardOriginMacroRegion').textContent = cardVm.originMacroRegion;
         document.getElementById('coffeeTypeCardRoast').textContent = cardVm.roast;
         document.getElementById('coffeeTypeCardProcess').textContent = cardVm.processing;
         document.getElementById('coffeeTypeCardVariety').textContent = cardVm.variety;
@@ -376,9 +378,11 @@ export const createCoffeeTypeCardModule = ({
         const type = getCurrentType();
         if (!type) return;
 
+        document.getElementById('coffeeTypeEditName').value = type.name || '';
         document.getElementById('coffeeTypeEditFarmer').value = type.farmer || '';
         document.getElementById('coffeeTypeEditRoaster').value = type.roaster || '';
         document.getElementById('coffeeTypeEditOrigin').value = type.origin || '';
+        document.getElementById('coffeeTypeEditOriginMicroRegion').value = type.originMicroRegion || '';
         document.getElementById('coffeeTypeEditProcessing').value = type.processing || '';
         document.getElementById('coffeeTypeEditVariety').value = type.variety || '';
         document.getElementById('coffeeTypeEditRoast').value = type.roast || type.roastType || '';
@@ -414,9 +418,11 @@ export const createCoffeeTypeCardModule = ({
 
         const nowIso = new Date().toISOString();
         const updates = {
+            name: document.getElementById('coffeeTypeEditName').value || '',
             farmer: document.getElementById('coffeeTypeEditFarmer').value || '',
             roaster: document.getElementById('coffeeTypeEditRoaster').value || '',
             origin: document.getElementById('coffeeTypeEditOrigin').value || '',
+            originMicroRegion: document.getElementById('coffeeTypeEditOriginMicroRegion').value || '',
             processing: document.getElementById('coffeeTypeEditProcessing').value || '',
             variety: document.getElementById('coffeeTypeEditVariety').value || '',
             roast: document.getElementById('coffeeTypeEditRoast').value || '',

@@ -1,3 +1,4 @@
+import { formatCoffeeLabel, formatCoffeeTypeOption } from '../../core/coffee-display.js';
 import { createBrewsVmModule } from './brews.vm.js';
 import {
     createDefaultActiveFilters,
@@ -63,8 +64,10 @@ export const createBrewsTableModule = ({
             temp: 'Temperature',
             roastType: 'Roast',
             roaster: 'Roaster',
-            origin: 'Origin',
-            farmer: 'Blend/Farmer',
+            origin: 'Origin country',
+            originMicroRegion: 'Micro-region',
+            originMacroRegion: 'Macro-region',
+            farmer: 'Farmer',
             variety: 'Variety',
             processing: 'Process',
             decaf: 'Decaf',
@@ -336,7 +339,7 @@ export const createBrewsTableModule = ({
 
             if (key === 'coffeeType') {
                 const type = coffeeTypes.find((ct) => ct.id === value);
-                if (type) displayValue = `${type.roaster || 'Unknown'}${type.farmer ? ` - ${type.farmer}` : ''}`;
+                if (type) displayValue = formatCoffeeTypeOption(type);
             }
 
             if (key === 'gear') {
@@ -374,8 +377,10 @@ export const createBrewsTableModule = ({
             { key: 'method', label: 'Method' },
             { key: 'drink', label: 'Drink' },
             { key: 'roaster', label: 'Roaster' },
-            { key: 'origin', label: 'Origin' },
-            { key: 'farmer', label: 'Blend/Farmer' },
+            { key: 'origin', label: 'Origin country' },
+            { key: 'originMicroRegion', label: 'Micro-region' },
+            { key: 'originMacroRegion', label: 'Macro-region' },
+            { key: 'farmer', label: 'Farmer' },
             { key: 'variety', label: 'Variety' },
             { key: 'processing', label: 'Process' },
             { key: 'decaf', label: 'Decaf' },
@@ -473,7 +478,7 @@ export const createBrewsTableModule = ({
         if (isAccordionSettingsMode) {
             const fieldOptions = getMobileAccordionHeaderFieldOptions();
             html += '<div class="text-[10px] font-bold text-coffee-400 dark:text-[#78716c] uppercase">Accordion header fields</div>';
-            html += '<p class="text-[11px] text-coffee-500 dark:text-[#78716c]">Choose the 3 fields shown under farmer and roaster.</p>';
+            html += '<p class="text-[11px] text-coffee-500 dark:text-[#78716c]">Choose the 3 fields shown under coffee and roaster.</p>';
             for (let index = 0; index < 3; index += 1) {
                 html += `<div class="grid grid-cols-[70px_1fr] items-center gap-2">
                     <span class="text-[11px] font-semibold text-coffee-600 dark:text-[#a8a29e]">Field ${index + 1}</span>
@@ -1024,7 +1029,7 @@ export const createBrewsTableModule = ({
                         <div class="flex items-start gap-2">
                             <div class="flex-shrink-0">${buildMobilePhotoHtml(brew)}</div>
                             <div class="min-w-0 flex-1">
-                                <div class="text-sm font-semibold text-coffee-900 dark:text-white truncate inline-flex items-center gap-1">${typeDisplay.farmer || '-'}${typeDisplay.decaf ? '<i class="fa-solid fa-moon text-[10px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>' : ''}</div>
+                                <div class="text-sm font-semibold text-coffee-900 dark:text-white truncate inline-flex items-center gap-1">${formatCoffeeLabel(typeDisplay)}${typeDisplay.decaf ? '<i class="fa-solid fa-moon text-[10px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>' : ''}</div>
                                 <div class="text-xs text-coffee-600 dark:text-[#a8a29e] truncate">${rowDisplay.displayRoaster || '-'}</div>
                                 ${headerRatingHtml}
                             </div>

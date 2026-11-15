@@ -1,3 +1,4 @@
+import { formatOriginLabel } from '../../core/origin-regions.js';
 export const createBrewFormLookupModule = ({
     getBeans,
     getCoffeeTypes,
@@ -148,7 +149,8 @@ export const createBrewFormLookupModule = ({
 
         if (roaster) roaster.value = source.roaster || '';
         if (farmer) farmer.value = source.farmer || '';
-        if (origin) origin.value = source.origin || '';
+        // A coffee's fields are locked (and not saved with the brew), so the origin can show the micro-region too.
+        if (origin) origin.value = type ? formatOriginLabel(type) : (source.origin || '');
         if (variety) variety.value = source.variety || '';
         if (processing) processing.value = source.processing || '';
         if (roastType) roastType.value = source.roast || source.roastType || '';

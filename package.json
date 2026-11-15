@@ -17,6 +17,8 @@
     "backfill:bean-dates-from-brews:apply": "node scripts/backfill-bean-dates-from-brews.mjs --apply",
     "backfill:coffee-type-decaf:dry": "node scripts/backfill-coffee-type-decaf-from-scan.mjs",
     "backfill:coffee-type-decaf:apply": "node scripts/backfill-coffee-type-decaf-from-scan.mjs --apply",
+    "migrate:split-coffee-origins:dry": "node scripts/split-coffee-origins.mjs",
+    "migrate:split-coffee-origins:apply": "node scripts/split-coffee-origins.mjs --apply",
     "backfill:extract-coffee-types:dry": "node scripts/extract-coffee-types-from-beans.mjs",
     "backfill:extract-coffee-types:apply": "node scripts/extract-coffee-types-from-beans.mjs --apply",
     "backfill:beans-left-missing:dry": "node scripts/maybe-migrate-beans-left.mjs",

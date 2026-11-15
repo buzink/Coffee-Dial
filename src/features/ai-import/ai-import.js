@@ -4,6 +4,13 @@ import { fetchPageImage } from '../../core/page-image.js';
 import { withoutDrafts } from '../../core/draft-items.js';
 import { AiNotConfiguredError, analyzeCoffeeBag, analyzeCoffeeBagUrl } from '../../core/gemini-client.js';
 
+// "14,50", "€ 14.50" or 14.5 -> 14.5; anything that is not a positive amount -> null.
+const toBagPrice = (value) => {
+    const text = `${value ?? ''}`.replace(',', '.').replace(/[^0-9.]/g, '');
+    const price = Number.parseFloat(text);
+    return Number.isFinite(price) && price > 0 ? Math.round(price * 100) / 100 : null;
+};
+
 export const createAiImportModule = ({
     aiSettings,
     imageCompression,
@@ -33,6 +40,9 @@ export const createAiImportModule = ({
     // The page an Extract From URL in the brew form came from; saved as the coffee's web shop URL.
     let pendingAIWebshopUrl = '';
     let pendingAITasteNotes = '';
+    let pendingAIName = '';
+    let pendingAIMicroRegion = '';
+    let pendingAIBagPrice = null;
     const callFetchShopImage = functionsService?.httpsCallable
         ? functionsService.httpsCallable(functionsService.functions, 'fetchShopImage')
         : null;
@@ -130,6 +140,9 @@ export const createAiImportModule = ({
             pendingAIBeanImageFile = compressedFile || null;
             pendingAIWebshopUrl = sourceUrl || '';
             pendingAITasteNotes = data.tasteNotes || '';
+            pendingAIName = data.name || '';
+            pendingAIMicroRegion = data.originMicroRegion || '';
+            pendingAIBagPrice = toBagPrice(data.price);
             toggleForm(true);
         } catch (error) {
             console.error(error);
@@ -142,10 +155,12 @@ export const createAiImportModule = ({
     };
 
     // After the brew form saved and the coffee is known: give it the photo and the web shop
-    // URL and taste notes from the last Extract. An existing web shop URL or taste notes are kept.
+    // URL, taste notes, name and micro-region from the last Extract (the form has no fields for
+    // them). Values the coffee already has are kept.
     const uploadPendingCoffeeTypeImage = async (coffeeTypeId) => {
         const user = getCurrentUser();
-        if ((!pendingAIBeanImageFile && !pendingAIWebshopUrl && !pendingAITasteNotes) || !coffeeTypeId || !user) return null;
+        const hasPending = pendingAIBeanImageFile || pendingAIWebshopUrl || pendingAITasteNotes || pendingAIName || pendingAIMicroRegion;
+        if (!hasPending || !coffeeTypeId || !user) return null;
 
         const nowIso = new Date().toISOString();
         const updates = {};
@@ -165,9 +180,18 @@ export const createAiImportModule = ({
         if (pendingAITasteNotes && !`${currentType?.tasteNotes || ''}`.trim()) {
             updates.tasteNotes = pendingAITasteNotes;
         }
+        if (pendingAIName && !`${currentType?.name || ''}`.trim()) {
+            updates.name = pendingAIName;
+        }
+        if (pendingAIMicroRegion && !`${currentType?.originMicroRegion || ''}`.trim()) {
+            updates.originMicroRegion = pendingAIMicroRegion;
+        }
         pendingAIBeanImageFile = null;
         pendingAIWebshopUrl = '';
         pendingAITasteNotes = '';
+        pendingAIName = '';
+        pendingAIMicroRegion = '';
+        pendingAIBagPrice = null;
         if (!Object.keys(updates).length) return null;
 
         updates.updatedAt = nowIso;
@@ -176,10 +200,20 @@ export const createAiImportModule = ({
         return updates.imageUrl || null;
     };
 
+    // The bag price from the last Extract in the brew form, for the bag the save creates (once).
+    const takePendingAIBagPrice = () => {
+        const price = pendingAIBagPrice;
+        pendingAIBagPrice = null;
+        return price;
+    };
+
     const clearPendingAIBeanImageFile = () => {
         pendingAIBeanImageFile = null;
         pendingAIWebshopUrl = '';
         pendingAITasteNotes = '';
+        pendingAIName = '';
+        pendingAIMicroRegion = '';
+        pendingAIBagPrice = null;
     };
 
     // While Extract runs from an Add card, that card stays open with a spinner over it
@@ -251,8 +285,10 @@ export const createAiImportModule = ({
             const typeData = withDetectedDecaf({
                 uid: user.uid,
                 roaster: data.roaster || '',
+                name: data.name || '',
                 farmer: data.farmer || '',
                 origin: data.origin || '',
+                originMicroRegion: data.originMicroRegion || '',
                 processing: data.processing || '',
                 variety: data.variety || '',
                 roast: data.roastType || data.roast || '',
@@ -270,6 +306,7 @@ export const createAiImportModule = ({
                 updatedAt: nowIso,
                 archived: false,
                 frozen: false,
+                price: toBagPrice(data.price),
                 stock: 250,
                 beansLeft: 250,
                 openedDate: null,
@@ -325,8 +362,10 @@ export const createAiImportModule = ({
             const typeData = withDetectedDecaf({
                 uid: user.uid,
                 roaster: data.roaster || '',
+                name: data.name || '',
                 farmer: data.farmer || '',
                 origin: data.origin || '',
+                originMicroRegion: data.originMicroRegion || '',
                 processing: data.processing || '',
                 variety: data.variety || '',
                 roast: data.roastType || data.roast || '',
@@ -429,6 +468,7 @@ export const createAiImportModule = ({
         triggerCoffeeTypesAIScan,
         handleAIFile,
         uploadPendingCoffeeTypeImage,
+        takePendingAIBagPrice,
         clearPendingAIBeanImageFile,
         handleBeansAIFile,
         handleCoffeeTypesAIFile

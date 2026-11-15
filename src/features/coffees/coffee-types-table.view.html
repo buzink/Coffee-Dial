@@ -38,6 +38,12 @@
                             <thead class="text-xs text-coffee-700 dark:text-[#a8a29e] uppercase bg-coffee-100/50 dark:bg-[#1c1917] border-b border-coffee-200 dark:border-[#44403c]">
                                 <tr>
                                     <th class="px-4 py-3">
+                                        <button type="button" data-action-click="setCoffeeTypesSort('name')" class="flex items-center gap-2">
+                                            <span>Name</span>
+                                            <span id="coffeeTypesSortIcon-name" class="text-[10px]"></span>
+                                        </button>
+                                    </th>
+                                    <th class="px-4 py-3">
                                         <button type="button" data-action-click="setCoffeeTypesSort('farmer')" class="flex items-center gap-2">
                                             <span>Farmer</span>
                                             <span id="coffeeTypesSortIcon-farmer" class="text-[10px]"></span>
@@ -51,8 +57,20 @@
                                     </th>
                                     <th class="px-4 py-3">
                                         <button type="button" data-action-click="setCoffeeTypesSort('origin')" class="flex items-center gap-2">
-                                            <span>Origin</span>
+                                            <span>Origin country</span>
                                             <span id="coffeeTypesSortIcon-origin" class="text-[10px]"></span>
+                                        </button>
+                                    </th>
+                                    <th class="px-4 py-3">
+                                        <button type="button" data-action-click="setCoffeeTypesSort('originMicroRegion')" class="flex items-center gap-2">
+                                            <span>Micro-region</span>
+                                            <span id="coffeeTypesSortIcon-originMicroRegion" class="text-[10px]"></span>
+                                        </button>
+                                    </th>
+                                    <th class="px-4 py-3">
+                                        <button type="button" data-action-click="setCoffeeTypesSort('originMacroRegion')" class="flex items-center gap-2">
+                                            <span>Macro-region</span>
+                                            <span id="coffeeTypesSortIcon-originMacroRegion" class="text-[10px]"></span>
                                         </button>
                                     </th>
                                     <th class="px-4 py-3">

@@ -1,8 +1,14 @@
+import { formatCoffeeCellHtml, formatCoffeeLabel, formatCoffeeTypeOption } from '../../core/coffee-display.js';
 import {
+    BEAN_FIELD_FILTERS,
+    BEAN_FIELD_FILTER_KEYS,
     createDefaultBeansFilters,
     selectBeansCoffeeTypeValues,
+    selectBeansFieldFilterValues,
     selectFilteredBeans
 } from '../../app/stores/beans-table.selectors.js';
+
+const escapeFilterHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 export const createBeansTableModule = ({
     getCurrentUser,
@@ -71,7 +77,7 @@ export const createBeansTableModule = ({
         setBeansSortDirState?.(primary.direction);
     };
     const getSortableFields = () => ([
-        { key: 'farmer', label: 'Farmer' },
+        { key: 'farmer', label: 'Coffee' },
         { key: 'roaster', label: 'Roaster' },
         { key: 'origin', label: 'Origin' },
         { key: 'processing', label: 'Process' },
@@ -169,6 +175,7 @@ export const createBeansTableModule = ({
 
         const filterCategories = [
             { key: 'coffeeType', label: 'Coffee' },
+            ...BEAN_FIELD_FILTERS,
             { key: 'decaf', label: 'Decaf' }
         ];
         const filters = getBeansFilters();
@@ -340,6 +347,8 @@ export const createBeansTableModule = ({
             const hasDecaf = getBeans().some((bean) => !!getBeanCoffeeTypeDisplay(bean).decaf);
             const hasRegular = getBeans().some((bean) => !getBeanCoffeeTypeDisplay(bean).decaf);
             uniqueVals = [hasDecaf ? 'Decaf' : null, hasRegular ? 'Regular' : null].filter(Boolean);
+        } else if (BEAN_FIELD_FILTER_KEYS.includes(key)) {
+            uniqueVals = selectBeansFieldFilterValues({ beans: getBeans(), key, getBeanCoffeeTypeDisplay });
         }
 
         if (!uniqueVals.length) {
@@ -413,9 +422,15 @@ export const createBeansTableModule = ({
         if (filters.coffeeType) {
             hasFilters = true;
             const type = getCoffeeTypes().find((ct) => ct.id === filters.coffeeType);
-            const label = type ? `${type.roaster || 'Unknown'}${type.farmer ? ' - ' + type.farmer : ''}` : filters.coffeeType;
+            const label = type ? formatCoffeeTypeOption(type) : filters.coffeeType;
             list.innerHTML += `<div class="flex items-center gap-2 bg-coffee-700 dark:bg-[#57534e] text-white text-xs px-3 py-1 rounded-full shadow-sm"><span>Coffee:</span><b>${label}</b><button data-action-click="applyBeansFilterFromQuick('coffeeType', null)" aria-label="Remove filter" title="Remove filter" class="ml-1 hover:text-red-200">x</button></div>`;
         }
+        BEAN_FIELD_FILTERS.forEach(({ key, label }) => {
+            if (!filters[key]) return;
+            hasFilters = true;
+            const escapedKey = escapeFilterHtml(filters[key]);
+            list.innerHTML += `<div class="flex items-center gap-2 bg-coffee-700 dark:bg-[#57534e] text-white text-xs px-3 py-1 rounded-full shadow-sm"><span>${label}:</span><b>${escapedKey}</b><button data-action-click="applyBeansFilterFromQuick('${key}', null)" aria-label="Remove filter" title="Remove filter" class="ml-1 hover:text-red-200">x</button></div>`;
+        });
         if (filters.decaf) {
             hasFilters = true;
             list.innerHTML += `<div class="flex items-center gap-2 bg-coffee-700 dark:bg-[#57534e] text-white text-xs px-3 py-1 rounded-full shadow-sm"><span>Decaf:</span><b>${filters.decaf}</b><button data-action-click="applyBeansFilterFromQuick('decaf', null)" aria-label="Remove filter" title="Remove filter" class="ml-1 hover:text-red-200">x</button></div>`;
@@ -465,6 +480,7 @@ export const createBeansTableModule = ({
             searchTerm: getBeansSearch(),
             coffeeTypeFilter: getBeansFilters().coffeeType,
             decafFilter: getBeansFilters().decaf,
+            fieldFilters: getBeansFilters(),
             getBeanCoffeeTypeDisplay
         });
         const brewCountByBeanId = new Map();
@@ -486,7 +502,7 @@ export const createBeansTableModule = ({
         };
         const getSortValue = (bean, key) => {
             const coffeeDisplay = getBeanCoffeeTypeDisplay(bean);
-            if (key === 'farmer') return coffeeDisplay.farmer || '';
+            if (key === 'farmer') return formatCoffeeLabel(coffeeDisplay, '');
             if (key === 'roaster') return coffeeDisplay.roaster || '';
             if (key === 'origin') return coffeeDisplay.origin || '';
             if (key === 'processing') return coffeeDisplay.processing || '';
@@ -575,13 +591,9 @@ export const createBeansTableModule = ({
             }
 
             const roaster = coffeeDisplay.roaster !== '-' ? coffeeDisplay.roaster : 'Unknown';
-            const farmer = coffeeDisplay.farmer;
+            const farmer = formatCoffeeLabel(coffeeDisplay);
             const origin = coffeeDisplay.origin;
             const process = coffeeDisplay.processing;
-            const variety = coffeeDisplay.variety !== '-' ? `<br><span class="text-xs text-coffee-500">${coffeeDisplay.variety}</span>` : '';
-            const decafIcon = coffeeDisplay.decaf
-                ? '<i class="fa-solid fa-moon text-[11px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>'
-                : '';
             const brewCount = Number(bean.brewsCount) || 0;
             const openedDateInputValue = formatBeanDateForInput(bean.openedDate);
             const frozenDateInputValue = formatBeanDateForInput(bean.frozenDate);
@@ -728,10 +740,7 @@ export const createBeansTableModule = ({
             tr.className = 'bg-white dark:bg-[#292524] border-b border-coffee-50 dark:border-[#34302e] hover:bg-coffee-50 dark:hover:bg-[#1c1917] transition-colors';
             tr.ondblclick = (e) => openBeanCardViaCommand(bean.id, e);
             tr.innerHTML = `
-                <td class="px-4 py-3 font-medium text-coffee-900 dark:text-white">${farmer}<br><span class="text-xs text-coffee-500">${roaster}</span></td>
-                <td class="px-4 py-3">${origin}</td>
-                <td class="px-4 py-3">${process}${variety}</td>
-                <td class="px-4 py-3 text-center">${decafIcon}</td>
+                <td class="px-4 py-3 font-medium text-coffee-900 dark:text-white">${formatCoffeeCellHtml({ ...coffeeDisplay, roaster })}</td>
                 <td class="px-4 py-3 text-center">${getRoastBadge(coffeeDisplay.roastType)}</td>
                 <td class="px-4 py-3 text-center">
                     <input type="number" step="0.01" min="0" value="${bean.price ?? ''}"

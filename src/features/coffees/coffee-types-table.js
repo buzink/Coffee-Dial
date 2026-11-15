@@ -1,6 +1,8 @@
+import { formatCoffeeLabel } from '../../core/coffee-display.js';
 import { createCoffeesVmModule } from './coffees.vm.js';
 import {
     createDefaultCoffeeTypeFilters,
+    getCoffeeTypeFieldValue,
     selectCoffeeTypesQuickFilterValues,
     selectFilteredSortedCoffeeTypes
 } from '../../app/stores/coffee-types-table.selectors.js';
@@ -69,9 +71,12 @@ export const createCoffeeTypesTableModule = ({
         setCoffeeTypesSortDirState(primary.direction);
     };
     const getSortableFields = () => ([
+        { key: 'name', label: 'Name' },
         { key: 'farmer', label: 'Farmer' },
         { key: 'roaster', label: 'Roaster' },
-        { key: 'origin', label: 'Origin' },
+        { key: 'origin', label: 'Origin country' },
+        { key: 'originMicroRegion', label: 'Micro-region' },
+        { key: 'originMacroRegion', label: 'Macro-region' },
         { key: 'processing', label: 'Process' },
         { key: 'decaf', label: 'Decaf' },
         { key: 'variety', label: 'Variety' },
@@ -177,9 +182,12 @@ export const createCoffeeTypesTableModule = ({
 
         const sortOptions = getSortableFields();
         const filterCategories = [
+            { key: 'name', label: 'Name' },
             { key: 'farmer', label: 'Farmer' },
             { key: 'roaster', label: 'Roaster' },
-            { key: 'origin', label: 'Origin' },
+            { key: 'origin', label: 'Origin country' },
+            { key: 'originMicroRegion', label: 'Micro-region' },
+            { key: 'originMacroRegion', label: 'Macro-region' },
             { key: 'processing', label: 'Process' },
             { key: 'decaf', label: 'Decaf' },
             { key: 'variety', label: 'Variety' },
@@ -409,9 +417,12 @@ export const createCoffeeTypesTableModule = ({
         list.innerHTML = '';
         let hasFilters = false;
         const labelMap = {
+            name: 'Name',
             farmer: 'Farmer',
             roaster: 'Roaster',
-            origin: 'Origin',
+            origin: 'Origin country',
+            originMicroRegion: 'Micro-region',
+            originMacroRegion: 'Macro-region',
             processing: 'Process',
             decaf: 'Decaf',
             variety: 'Variety',
@@ -447,7 +458,7 @@ export const createCoffeeTypesTableModule = ({
     };
 
     const updateCoffeeTypesSortIcons = () => {
-        const keys = ['farmer', 'roaster', 'origin', 'processing', 'decaf', 'variety', 'roast', 'brews', 'bags', 'ground', 'rating', 'createdAt'];
+        const keys = ['name', 'farmer', 'roaster', 'origin', 'originMicroRegion', 'originMacroRegion', 'processing', 'decaf', 'variety', 'roast', 'brews', 'bags', 'ground', 'rating', 'createdAt'];
         const sortChain = getSortChain();
         keys.forEach((key) => {
             const el = document.getElementById(`coffeeTypesSortIcon-${key}`);
@@ -472,7 +483,7 @@ export const createCoffeeTypesTableModule = ({
             if (key === 'ground') return Number(type.groundKg) || 0;
             if (key === 'rating') return parseInt(type.rating, 10) || 0;
             if (key === 'createdAt') return type.createdAt || '';
-            return type[key] || '';
+            return getCoffeeTypeFieldValue(type, key);
         };
         const compareByKey = (a, b, key, direction = 'asc') => {
             const dir = direction === 'desc' ? -1 : 1;
@@ -565,8 +576,12 @@ export const createCoffeeTypesTableModule = ({
         sortedTypes.forEach((type) => {
             const rowVm = coffeesVm.toTableRow(type);
             const roaster = rowVm.roaster;
+            const name = rowVm.name;
             const farmer = rowVm.farmer;
+            const title = formatCoffeeLabel(type);
             const origin = rowVm.origin;
+            const originMicroRegion = rowVm.originMicroRegion;
+            const originMacroRegion = rowVm.originMacroRegion;
             const processing = rowVm.processing;
             const variety = rowVm.variety;
             const roast = rowVm.roast;
@@ -604,7 +619,9 @@ export const createCoffeeTypesTableModule = ({
                 const detailsHtml = `
                     <div class="pt-2 space-y-3 text-sm">
                         <div class="grid grid-cols-2 gap-3">
-                            <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Origin</span><span>${origin}</span></div>
+                            <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Origin country</span><span>${origin}</span></div>
+                            <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Micro-region</span><span>${originMicroRegion}</span></div>
+                            <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Macro-region</span><span>${originMacroRegion}</span></div>
                             <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Process</span><span>${processing}</span></div>
                             <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Variety</span><span>${variety}</span></div>
                             <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Roast</span><span>${roast}</span></div>
@@ -626,7 +643,7 @@ export const createCoffeeTypesTableModule = ({
                                 <div class="flex items-start gap-2">
                                     <div class="flex-shrink-0">${buildTypePhotoHtml(type)}</div>
                                     <div class="min-w-0 flex-1">
-                                        <div class="text-sm font-semibold text-coffee-900 dark:text-white truncate inline-flex items-center gap-1">${farmer || '-'}${decaf ? '<i class="fa-solid fa-moon text-[10px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>' : ''}</div>
+                                        <div class="text-sm font-semibold text-coffee-900 dark:text-white truncate inline-flex items-center gap-1">${title}${decaf ? '<i class="fa-solid fa-moon text-[10px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>' : ''}</div>
                                         <div class="text-xs text-coffee-600 dark:text-[#a8a29e] truncate">${roaster || '-'}</div>
                                         <div class="mt-0.5 leading-none">${ratingHtml}</div>
                                     </div>
@@ -678,9 +695,12 @@ export const createCoffeeTypesTableModule = ({
             row.className = 'bg-white dark:bg-[#292524] border-b border-coffee-100 dark:border-[#44403c] last:border-b-0';
             row.ondblclick = (event) => dispatchCommand('coffees.openCard', { id: type.id, event });
             row.innerHTML = `
+                <td class="px-4 py-3 text-sm font-medium">${name}</td>
                 <td class="px-4 py-3 text-sm">${farmer}</td>
                 <td class="px-4 py-3 font-semibold">${roaster}</td>
                 <td class="px-4 py-3 text-sm">${origin}</td>
+                <td class="px-4 py-3 text-sm">${originMicroRegion}</td>
+                <td class="px-4 py-3 text-sm">${originMacroRegion}</td>
                 <td class="px-4 py-3 text-sm">${processing}</td>
                 <td class="px-4 py-3 text-center">${decafIcon}</td>
                 <td class="px-4 py-3 text-sm">${variety}</td>

@@ -1,3 +1,4 @@
+import { formatCoffeeCellHtml } from '../../core/coffee-display.js';
 import { brewHasGraph, hasInlineBrewGraph } from '../../core/brew-graphs.js';
 export const createBrewsVmModule = () => {
     const formatOutWeight = (weight, ratio) => {
@@ -127,18 +128,10 @@ export const createBrewsVmModule = () => {
         actionsHtml
     }) => {
         let rowHtml = '';
-        if (columnPreferences.farmer !== false) rowHtml += `<td class="px-3 py-1 text-sm">${typeDisplay.farmer}</td>`;
-        if (columnPreferences.roaster !== false) rowHtml += `<td class="px-3 py-1 font-semibold text-coffee-900 dark:text-[#e7e5e4]">${rowDisplay.displayRoaster}</td>`;
-        if (columnPreferences.origin !== false) rowHtml += `<td class="px-3 py-1 text-sm">${rowDisplay.displayOrigin}</td>`;
-        if (columnPreferences.variety !== false) rowHtml += `<td class="px-3 py-1 text-sm">${typeDisplay.variety}</td>`;
-        if (columnPreferences.processing !== false) rowHtml += `<td class="px-3 py-1 text-sm">${typeDisplay.processing}</td>`;
-        if (columnPreferences.decaf !== false) {
-            const decafIcon = typeDisplay.decaf
-                ? '<i class="fa-solid fa-moon text-[11px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>'
-                : '';
-            rowHtml += `<td class="px-3 py-1 text-center">${decafIcon}</td>`;
+        if (columnPreferences.farmer !== false) {
+            const display = { ...typeDisplay, roaster: rowDisplay.displayRoaster };
+            rowHtml += `<td class="px-3 py-1 font-medium text-coffee-900 dark:text-white">${formatCoffeeCellHtml(display)}</td>`;
         }
-        if (columnPreferences.roastType !== false) rowHtml += `<td class="px-3 py-1 text-sm">${typeDisplay.roastType}</td>`;
         if (columnPreferences.method !== false) rowHtml += `<td class="px-3 py-1 text-sm">${brew.method || '-'}</td>`;
         if (columnPreferences.grinder !== false) rowHtml += `<td class="px-3 py-1 text-sm">${brew.grinder || '-'}</td>`;
         if (columnPreferences.grind !== false) rowHtml += `<td class="px-3 py-1 font-mono text-coffee-700 dark:text-[#d6ccc2]">${brew.grind || '-'}</td>`;

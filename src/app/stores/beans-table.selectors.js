@@ -1,4 +1,19 @@
-export const DEFAULT_BEANS_FILTERS = { coffeeType: null, decaf: null };
+import { formatCoffeeTypeOption } from '../../core/coffee-display.js';
+
+export const BEAN_FIELD_FILTERS = [
+    { key: 'origin', label: 'Origin country' },
+    { key: 'originMicroRegion', label: 'Micro-region' },
+    { key: 'originMacroRegion', label: 'Macro-region' },
+    { key: 'processing', label: 'Process' },
+    { key: 'variety', label: 'Variety' }
+];
+export const BEAN_FIELD_FILTER_KEYS = BEAN_FIELD_FILTERS.map((item) => item.key);
+
+export const DEFAULT_BEANS_FILTERS = {
+    coffeeType: null,
+    ...Object.fromEntries(BEAN_FIELD_FILTERS.map(({ key }) => [key, null])),
+    decaf: null
+};
 
 export const createDefaultBeansFilters = () => ({ ...DEFAULT_BEANS_FILTERS });
 
@@ -7,8 +22,18 @@ const normalizeText = (value) => (value || '').toString().toLowerCase().trim();
 export const selectBeansCoffeeTypeValues = (coffeeTypes = []) => {
     return coffeeTypes.map((type) => ({
         id: type.id,
-        display: `${type.roaster || 'Unknown'}${type.farmer ? ' - ' + type.farmer : ''}`
+        display: formatCoffeeTypeOption(type)
     }));
+};
+
+const cleanFieldValue = (value) => {
+    const text = (value || '').toString().trim();
+    return text && text !== '-' ? text : '';
+};
+
+export const selectBeansFieldFilterValues = ({ beans = [], key, getBeanCoffeeTypeDisplay }) => {
+    const values = beans.map((bean) => cleanFieldValue(getBeanCoffeeTypeDisplay(bean)?.[key])).filter(Boolean);
+    return [...new Set(values)].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 };
 
 export const selectFilteredBeans = ({
@@ -16,6 +41,7 @@ export const selectFilteredBeans = ({
     searchTerm = '',
     coffeeTypeFilter = null,
     decafFilter = null,
+    fieldFilters = {},
     getBeanCoffeeTypeDisplay
 }) => {
     const normalizedSearch = normalizeText(searchTerm);
@@ -25,6 +51,7 @@ export const selectFilteredBeans = ({
             const coffeeDisplay = getBeanCoffeeTypeDisplay(bean);
             const haystack = [
                 coffeeDisplay.roaster,
+                coffeeDisplay.name,
                 coffeeDisplay.farmer,
                 coffeeDisplay.origin,
                 coffeeDisplay.processing,
@@ -38,8 +65,13 @@ export const selectFilteredBeans = ({
         });
 
     const byCoffeeType = !coffeeTypeFilter ? bySearch : bySearch.filter((bean) => bean.coffeeTypeId === coffeeTypeFilter);
-    if (!decafFilter) return byCoffeeType;
-    return byCoffeeType.filter((bean) => {
+    const activeFieldFilters = BEAN_FIELD_FILTER_KEYS.filter((key) => fieldFilters?.[key]);
+    const byFields = !activeFieldFilters.length ? byCoffeeType : byCoffeeType.filter((bean) => {
+        const coffeeDisplay = getBeanCoffeeTypeDisplay(bean);
+        return activeFieldFilters.every((key) => normalizeText(cleanFieldValue(coffeeDisplay[key])) === normalizeText(fieldFilters[key]));
+    });
+    if (!decafFilter) return byFields;
+    return byFields.filter((bean) => {
         const coffeeDisplay = getBeanCoffeeTypeDisplay(bean);
         const status = coffeeDisplay.decaf ? 'Decaf' : 'Regular';
         return normalizeText(status) === normalizeText(decafFilter);

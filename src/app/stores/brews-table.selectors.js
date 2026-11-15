@@ -1,4 +1,6 @@
 import { brewHasGraph } from '../../core/brew-graphs.js';
+import { formatCoffeeLabel, formatCoffeeTypeOption } from '../../core/coffee-display.js';
+import { getOriginMacroRegion } from '../../core/origin-regions.js';
 
 export const DEFAULT_ACTIVE_FILTERS = {
     bean: null,
@@ -10,6 +12,8 @@ export const DEFAULT_ACTIVE_FILTERS = {
     roastType: null,
     roaster: null,
     origin: null,
+    originMicroRegion: null,
+    originMacroRegion: null,
     farmer: null,
     variety: null,
     processing: null,
@@ -45,7 +49,7 @@ const getSortValue = (brew, key, getCoffeeTypeDisplay) => {
     const typeDisplay = typeof getCoffeeTypeDisplay === 'function' ? getCoffeeTypeDisplay(brew) : null;
     if (key === 'roaster') return typeDisplay?.roaster || brew.roaster || brew.name;
     if (key === 'origin') return typeDisplay?.origin || brew.origin || brew.beanType;
-    if (key === 'farmer') return typeDisplay?.farmer || brew.farmer;
+    if (key === 'farmer') return typeDisplay ? formatCoffeeLabel(typeDisplay, '') : brew.farmer;
     if (key === 'variety') return typeDisplay?.variety || brew.variety;
     if (key === 'processing') return typeDisplay?.processing || brew.processing;
     if (key === 'roastType') return typeDisplay?.roastType || brew.roastType;
@@ -105,6 +109,17 @@ export const selectBrewsQuickFilterValues = ({ key, coffees = [], beans = [], co
     if (key === 'hasGraph') {
         return ['Has graph'];
     }
+    if (key === 'originMicroRegion' || key === 'originMacroRegion') {
+        const beanById = new Map(beans.map((bean) => [bean.id, bean]));
+        const typeById = new Map(coffeeTypes.map((type) => [type.id, type]));
+        const values = coffees.map((brew) => {
+            const bean = beanById.get(brew.beanId);
+            const type = bean?.coffeeTypeId ? typeById.get(bean.coffeeTypeId) : null;
+            if (key === 'originMicroRegion') return (type?.originMicroRegion || '').trim();
+            return getOriginMacroRegion(type?.origin || brew?.origin);
+        });
+        return [...new Set(values)].filter(Boolean).sort();
+    }
     if (key === 'bean') {
         return beans.map((bean) => {
             const opened = formatBeanOpenedDate(bean.openedDate);
@@ -118,7 +133,7 @@ export const selectBrewsQuickFilterValues = ({ key, coffees = [], beans = [], co
     if (key === 'coffeeType') {
         return coffeeTypes.map((type) => ({
             id: type.id,
-            display: `${type.roaster || 'Unknown'}${type.farmer ? ` - ${type.farmer}` : ''}`
+            display: formatCoffeeTypeOption(type)
         }));
     }
     if (key === 'gear') {
@@ -165,6 +180,7 @@ export const selectFilteredSortedBrews = ({
                 brew.improve || '',
                 brew.grinder || '',
                 typeDisplay.roaster || '',
+                typeDisplay.name || '',
                 typeDisplay.farmer || '',
                 typeDisplay.origin || '',
                 typeDisplay.variety || '',
@@ -182,6 +198,10 @@ export const selectFilteredSortedBrews = ({
         const cOrigin = brew.origin || brew.beanType;
         const coffeeType = getCoffeeTypeForBrew(brew);
         const typeId = coffeeType?.id || null;
+        const needsTypeDisplay = activeFilters.originMicroRegion || activeFilters.originMacroRegion;
+        const regionDisplay = needsTypeDisplay ? getCoffeeTypeDisplay(brew) : null;
+        const micro = !activeFilters.originMicroRegion || normalizeText(regionDisplay.originMicroRegion) === normalizeText(activeFilters.originMicroRegion);
+        const macro = !activeFilters.originMacroRegion || regionDisplay.originMacroRegion === activeFilters.originMacroRegion;
 
         const m = !activeFilters.method || brew.method === activeFilters.method;
         const t = !activeFilters.temp || String(brew.temp) === String(activeFilters.temp);
@@ -200,7 +220,7 @@ export const selectFilteredSortedBrews = ({
         const beanMatch = !activeFilters.bean || brew.beanId === activeFilters.bean;
         const typeMatch = !activeFilters.coffeeType || typeId === activeFilters.coffeeType;
 
-        return m && t && r && rost && orig && farm && varr && proc && decafMatch && dr && gri && gearMatch && graphMatch && beanMatch && typeMatch;
+        return m && t && r && rost && orig && micro && macro && farm && varr && proc && decafMatch && dr && gri && gearMatch && graphMatch && beanMatch && typeMatch;
     });
 
     const sortChain = normalizeSortChain(currentSort);

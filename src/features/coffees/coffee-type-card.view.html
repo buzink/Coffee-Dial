@@ -73,8 +73,16 @@
                     <div class="flex-1 space-y-4">
                         <div class="grid grid-cols-2 gap-3 text-sm">
                             <div>
-                                <span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Origin</span>
+                                <span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Origin country</span>
                                 <span id="coffeeTypeCardOrigin" class="font-medium text-coffee-800 dark:text-[#d6ccc2]"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Micro-region</span>
+                                <span id="coffeeTypeCardOriginMicroRegion" class="font-medium text-coffee-800 dark:text-[#d6ccc2]"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Macro-region</span>
+                                <span id="coffeeTypeCardOriginMacroRegion" class="font-medium text-coffee-800 dark:text-[#d6ccc2]"></span>
                             </div>
                             <div>
                                 <span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Roast</span>
@@ -150,6 +158,10 @@
             <div id="coffeeTypeCardEdit" class="app-card-edit hidden flex-1 flex flex-col min-h-0">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 overflow-y-auto ios-scroll p-4">
                     <div>
+                        <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Name</label>
+                        <input id="coffeeTypeEditName" type="text" class="w-full text-sm border border-coffee-200 dark:border-[#44403c] rounded p-2 bg-white dark:bg-[#1c1917] text-coffee-900 dark:text-white">
+                    </div>
+                    <div>
                         <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Farmer</label>
                         <input id="coffeeTypeEditFarmer" type="text" class="w-full text-sm border border-coffee-200 dark:border-[#44403c] rounded p-2 bg-white dark:bg-[#1c1917] text-coffee-900 dark:text-white">
                     </div>
@@ -158,8 +170,12 @@
                         <input id="coffeeTypeEditRoaster" type="text" class="w-full text-sm border border-coffee-200 dark:border-[#44403c] rounded p-2 bg-white dark:bg-[#1c1917] text-coffee-900 dark:text-white">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Origin</label>
+                        <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Origin country</label>
                         <input id="coffeeTypeEditOrigin" type="text" class="w-full text-sm border border-coffee-200 dark:border-[#44403c] rounded p-2 bg-white dark:bg-[#1c1917] text-coffee-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Origin micro-region</label>
+                        <input id="coffeeTypeEditOriginMicroRegion" type="text" placeholder="e.g. Huila, Yirgacheffe" class="w-full text-sm border border-coffee-200 dark:border-[#44403c] rounded p-2 bg-white dark:bg-[#1c1917] text-coffee-900 dark:text-white">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Process</label>

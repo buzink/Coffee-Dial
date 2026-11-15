@@ -28,6 +28,7 @@
 import {createRequire} from "module";
 import {execSync} from "child_process";
 import {createHash} from "crypto";
+import {formatOriginLabel} from "../src/core/origin-regions.js";
 
 const require = createRequire(import.meta.url);
 const {Firestore} = require("@google-cloud/firestore");
@@ -144,6 +145,10 @@ function blendOf(recipe) {
   return name;
 }
 
+// How a coffee is named in both apps: its name, or the farmer for coffees without a name
+// (all coffees made before Coffee Dial had a name field). Keys on this stay the same for those.
+const coffeeLabel = (type) => clean(type?.name) || clean(type?.farmer);
+
 async function syncTieme({oldDb, newDb, apply, since}) {
   console.log(`\n== Tieme: ${OLD_PROJECT} simpleRecipes -> ${NEW_PROJECT} brews ==`);
   const base = `users/${TIEME_UID}`;
@@ -162,7 +167,7 @@ async function syncTieme({oldDb, newDb, apply, since}) {
 
   const existingIds = new Set(brews.map((b) => b.id));
   const beanIds = new Set(beans.map((b) => b.id));
-  const typeByKey = new Map(types.map((t) => [`${norm(t.roaster)}|${norm(t.farmer)}`, t]));
+  const typeByKey = new Map(types.map((t) => [`${norm(t.roaster)}|${norm(coffeeLabel(t))}`, t]));
   const typeIds = new Set(types.map((t) => t.id));
   const gearByName = new Map(gear.filter((g) => !g.archived && g.name).map((g) => [norm(g.name), g]));
   let customOrder = Math.min(0, ...brews.map((b) => Number(b.customOrder)).filter(Number.isFinite));
@@ -176,10 +181,13 @@ async function syncTieme({oldDb, newDb, apply, since}) {
   for (const recipe of todo) {
     const createdMs = toMs(recipe.createdAt);
     const roaster = clean(recipe.roaster);
-    const farmer = blendOf(recipe);
+    // Tieme's blend is the coffee's name; his farmer field is the farm (often empty).
+    const name = blendOf(recipe);
+    const farmer = clean(recipe.farmer);
     const coffee = {
       roaster,
       farmer,
+      // Tieme's origin goes in as the country.
       origin: clean(recipe.origin),
       variety: clean(recipe.variety),
       processing: clean(recipe.processing),
@@ -187,7 +195,7 @@ async function syncTieme({oldDb, newDb, apply, since}) {
     };
 
     // Coffee type: reuse one with the same roaster and name, else create one.
-    let type = typeByKey.get(`${norm(roaster)}|${norm(farmer)}`);
+    let type = typeByKey.get(`${norm(roaster)}|${norm(name)}`);
     if (!type) {
       const id = `sr_${recipe.id}`;
       type = {id};
@@ -195,6 +203,7 @@ async function syncTieme({oldDb, newDb, apply, since}) {
         writer.set(newDb.doc(`${base}/coffeeTypes/${id}`), {
           uid: TIEME_UID,
           roaster,
+          name,
           farmer,
           origin: coffee.origin,
           variety: coffee.variety,
@@ -203,7 +212,7 @@ async function syncTieme({oldDb, newDb, apply, since}) {
           rating: 0,
           webshopUrl: clean(recipe.roasterUrl),
           tasteNotes: "",
-          decaf: /decaf/i.test(`${recipe.name} ${farmer}`),
+          decaf: /decaf/i.test(`${recipe.name} ${name}`),
           imageUrl: "",
           createdAt: toIso(createdMs),
           updatedAt: toIso(createdMs),
@@ -211,7 +220,7 @@ async function syncTieme({oldDb, newDb, apply, since}) {
         });
         typeIds.add(id);
       }
-      typeByKey.set(`${norm(roaster)}|${norm(farmer)}`, type);
+      typeByKey.set(`${norm(roaster)}|${norm(name)}`, type);
     }
 
     // One bean per recipe document.
@@ -362,8 +371,10 @@ async function syncRobert({oldDb, newDb, apply, since}) {
     const pick = (field, typeField = field) => clean(brew[field]) || clean(bean?.[field]) || clean(type?.[typeField]);
     const coffee = {
       roaster: pick("roaster"),
-      blend: pick("farmer"),
-      origin: pick("origin"),
+      // Same label as before for coffees without a name, so their recipe documents keep their key.
+      blend: clean(type?.name) || pick("farmer"),
+      // Tieme's app has one origin field: "Micro-region, Country".
+      origin: formatOriginLabel({origin: pick("origin"), originMicroRegion: type?.originMicroRegion}),
       variety: pick("variety"),
       processing: pick("processing"),
       roastType: pick("roastType", "roast"),

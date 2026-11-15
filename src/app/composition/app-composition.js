@@ -767,6 +767,8 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
         const handleAIFile = (...args) => ensureAiImportModule().then((module) => module.handleAIFile(...args));
         const uploadPendingCoffeeTypeImage = (...args) =>
             ensureAiImportModule().then((module) => module.uploadPendingCoffeeTypeImage(...args));
+        const takePendingAIBagPrice = () =>
+            ensureAiImportModule().then((module) => module.takePendingAIBagPrice());
         const clearPendingAIBeanImageFile = (...args) => {
             void ensureAiImportModule().then((module) => module.clearPendingAIBeanImageFile(...args));
         };
@@ -1631,6 +1633,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                     appCommands?.dispatch?.(commandName, payload, { source: 'brews.actions' }),
                 getFirstBrewDateForBean,
                 uploadPendingCoffeeTypeImage,
+                takePendingAIBagPrice,
                 clearPendingAIBeanImageFile,
                 getCoffeeScale: () => coffeeScale,
                 showToast,

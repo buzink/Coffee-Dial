@@ -56,12 +56,21 @@ const generateContent = async ({ apiKey, model, parts, json = false, tools = nul
     return text;
 };
 
-const BAG_FIELDS = ['roaster', 'farmer', 'origin', 'variety', 'processing', 'roastType', 'tasteNotes'];
+const BAG_FIELDS = ['roaster', 'name', 'farmer', 'origin', 'originMicroRegion', 'variety', 'processing', 'roastType', 'tasteNotes', 'price'];
+const FIELD_RULES = [
+    'roaster is the roasting company.',
+    'name is the name the roaster gives this coffee or blend (for example "Kochere" or "Morning Blend"); not the roaster, and not the farm unless the coffee is named after it.',
+    'farmer is the farm, producer or washing station; leave it empty for a blend without one.',
+    'origin is the country only (for example "Ethiopia"); for a blend of several countries, list them comma-separated.',
+    'originMicroRegion is the region or area within that country (for example "Yirgacheffe", "Huila" or "Gedeb, Gedeo"), without the country.',
+    'price is the price of one bag as a plain number without currency sign (for example "14.50"); when several bag sizes are offered, the price of the smallest one.'
+].join(' ');
 const TASTE_NOTES_RULE = 'tasteNotes is the flavour or tasting notes the roaster gives (for example "violet, honeysuckle, bergamot, white peach"), as a short comma-separated list in the language of the source.';
 const BAG_PROMPT = [
     'You are a coffee expert.',
     'Look at this image of a coffee bag and extract the following information.',
     `Return ONLY a JSON object with these keys: ${BAG_FIELDS.join(', ')}.`,
+    FIELD_RULES,
     "For roastType, choose only from: 'Ultralight', 'Light', 'Medium', 'Medium-Dark', 'Dark' (Ultralight for very light, Nordic-style or 'ultra light' roasts).",
     TASTE_NOTES_RULE,
     'If a field is not found, use an empty string.'
@@ -109,7 +118,7 @@ const URL_PROMPT = [
     'Read the web page at the URL below (for example a roaster\'s shop page for one coffee)',
     'and extract the information about that coffee.',
     `Return ONLY a JSON object with these keys: ${[...BAG_FIELDS, 'imageUrl'].join(', ')}.`,
-    'roaster is the roasting company, farmer is the farm, producer, washing station or blend name.',
+    FIELD_RULES,
     "For roastType, choose only from: 'Ultralight', 'Light', 'Medium', 'Medium-Dark', 'Dark' (Ultralight for very light, Nordic-style or 'ultra light' roasts).",
     TASTE_NOTES_RULE,
     'imageUrl is the full address of the main product photo of this coffee on the page (for example its og:image).',

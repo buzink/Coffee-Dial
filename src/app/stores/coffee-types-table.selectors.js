@@ -1,7 +1,12 @@
+import { getOriginMacroRegion } from '../../core/origin-regions.js';
+
 export const DEFAULT_COFFEE_TYPES_FILTERS = {
+    name: null,
     roaster: null,
     farmer: null,
     origin: null,
+    originMicroRegion: null,
+    originMacroRegion: null,
     processing: null,
     decaf: null,
     variety: null,
@@ -12,6 +17,13 @@ export const createDefaultCoffeeTypeFilters = () => ({ ...DEFAULT_COFFEE_TYPES_F
 
 const normalizeText = (value) => (value || '').toString().toLowerCase().trim();
 
+// A coffee's value for a filter or sort key; the macro-region is worked out from the country.
+export const getCoffeeTypeFieldValue = (type = {}, key) => {
+    if (key === 'roast') return type.roast || type.roastType || '';
+    if (key === 'originMacroRegion') return getOriginMacroRegion(type.origin);
+    return type[key] || '';
+};
+
 export const selectCoffeeTypesQuickFilterValues = ({ key, coffeeTypes = [] }) => {
     if (key === 'decaf') {
         const hasDecaf = coffeeTypes.some((type) => !!type.decaf);
@@ -19,7 +31,7 @@ export const selectCoffeeTypesQuickFilterValues = ({ key, coffeeTypes = [] }) =>
         return [hasDecaf ? 'Decaf' : null, hasRegular ? 'Regular' : null].filter(Boolean);
     }
     const valueSource = coffeeTypes
-        .map((type) => (key === 'roast' ? (type.roast || type.roastType) : type[key]))
+        .map((type) => getCoffeeTypeFieldValue(type, key))
         .filter(Boolean);
     return [...new Set(valueSource)].sort();
 };
@@ -42,22 +54,25 @@ export const selectFilteredSortedCoffeeTypes = ({
                 const status = type.decaf ? 'Decaf' : 'Regular';
                 return normalizeText(status) === normalizeText(value);
             }
-            const targetValue = key === 'roast' ? (type.roast || type.roastType || '') : (type[key] || '');
+            const targetValue = getCoffeeTypeFieldValue(type, key);
             return normalizeText(targetValue) === normalizeText(value);
         });
     };
 
     const filteredTypes = uniqueCoffeeTypes.filter((type) => {
         const roaster = normalizeText(type.roaster);
+        const name = normalizeText(type.name);
         const farmer = normalizeText(type.farmer);
         const origin = normalizeText(type.origin);
+        const originMicroRegion = normalizeText(type.originMicroRegion);
+        const originMacroRegion = normalizeText(getOriginMacroRegion(type.origin));
         const processing = normalizeText(type.processing);
         const variety = normalizeText(type.variety);
         const roast = normalizeText(type.roast || type.roastType);
 
         if (!matchesQuickFilters(type)) return false;
         if (!hasSearch) return true;
-        return [roaster, farmer, origin, processing, variety, roast].join(' ').includes(normalizedSearch);
+        return [name, roaster, farmer, origin, originMicroRegion, originMacroRegion, processing, variety, roast].join(' ').includes(normalizedSearch);
     });
 
     const getSortValue = (type, key) => {
@@ -68,7 +83,7 @@ export const selectFilteredSortedCoffeeTypes = ({
         if (key === 'ground') return Number(type.groundKg) || 0;
         if (key === 'rating') return parseInt(type.rating, 10) || 0;
         if (key === 'createdAt') return type.createdAt || '';
-        return type[key] || '';
+        return getCoffeeTypeFieldValue(type, key);
     };
 
     return [...filteredTypes].sort((a, b) => {

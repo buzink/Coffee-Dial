@@ -5,13 +5,7 @@ import { DEFAULT_INTEGRATION_PREFERENCES } from '../core/integration-preferences
 export const DEFAULT_BREWS_PER_PAGE = 50;
 
 export const createColumnDefs = () => ([
-    { id: 'farmer', label: 'Blend/Farmer' },
-    { id: 'roaster', label: 'Roaster' },
-    { id: 'origin', label: 'Origin' },
-    { id: 'variety', label: 'Variety' },
-    { id: 'processing', label: 'Process' },
-    { id: 'decaf', label: 'Decaf' },
-    { id: 'roastType', label: 'Roast' },
+    { id: 'farmer', label: 'Coffee' },
     { id: 'method', label: 'Method' },
     { id: 'grinder', label: 'Grinder' },
     { id: 'grind', label: 'Grind' },
@@ -93,6 +87,6 @@ export const createInitialAppState = () => {
         beansSortKey: 'createdAt',
         beansSortDir: 'desc',
         currentSort: [{ key: 'createdAt', direction: 'desc' }],
-        activeFilters: { bean: null, coffeeType: null, gear: null, hasGraph: null, method: null, temp: null, roastType: null, roaster: null, origin: null, farmer: null, variety: null, processing: null, decaf: null, drink: null, grinder: null }
+        activeFilters: { bean: null, coffeeType: null, gear: null, hasGraph: null, method: null, temp: null, roastType: null, roaster: null, origin: null, originMicroRegion: null, originMacroRegion: null, farmer: null, variety: null, processing: null, decaf: null, drink: null, grinder: null }
     };
 };

@@ -74,8 +74,10 @@ export const createCoffeesCoordinator = ({
         const typeData = withDetectedDecaf({
             uid: user.uid,
             roaster: '',
+            name: '',
             farmer: '',
             origin: '',
+            originMicroRegion: '',
             processing: '',
             variety: '',
             roast: '',
