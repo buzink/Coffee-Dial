@@ -1370,6 +1370,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             void showSavedAIProfile();
             return ensureStatsModule().then((module) => module.changeStatsView(...args));
         };
+        const changeStatsPeriod = (...args) => ensureStatsModule().then((module) => module.changeStatsPeriod(...args));
         const calculateStats = (...args) => ensureStatsModule().then((module) => module.calculateStats(...args));
         const updateBeanMeter = (...args) => ensureStatsModule().then((module) => module.updateBeanMeter(...args));
         const renderCharts = (...args) => ensureStatsModule().then((module) => module.renderCharts(...args));
@@ -1955,6 +1956,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             cancelBrewQuickEditMode,
             cancelCoffeeTypeEditMode,
             cancelGasEditMode,
+            changeStatsPeriod,
             changeStatsView,
             changeView,
             clearAllFilters,

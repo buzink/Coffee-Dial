@@ -21,6 +21,51 @@ export const createStatsModule = ({
     }
     const chartInstances = {};
     let currentStatsUid = 'mine';
+    let currentStatsPeriod = 'all';
+    let loadedStats = null;
+    let loadSeq = 0;
+
+    const dateMs = (value) => {
+        if (!value) return NaN;
+        const dateObj = typeof value.toDate === 'function' ? value.toDate() : new Date(value);
+        return dateObj instanceof Date ? dateObj.getTime() : NaN;
+    };
+    // Start of the chosen period, or null for all time.
+    const getPeriodStart = (period, now = new Date()) => {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        if (period === '7d') start.setDate(start.getDate() - 6);
+        else if (period === '30d') start.setDate(start.getDate() - 29);
+        else if (period === '90d') start.setMonth(start.getMonth() - 3);
+        else if (period === '365d') start.setFullYear(start.getFullYear() - 1);
+        else if (period === 'year') start.setMonth(0, 1);
+        else return null;
+        return start;
+    };
+    // Brews made in the period, gear bought in it, and bags that were open at some point during it.
+    const filterByPeriod = ({ brews, gear, beans }, period) => {
+        const start = getPeriodStart(period);
+        if (!start) return { brews, gear, beans };
+        const startMs = start.getTime();
+        return {
+            brews: brews.filter((b) => dateMs(b.createdAt) >= startMs),
+            gear: gear.filter((g) => dateMs(g.purchasedDate) >= startMs),
+            beans: beans.filter((bean) => {
+                const endMs = bean?.archived ? dateMs(bean.archivedDate) : Date.now();
+                return !Number.isFinite(endMs) || endMs >= startMs;
+            })
+        };
+    };
+    const applyStatsPeriod = async () => {
+        if (!loadedStats) return;
+        const { brews, gear, beans } = filterByPeriod(loadedStats, currentStatsPeriod);
+        await calculateStats(brews, gear, beans);
+    };
+    const changeStatsPeriod = async (period) => {
+        currentStatsPeriod = period || 'all';
+        const sel = document.getElementById('statsPeriodSelect');
+        if (sel && sel.value !== currentStatsPeriod) sel.value = currentStatsPeriod;
+        await applyStatsPeriod();
+    };
     const getChartCtor = async () => {
         try {
             if (typeof getChart === 'function') {
@@ -93,6 +138,7 @@ export const createStatsModule = ({
 
     const changeStatsView = async (uid) => {
         currentStatsUid = uid;
+        const seq = ++loadSeq;
         const user = getCurrentUser();
         let dataToUse = [];
         let gearToUse = [];
@@ -118,7 +164,9 @@ export const createStatsModule = ({
             const beansSnap = await getDocs(beansQ);
             beansSnap.forEach((d) => beansToUse.push({ id: d.id, ...d.data() }));
         }
-        await calculateStats(dataToUse, gearToUse, beansToUse);
+        if (seq !== loadSeq) return;
+        loadedStats = { brews: dataToUse, gear: gearToUse, beans: beansToUse };
+        await applyStatsPeriod();
     };
 
     const renderCharts = async (roast, method, drink, stars) => {
@@ -261,7 +309,8 @@ export const createStatsModule = ({
 
         const now = new Date();
         const last7 = dataToUse.filter((c) => now - new Date(c.createdAt) < 7 * oneDay).length;
-        const firstDate = new Date(Math.min(...dataToUse.map((c) => new Date(c.createdAt || now))));
+        const periodStart = getPeriodStart(currentStatsPeriod, now);
+        const firstDate = periodStart || new Date(Math.min(...dataToUse.map((c) => new Date(c.createdAt || now))));
         const diffDays = Math.max(1, Math.round(Math.abs((now - firstDate) / oneDay)));
         const avg = (total / diffDays).toFixed(1);
         const lastBrewDate = new Date(Math.max(...dataToUse.map((c) => new Date(c.createdAt || now))));
@@ -482,6 +531,7 @@ export const createStatsModule = ({
         closeStats,
         toggleStatsUniqueTable,
         changeStatsView,
+        changeStatsPeriod,
         calculateStats,
         updateBeanMeter: updateBeanMeterInternal,
         renderCharts

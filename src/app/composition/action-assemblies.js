@@ -14,6 +14,7 @@ export const createActionAssemblies = (deps = {}) => {
             'applyFilter',
             'applyFilterFromQuick',
             'cancelBeanEditMode',
+            'changeStatsPeriod',
             'changeStatsView',
             'changeView',
             'clearAllFilters',

@@ -232,6 +232,24 @@ export const createSocialModule = ({
         populateSelect(document.getElementById('beansViewSelect'), 'bags');
         populateSelect(document.getElementById('coffeeTypesViewSelect'), 'coffees');
         populateSelect(document.getElementById('gasViewSelect'), 'gear');
+
+        // Statistics keeps its own choice: the page can open (e.g. after a refresh) before
+        // the following list arrives, so add the friends now and keep what it shows.
+        const statsSelect = document.getElementById('statsViewSelect');
+        if (statsSelect) {
+            const shown = statsSelect.value || 'mine';
+            statsSelect.innerHTML = '<option value="mine">My brews</option>';
+            following.forEach((f) => {
+                const option = document.createElement('option');
+                option.value = f.uid;
+                option.text = f.name || `Friend (${f.uid.substr(0, 5)}...)`;
+                statsSelect.appendChild(option);
+            });
+            const stillThere = [...statsSelect.options].some((o) => o.value === shown);
+            statsSelect.value = stillThere ? shown : 'mine';
+            statsSelect.classList.toggle('hidden', !hasFriendOptions);
+            if (!stillThere && shown !== 'mine') statsSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
     };
 
     const loadFollowingList = async () => {

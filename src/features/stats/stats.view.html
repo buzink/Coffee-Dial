@@ -6,9 +6,17 @@
                     <span>Statistics</span>
                 </h3>
 
-                <div class="flex flex-wrap items-center justify-end gap-3">
+                <div class="stats-filters">
                     <select id="statsViewSelect" aria-label="Statistics view" data-action-change="changeStatsView(this.value)" class="bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] text-coffee-900 dark:text-white text-sm rounded-lg block p-2.5 shadow-sm font-bold min-w-[140px]">
                         <option value="mine">My brews</option>
+                    </select>
+                    <select id="statsPeriodSelect" aria-label="Statistics period" data-action-change="changeStatsPeriod(this.value)" class="bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] text-coffee-900 dark:text-white text-sm rounded-lg block p-2.5 shadow-sm font-bold min-w-[140px]">
+                        <option value="all">All time</option>
+                        <option value="7d">Last 7 days</option>
+                        <option value="30d">Last 30 days</option>
+                        <option value="90d">Last 3 months</option>
+                        <option value="year">This year</option>
+                        <option value="365d">Last 12 months</option>
                     </select>
                 </div>
             </div>
@@ -75,7 +83,7 @@
                                     <span class="text-sm text-coffee-600 dark:text-[#a8a29e]">Unique Coffees Tried:</span>
                                     <span id="statUniqueCoffees" data-action-click="toggleStatsUniqueTable(true)" class="font-bold text-xl text-blue-500 dark:text-blue-400 cursor-pointer hover:underline">-</span>
                                 </div>
-                                <div class="text-xs text-gray-400 italic mb-2">*Based on unique combination of Roaster, Origin, and Blend/Farmer.</div>
+                                <div class="text-xs text-gray-400 italic mb-2">*One entry per coffee.</div>
                                 
                                 <div>
                                     <span class="block text-sm text-coffee-600 dark:text-[#a8a29e] mb-1">Most Frequently Brewed:</span>
