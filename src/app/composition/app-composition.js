@@ -1527,7 +1527,8 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             dispatchCommand: (commandName, payload) =>
                 appCommands?.dispatch?.(commandName, payload, { source: 'brews.card-ui' }),
             cancelBrewQuickEditMode: (...args) => cancelBrewQuickEditMode(...args),
-            resetCardPhotoState: (...args) => resetCardPhotoState(...args)
+            resetCardPhotoState: (...args) => resetCardPhotoState(...args),
+            openLightbox: (...args) => openLightbox?.(...args)
         });
 
         let brewsCardGraphModulePromise = null;

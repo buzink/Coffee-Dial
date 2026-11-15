@@ -19,7 +19,8 @@ export const createBeansCardUiModule = ({
     toggleBeanFrozen,
     toggleBeanArchive,
     dispatchCommand,
-    publishEvent
+    publishEvent,
+    openLightbox
 }) => {
     let navigationOrderOverride = null;
     const beansVm = createBeansVmModule();
@@ -132,15 +133,14 @@ export const createBeansCardUiModule = ({
             imgEl.classList.add('hidden');
             placeholderEl.classList.remove('hidden');
         }
+        // Tapping the coffee's photo shows it larger in the lightbox (as on the coffee card);
+        // "Go to coffee" in the menu is the way to the coffee.
         if (imgEl) {
-            if (bean.coffeeTypeId) {
+            if (coffeeImageUrl && typeof openLightbox === 'function') {
                 imgEl.classList.add('cursor-pointer');
                 imgEl.onclick = (event) => {
                     event.stopPropagation();
-                    dispatchCommand?.(
-                        'coffees.openCard',
-                        { id: bean.coffeeTypeId, source: 'beans.image' }
-                    );
+                    openLightbox({ items: [{ url: coffeeImageUrl, alt: 'Coffee photo' }], startIndex: 0 });
                 };
             } else {
                 imgEl.classList.remove('cursor-pointer');
@@ -148,19 +148,8 @@ export const createBeansCardUiModule = ({
             }
         }
         if (placeholderEl) {
-            if (bean.coffeeTypeId) {
-                placeholderEl.classList.add('cursor-pointer');
-                placeholderEl.onclick = (event) => {
-                    event.stopPropagation();
-                    dispatchCommand?.(
-                        'coffees.openCard',
-                        { id: bean.coffeeTypeId, source: 'beans.image' }
-                    );
-                };
-            } else {
-                placeholderEl.classList.remove('cursor-pointer');
-                placeholderEl.onclick = null;
-            }
+            placeholderEl.classList.remove('cursor-pointer');
+            placeholderEl.onclick = null;
         }
         if (beanImageUrl) {
             beanImgEl.src = beanImageUrl;

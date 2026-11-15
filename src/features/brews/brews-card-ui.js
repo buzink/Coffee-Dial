@@ -18,7 +18,8 @@ export const createBrewsCardUiModule = ({
     updateCoffeeCardActionMenu,
     dispatchCommand,
     cancelBrewQuickEditMode,
-    resetCardPhotoState
+    resetCardPhotoState,
+    openLightbox
 }) => {
     const brewsVm = createBrewsVmModule();
     let navigationOrderOverride = null;
@@ -86,8 +87,6 @@ export const createBrewsCardUiModule = ({
         const imageSection = document.getElementById('cardCoffeeImageSection');
         const imageEl = document.getElementById('cardCoffeeImage');
         const placeholderEl = document.getElementById('cardCoffeeImagePlaceholder');
-        const linkedBeanId = c.beanId || null;
-        const bean = linkedBeanId ? getBeans().find((b) => b.id === linkedBeanId) : null;
         const coffeeTypeForBrew = getCoffeeTypeForBrew?.(c) || null;
         const coffeeImageUrl = coffeeTypeForBrew?.imageUrl || coffeeTypeForBrew?.imageURL || '';
 
@@ -110,22 +109,19 @@ export const createBrewsCardUiModule = ({
                 placeholderEl.classList.remove('hidden');
             }
 
-            if (bean?.id) {
+            // Tapping the coffee's photo shows it larger in the lightbox (as on the coffee card);
+            // "Go to bag" in the menu is the way to the bag.
+            imageEl.onclick = null;
+            placeholderEl.onclick = null;
+            placeholderEl.classList.remove('cursor-pointer');
+            if (coffeeImageUrl && typeof openLightbox === 'function') {
                 imageEl.classList.add('cursor-pointer');
-                placeholderEl.classList.add('cursor-pointer');
                 imageEl.onclick = (event) => {
                     event.stopPropagation();
-                    dispatchCommand?.('beans.openCard', { beanId: bean.id, event: null, keepNavigationOrder: false });
-                };
-                placeholderEl.onclick = (event) => {
-                    event.stopPropagation();
-                    dispatchCommand?.('beans.openCard', { beanId: bean.id, event: null, keepNavigationOrder: false });
+                    openLightbox({ items: [{ url: coffeeImageUrl, alt: 'Coffee photo' }], startIndex: 0 });
                 };
             } else {
                 imageEl.classList.remove('cursor-pointer');
-                placeholderEl.classList.remove('cursor-pointer');
-                imageEl.onclick = null;
-                placeholderEl.onclick = null;
             }
         } else if (imageEl && placeholderEl) {
             imageEl.onclick = null;

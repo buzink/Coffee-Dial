@@ -154,7 +154,8 @@ export const createBeansCoordinator = ({
         toggleBeanFrozen: (...args) => toggleBeanFrozen(...args),
         toggleBeanArchive: (...args) => toggleBeanArchive(...args),
         dispatchCommand,
-        publishEvent
+        publishEvent,
+        openLightbox: (...args) => openLightbox?.(...args)
     });
     openCard = beansCardUi.openCard;
     // Closing the card of a new, unsaved bean discards it.
