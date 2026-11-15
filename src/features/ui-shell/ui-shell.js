@@ -419,7 +419,6 @@ export const createUiShellModule = ({
             closeIfVisible('coffeeScaleModal', () => closeCoffeeScaleModal?.()) ||
             closeIfVisible('uploadPhotoModal', () => closeUploadModal()) ||
             closeIfVisible('coffeeTypeCardOverlay', () => closeCoffeeTypeCard(null)) ||
-            closeIfVisible('galleryModal', () => document.getElementById('galleryModal')?.classList.add('hidden')) ||
             closeIfVisible('gasCardOverlay', () => closeGasCard(null)) ||
             closeIfVisible('beanCardOverlay', () => closeBeanCard(null)) ||
             closeIfVisible('modalOverlay', () => closeModal());

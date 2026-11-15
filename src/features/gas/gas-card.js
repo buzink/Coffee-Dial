@@ -92,7 +92,7 @@ export const createGasCardModule = ({
     const setGasCardHeightForMode = (mode = 'view') => {
         const panel = document.getElementById('gasCardPanel');
         if (!panel) return;
-        panel.style.maxHeight = '85vh';
+        panel.style.maxHeight = '90vh';
         panel.style.minHeight = '48vh';
     };
 

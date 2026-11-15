@@ -1,7 +1,9 @@
-<div id="gasCardOverlay" data-feature-root="gas" class="app-card hidden fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeGasCard(event)">
-    <div id="gasCardPanel" class="bg-white dark:bg-[#292524] w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col max-h-[85vh]" data-action-click="handleGasCardOverlayClick(event)">
-        <div class="bg-coffee-100 dark:bg-[#1c1917] p-4 border-b border-coffee-200 dark:border-[#44403c] relative">
-            <div class="absolute top-3 right-3 flex items-center gap-1">
+<div id="gasCardOverlay" data-feature-root="gas" class="app-card app-sheet hidden fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeGasCard(event)">
+    <div id="gasCardPanel" class="app-sheet-panel bg-white dark:bg-[#292524] w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col max-h-[85vh]" data-action-click="handleGasCardOverlayClick(event)">
+        <div class="app-sheet-head bg-coffee-100 dark:bg-[#1c1917] p-4 border-b border-coffee-200 dark:border-[#44403c] relative">
+            <button type="button" data-card-back class="app-sheet-back" title="Back" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="app-sheet-type"><i class="fa-solid fa-screwdriver-wrench"></i> Gear</span>
+            <div class="app-sheet-actions absolute top-3 right-3 flex items-center gap-1">
                 <button id="gasCardEditBtn" data-action-click="enterGasEditMode()" class="w-11 h-11 flex items-center justify-center text-coffee-400 hover:text-coffee-800 dark:text-[#57534e] dark:hover:text-white transition-colors" title="Edit">
                     <i class="fa-solid fa-pen-to-square text-lg"></i>
                 </button>
@@ -28,15 +30,12 @@
                         </button>
                     </div>
                 </div>
-                <button data-action-click="closeGasCard(null)" class="w-11 h-11 flex items-center justify-center text-coffee-400 hover:text-coffee-800 dark:text-[#57534e] dark:hover:text-white transition-colors" title="Close">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+                <button type="button" data-card-close class="app-sheet-close" title="Close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <!-- Shown instead of the title while editing or adding a gear -->
             <h3 class="app-card-mode-title text-lg font-bold text-coffee-900 dark:text-white items-center gap-2 pr-36 py-2" hidden><i class="fa-solid fa-screwdriver-wrench text-coffee-700 dark:text-[#d6ccc2]"></i> <span class="app-when-editing">Edit gear</span><span class="app-when-adding" hidden>Add gear</span></h3>
             <div class="app-card-title-block pr-36">
                 <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-screwdriver-wrench text-coffee-600 dark:text-[#d6ccc2]"></i>
                     <h3 id="gasCardTitle" class="text-lg font-bold text-coffee-900 dark:text-white leading-tight mb-1"></h3>
                 </div>
                 <p id="gasCardSubtitle" class="text-xs text-coffee-500 dark:text-[#a8a29e]"></p>
@@ -150,13 +149,11 @@
     </div>
 </div>
 
-<div id="gasBulkAddModal" data-feature-root="gas" class="hidden fixed inset-0 z-[10020] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeGasBulkAddModal(event)">
-    <div class="bg-white dark:bg-[#292524] w-full max-w-sm min-h-[56vh] rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col" data-action-click="event.stopPropagation()">
-        <div class="p-4 border-b border-coffee-200 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] flex items-center justify-between">
-            <h3 class="text-sm font-bold text-coffee-900 dark:text-white"><i class="fa-solid fa-layer-group text-teal-600 mr-2"></i>Bulk add to brews</h3>
-            <button data-action-click="closeGasBulkAddModal(null)" class="text-coffee-400 hover:text-coffee-800 dark:text-[#57534e] dark:hover:text-white transition-colors">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
+<div id="gasBulkAddModal" data-feature-root="gas" class="app-sheet hidden fixed inset-0 z-[10020] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeGasBulkAddModal(event)">
+    <div class="app-sheet-panel bg-white dark:bg-[#292524] w-full max-w-sm min-h-[56vh] rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col" data-action-click="event.stopPropagation()">
+        <div class="app-sheet-head p-4 border-b border-coffee-200 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] flex items-center justify-between">
+            <button type="button" data-action-click="closeGasBulkAddModal(null)" class="app-sheet-back" title="Back" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+            <h3 class="app-sheet-type text-sm font-bold text-coffee-900 dark:text-white"><i class="fa-solid fa-layer-group text-teal-600"></i>Bulk add to brews</h3>
         </div>
         <div class="p-4 space-y-3 flex-1">
             <p class="text-xs text-coffee-600 dark:text-[#a8a29e]">Add <span id="gasBulkSourceLabel" class="font-semibold text-coffee-800 dark:text-[#d6ccc2]">this gear item</span> to brews that match all selected criteria.</p>
@@ -190,13 +187,11 @@
     </div>
 </div>
 
-<div id="gasMergeModal" data-feature-root="gas" class="hidden fixed inset-0 z-[10020] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeGasMergeModal(event)">
-    <div class="bg-white dark:bg-[#292524] w-full max-w-sm min-h-[44vh] rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col" data-action-click="event.stopPropagation()">
-        <div class="p-4 border-b border-coffee-200 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] flex items-center justify-between">
-            <h3 class="text-sm font-bold text-coffee-900 dark:text-white"><i class="fa-solid fa-code-merge text-purple-500 mr-2"></i>Merge gear item</h3>
-            <button data-action-click="closeGasMergeModal(null)" class="text-coffee-400 hover:text-coffee-800 dark:text-[#57534e] dark:hover:text-white transition-colors">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
+<div id="gasMergeModal" data-feature-root="gas" class="app-sheet hidden fixed inset-0 z-[10020] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeGasMergeModal(event)">
+    <div class="app-sheet-panel bg-white dark:bg-[#292524] w-full max-w-sm min-h-[44vh] rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col" data-action-click="event.stopPropagation()">
+        <div class="app-sheet-head p-4 border-b border-coffee-200 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] flex items-center justify-between">
+            <button type="button" data-action-click="closeGasMergeModal(null)" class="app-sheet-back" title="Back" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+            <h3 class="app-sheet-type text-sm font-bold text-coffee-900 dark:text-white"><i class="fa-solid fa-code-merge text-purple-500"></i>Merge gear item</h3>
         </div>
         <div class="p-4 space-y-3 flex-1">
             <p class="text-xs text-coffee-600 dark:text-[#a8a29e]">Merging will move all brew gear links from <span id="gasMergeSourceLabel" class="font-semibold text-coffee-800 dark:text-[#d6ccc2]">this gear item</span> to the selected item and then delete the source item.</p>

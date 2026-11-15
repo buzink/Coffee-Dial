@@ -2550,13 +2550,15 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 beans: () => actions.openBeans?.(),
                 coffees: () => actions.openCoffeeTypes?.(),
                 gear: () => actions.openGasList?.(),
-                statistics: () => actions.openStats?.()
+                statistics: () => actions.openStats?.(),
+                moments: () => actions.openGallery?.()
             };
             const pageCloseActions = {
                 beans: () => actions.closeBeans?.(),
                 coffees: () => actions.closeCoffeeTypes?.(),
                 gear: () => actions.closeGasList?.(),
-                statistics: () => actions.closeStats?.()
+                statistics: () => actions.closeStats?.(),
+                moments: () => actions.hideGalleryModal?.()
             };
             // "Brews" is the view shown when no page is: going there closes the current page.
             actions.openBrews = () => {

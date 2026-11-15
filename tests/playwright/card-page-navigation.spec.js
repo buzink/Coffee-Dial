@@ -2,8 +2,9 @@ import { test, expect } from '@playwright/test';
 
 // A card of another type than the current page moves to that card's page:
 // brews → brew card → "Go to coffee" shows the coffees page with the coffee card
-// on top. Closing the card stays on coffees; Back returns to brews with the brew
-// card open again.
+// on top. The card's back button returns to brews with the brew card open again;
+// there the back button just closes the brew card (it was opened on its own page).
+// The X always just closes the card and stays on the page under it.
 test('card of another type opens on its own page and Back restores the previous card', async ({ page }) => {
     await page.goto('/index.html?e2eSeed=1');
 
@@ -24,14 +25,25 @@ test('card of another type opens on its own page and Back restores the previous 
     await expect(page.locator('#coffeeTypesPage')).toBeVisible();
     await expect(page).toHaveURL(/[?&]coffees(&|$)/);
 
-    await coffeeCard.locator('[data-action-click="closeCoffeeTypeCard(null)"]').click();
-    await expect(coffeeCard).toBeHidden();
-    await expect(page.locator('#coffeeTypesPage')).toBeVisible();
-
-    await page.goBack();
+    await coffeeCard.locator('[data-card-back]').click();
     await expect(page).not.toHaveURL(/[?&]coffees(&|$)/);
     await expect(page.locator('#coffeeTypesPage')).toBeHidden();
     await expect(page.locator('#signedInContent')).toBeVisible();
     await expect(brewCard).toBeVisible();
     await expect(coffeeCard).toBeHidden();
+
+    await brewCard.locator('[data-card-back]').click();
+    await expect(brewCard).toBeHidden();
+    await expect(page.locator('#signedInContent')).toBeVisible();
+
+    // The X closes the card and stays on the page under it (coffees), unlike Back.
+    await page.evaluate((id) => window.__coffeeDialApp.actions.brewsOpenCard(id), brewId);
+    await page.locator('#coffeeCardMenuBtn').click();
+    await page.locator('#coffeeCardActionMenu').getByRole('button', { name: 'Go to coffee' }).click();
+    await expect(coffeeCard).toBeVisible();
+    await coffeeCard.locator('[data-card-close]').click();
+    await expect(coffeeCard).toBeHidden();
+    await expect(brewCard).toBeHidden();
+    await expect(page.locator('#coffeeTypesPage')).toBeVisible();
+    await expect(page).toHaveURL(/[?&]coffees(&|$)/);
 });

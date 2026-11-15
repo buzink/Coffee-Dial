@@ -1,10 +1,10 @@
-// Main sections (beans, coffees, gear, statistics) render as pages inside <main>
+// Main sections (beans, coffees, gear, statistics, moments) render as pages inside <main>
 // instead of overlays. Each page element carries `data-app-page="<route key>"` and
 // is still shown/hidden by its feature with the `hidden` class. This module keeps
 // at most one page visible: when one is shown, the others are hidden and the view
 // scrolls to the top. With no page visible, the brews view shows (see app.css).
 
-export const PAGE_ROUTE_KEYS = ['beans', 'coffees', 'gear', 'statistics'];
+export const PAGE_ROUTE_KEYS = ['beans', 'coffees', 'gear', 'statistics', 'moments'];
 
 const isVisible = (el) => !!el && !el.classList.contains('hidden');
 

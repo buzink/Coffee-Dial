@@ -1,13 +1,15 @@
     <!-- Coffee Card Overlay -->
-    <div id="coffeeTypeCardOverlay" data-feature-root="coffees" class="app-card hidden fixed inset-0 z-[10060] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeCoffeeTypeCard(event)">
-        <div class="relative bg-white dark:bg-[#292524] w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col max-h-[85vh]" data-action-click="handleCoffeeTypeCardOverlayClick(event)">
+    <div id="coffeeTypeCardOverlay" data-feature-root="coffees" class="app-card app-sheet hidden fixed inset-0 z-[10060] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeCoffeeTypeCard(event)">
+        <div class="app-sheet-panel relative bg-white dark:bg-[#292524] w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col max-h-[85vh]" data-action-click="handleCoffeeTypeCardOverlayClick(event)">
             <!-- While Extract reads a photo or page: the card stays open and waits here -->
             <div id="coffeeTypeCardBusy" class="app-card-busy" hidden role="status" aria-live="polite">
                 <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
                 <span>Extracting coffee details…</span>
             </div>
-            <div class="bg-coffee-100 dark:bg-[#1c1917] p-4 border-b border-coffee-200 dark:border-[#44403c] relative">
-                <div class="absolute top-3 right-3 flex items-center gap-1">
+            <div class="app-sheet-head bg-coffee-100 dark:bg-[#1c1917] p-4 border-b border-coffee-200 dark:border-[#44403c] relative">
+                <button type="button" data-card-back class="app-sheet-back" title="Back" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+                <span class="app-sheet-type"><i class="fa-solid fa-seedling"></i> Coffee</span>
+                <div class="app-sheet-actions absolute top-3 right-3 flex items-center gap-1">
                     <!-- While adding: fill the new coffee from a photo of the bag (AI) -->
                     <div class="app-card-extract relative" hidden>
                         <button type="button" data-action-click="toggleCoffeeTypesAiMenu(event)" id="coffeeTypesAiScanBtn" class="h-9 px-3 flex items-center gap-2 rounded-lg border border-coffee-200 dark:border-[#57534e] text-xs font-bold text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors">
@@ -52,15 +54,12 @@
                             </button>
                         </div>
                     </div>
-                    <button data-action-click="closeCoffeeTypeCard(null)" class="w-11 h-11 flex items-center justify-center text-coffee-400 hover:text-coffee-800 dark:text-[#57534e] dark:hover:text-white transition-colors" title="Close">
-                        <i class="fa-solid fa-xmark text-xl"></i>
-                    </button>
+                    <button type="button" data-card-close class="app-sheet-close" title="Close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <!-- Shown instead of the title while editing or adding a coffee -->
                 <h3 class="app-card-mode-title text-lg font-bold text-coffee-900 dark:text-white items-center gap-2 pr-36 py-2" hidden><i class="fa-solid fa-seedling text-coffee-700 dark:text-[#d6ccc2]"></i> <span class="app-when-editing">Edit coffee</span><span class="app-when-adding" hidden>Add coffee</span></h3>
                 <div class="app-card-title-block pr-36">
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-seedling text-coffee-600"></i>
                         <h3 id="coffeeTypeCardTitle" class="text-lg font-bold text-coffee-900 dark:text-white leading-tight mb-1"></h3>
                     </div>
                     <p id="coffeeTypeCardSubtitle" class="text-xs text-coffee-500 dark:text-[#a8a29e]"></p>

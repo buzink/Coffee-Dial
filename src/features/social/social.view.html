@@ -1,13 +1,11 @@
     <!-- Other Modals -->
-    <div id="modalOverlay" data-feature-root="social" class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div class="bg-white dark:bg-[#292524] rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col">
-            <div class="p-5 border-b border-coffee-200 dark:border-[#44403c] flex justify-between items-center bg-coffee-50 dark:bg-[#1c1917]">
-                <h3 class="font-bold text-coffee-900 dark:text-white">
-                    <i class="fa-solid fa-user-group mr-2"></i>Profile & friends
+    <div id="modalOverlay" data-feature-root="social" class="app-sheet hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div class="app-sheet-panel bg-white dark:bg-[#292524] rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden border border-coffee-200 dark:border-[#44403c] flex flex-col">
+            <div class="app-sheet-head p-5 border-b border-coffee-200 dark:border-[#44403c] flex justify-between items-center bg-coffee-50 dark:bg-[#1c1917]">
+                <button type="button" data-action-click="closeModal()" class="app-sheet-back" title="Back" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+                <h3 class="app-sheet-type font-bold text-coffee-900 dark:text-white">
+                    <i class="fa-solid fa-user-group"></i>Profile & friends
                 </h3>
-                <button data-action-click="closeModal()" class="text-gray-500 hover:text-gray-700 dark:text-[#78716c] dark:hover:text-white">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
             </div>
             <div class="flex-1 overflow-y-auto px-6 pt-4 pb-4">
                 <div class="bg-coffee-50 dark:bg-[#1c1917]/50 p-4 rounded-lg border border-coffee-100 dark:border-[#44403c] mb-3">

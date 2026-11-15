@@ -2033,17 +2033,9 @@ export const createGalleryModule = ({
         document.getElementById('galleryEmpty')?.classList.add('hidden');
         document.getElementById('galleryLoadMore')?.classList.add('hidden');
 
-        if (tab === 'mine') {
-            tMine.classList.add('bg-coffee-50', 'dark:bg-[#1c1917]', 'text-coffee-700', 'dark:text-[#d6ccc2]');
-            tMine.classList.remove('text-coffee-500', 'dark:text-[#78716c]');
-            tShared.classList.remove('bg-coffee-50', 'dark:bg-[#1c1917]', 'text-coffee-700', 'dark:text-[#d6ccc2]');
-            tShared.classList.add('text-coffee-500', 'dark:text-[#78716c]');
-        } else {
-            tShared.classList.add('bg-coffee-50', 'dark:bg-[#1c1917]', 'text-coffee-700', 'dark:text-[#d6ccc2]');
-            tShared.classList.remove('text-coffee-500', 'dark:text-[#78716c]');
-            tMine.classList.remove('bg-coffee-50', 'dark:bg-[#1c1917]', 'text-coffee-700', 'dark:text-[#d6ccc2]');
-            tMine.classList.add('text-coffee-500', 'dark:text-[#78716c]');
-        }
+        // Segmented control on the Moments page: the selected side is styled by app.css.
+        tMine?.setAttribute('aria-selected', tab === 'mine' ? 'true' : 'false');
+        tShared?.setAttribute('aria-selected', tab === 'mine' ? 'false' : 'true');
         loadMoreGallery();
     };
 

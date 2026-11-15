@@ -236,7 +236,8 @@
         body:has(#statsPage:not(.hidden)) .app-header-nav-item[data-nav-page="statistics"],
         body:has(#beansPage:not(.hidden)) .app-header-nav-item[data-nav-page="beans"],
         body:has(#coffeeTypesPage:not(.hidden)) .app-header-nav-item[data-nav-page="coffees"],
-        body:has(#gasPage:not(.hidden)) .app-header-nav-item[data-nav-page="gear"] {
+        body:has(#gasPage:not(.hidden)) .app-header-nav-item[data-nav-page="gear"],
+        body:has(#galleryModal:not(.hidden)) .app-header-nav-item[data-nav-page="moments"] {
             background-color: #f2e8e5;
             color: #4a3b32;
         }
@@ -244,7 +245,8 @@
         .dark body:has(#statsPage:not(.hidden)) .app-header-nav-item[data-nav-page="statistics"],
         .dark body:has(#beansPage:not(.hidden)) .app-header-nav-item[data-nav-page="beans"],
         .dark body:has(#coffeeTypesPage:not(.hidden)) .app-header-nav-item[data-nav-page="coffees"],
-        .dark body:has(#gasPage:not(.hidden)) .app-header-nav-item[data-nav-page="gear"] {
+        .dark body:has(#gasPage:not(.hidden)) .app-header-nav-item[data-nav-page="gear"],
+        .dark body:has(#galleryModal:not(.hidden)) .app-header-nav-item[data-nav-page="moments"] {
             background-color: #44403c;
             color: #ffffff;
         }
@@ -440,7 +442,8 @@
         body:has(#statsPage:not(.hidden)) .app-header-title > [data-title-page="statistics"],
         body:has(#beansPage:not(.hidden)) .app-header-title > [data-title-page="beans"],
         body:has(#coffeeTypesPage:not(.hidden)) .app-header-title > [data-title-page="coffees"],
-        body:has(#gasPage:not(.hidden)) .app-header-title > [data-title-page="gear"] {
+        body:has(#gasPage:not(.hidden)) .app-header-title > [data-title-page="gear"],
+        body:has(#galleryModal:not(.hidden)) .app-header-title > [data-title-page="moments"] {
             display: inline-flex;
         }
 
@@ -515,5 +518,268 @@
             .app-page-head { padding-top: 0 !important; }
         }
 
+
+        /* Cards and dialogs as liquid-glass sheets (iOS style). Markup:
+           .app-sheet (overlay) > .app-sheet-panel > .app-sheet-head with, in its first row,
+           .app-sheet-back (top left, goes back to where you came from), .app-sheet-type
+           (what the card is) and .app-sheet-actions (icons, top right; on brew, bag, coffee
+           and gear cards it ends with .app-sheet-close, the X that closes the card and stays on
+           the page under it; dialogs such as Help have no page under them); everything else in
+           the head (title, subtitle) goes in the rows below. Mobile: full screen. Desktop:
+           the width of the help card (42rem), unless .app-sheet-wide keeps its own. */
+        .app-sheet { background-color: rgba(28, 25, 23, 0.38) !important; }
+        .app-sheet-panel {
+            display: flex !important;
+            flex-direction: column;
+            width: 100%;
+            max-height: 90vh !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            border-radius: 1.75rem !important;
+            background-color: rgba(255, 255, 255, 0.86) !important;
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.7) !important;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+        }
+        .app-sheet-panel:not(.app-sheet-wide),
+        .app-sheet-frame { max-width: 42rem !important; }
+        .dark .app-sheet-panel {
+            background-color: rgba(28, 25, 23, 0.74) !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+        }
+        /* Inner parts with their own white or dark fill let the glass through. */
+        .app-sheet-panel > div:not(.app-sheet-head):not(.app-card-busy),
+        .app-sheet-panel #brewFormModalBody { background-color: transparent !important; }
+        /* A dialog body with its own height cap (Preferences: max-h-[60vh]) fills the sheet
+           instead, and scrolls inside it; otherwise the full-screen sheet ends in an empty
+           block under the content. */
+        .app-sheet-panel > div[class*="max-h-["]:not(.app-sheet-head) {
+            flex: 1 1 auto;
+            min-height: 0;
+            max-height: none !important;
+        }
+        .app-sheet-head {
+            display: grid !important;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            column-gap: 0.5rem;
+            row-gap: 0.75rem;
+            flex-shrink: 0;
+            /* Above the card's content, so the action menus open over it. */
+            position: relative;
+            z-index: 10;
+            padding: 0.75rem 0.75rem 1rem !important;
+            background-color: transparent !important;
+            border-bottom: 1px solid rgba(127, 85, 57, 0.12) !important;
+        }
+        .dark .app-sheet-head { border-bottom-color: rgba(255, 255, 255, 0.08) !important; }
+        .app-sheet-head-bare { border-bottom: 0 !important; padding-bottom: 0 !important; }
+        .app-sheet-head > * { grid-column: 1 / -1; min-width: 0; }
+        .app-sheet-head > :not(.app-sheet-back):not(.app-sheet-close):not(.app-sheet-type):not(.app-sheet-actions) {
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+            padding-right: 0 !important;
+        }
+        .app-sheet-head > .app-sheet-back { grid-column: 1; grid-row: 1; }
+        /* Item cards (span): the type sits centred between the back button and the icons
+           on the right. Dialogs (h3, or the graph's div): the title sits in the middle of
+           the whole header, over the row, leaving room for a button on each side. */
+        .app-sheet-head > .app-sheet-type {
+            grid-column: 2;
+            grid-row: 1;
+            justify-self: center;
+            justify-content: center;
+            text-align: center;
+            max-width: 100%;
+        }
+        .app-sheet-head > .app-sheet-type:not(span) {
+            grid-column: 1 / -1;
+            max-width: calc(100% - 7.5rem);
+            margin-left: 0 !important;
+        }
+        .app-sheet-head > .app-sheet-back,
+        .app-sheet-head > .app-sheet-actions { z-index: 1; }
+        /* On item cards the X is the last icon in the capsule, without a glass ring of its own. */
+        .app-sheet-actions > .app-sheet-close {
+            background-color: transparent;
+            border: 0;
+            box-shadow: none;
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+        }
+        .app-sheet-head > .app-sheet-actions {
+            grid-column: 3;
+            grid-row: 1;
+            position: relative !important;
+            top: auto !important;
+            right: auto !important;
+            justify-self: end;
+        }
+        /* Large title under the icon row. */
+        .app-sheet-head h2,
+        .app-sheet-head h3 {
+            font-size: 1.5rem !important;
+            line-height: 1.2 !important;
+            font-weight: 700 !important;
+        }
+        .app-sheet-back,
+        .app-sheet-close,
+        .app-sheet-actions {
+            background-color: rgba(255, 255, 255, 0.6);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+        .dark .app-sheet-back,
+        .dark .app-sheet-close,
+        .dark .app-sheet-actions {
+            background-color: rgba(68, 64, 60, 0.5);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .app-sheet-back,
+        .app-sheet-close {
+            width: 2.75rem;
+            height: 2.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            font-size: 1.0625rem;
+            color: #4a3b32;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        .app-sheet-back:active,
+        .app-sheet-close:active { transform: scale(0.92); }
+        .dark .app-sheet-back,
+        .dark .app-sheet-close { color: #ffffff; }
+        .app-sheet-actions {
+            display: flex;
+            align-items: center;
+            gap: 0 !important;
+            padding: 0 0.125rem;
+            border-radius: 9999px;
+        }
+        /* No capsule when no icon is left (a friend's item: no edit, no menu). */
+        .app-sheet-actions:not(:has(> button:not(.hidden), > div > .action-menu-toggle:not(.hidden))) { display: none; }
+        [data-adding] .app-sheet-actions { display: flex; }
+        .app-sheet-actions .action-menu-toggle,
+        .app-sheet-actions > button {
+            color: #4a3b32 !important;
+            border-radius: 9999px;
+        }
+        .dark .app-sheet-actions .action-menu-toggle,
+        .dark .app-sheet-actions > button { color: #ffffff !important; }
+        .app-sheet-actions .action-menu-toggle i,
+        .app-sheet-actions > button i { font-size: 1rem; }
+        .app-sheet-actions .app-card-extract > button { border: 0; height: 2.75rem; }
+        .app-sheet-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #7f5539;
+        }
+        .dark .app-sheet-type { color: #d6ccc2; }
+        /* A dialog's own title (Preferences, Help, Coffee scale, …) next to the back
+           button: a bit bolder than an item card's type. */
+        .app-sheet-head > h3.app-sheet-type,
+        .app-sheet-head > .app-sheet-type h2,
+        .app-sheet-head > .app-sheet-type h3 {
+            font-size: 1.0625rem !important;
+            line-height: 1.25 !important;
+            font-weight: 700 !important;
+            color: #2b211b;
+        }
+        .dark .app-sheet-head > h3.app-sheet-type,
+        .dark .app-sheet-head > .app-sheet-type h2,
+        .dark .app-sheet-head > .app-sheet-type h3 { color: #ffffff; }
+        .app-sheet-head > .app-sheet-type h2 { gap: 0.375rem !important; }
+        .app-sheet-head > h3.app-sheet-type i,
+        .app-sheet-head > .app-sheet-type h2 i { color: #7f5539; }
+        .dark .app-sheet-head > h3.app-sheet-type i,
+        .dark .app-sheet-head > .app-sheet-type h2 i { color: #d6ccc2; }
+
+        @media (max-width: 639px) {
+            .app-sheet {
+                padding: 0 !important;
+                align-items: stretch !important;
+            }
+            .app-sheet-frame {
+                max-width: none !important;
+                height: 100%;
+                gap: 0 !important;
+            }
+            .app-sheet-panel,
+            .app-sheet-panel:not(.app-sheet-wide) {
+                max-width: none !important;
+                width: 100% !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                border: 0 !important;
+                border-radius: 0 !important;
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+                background-color: rgba(255, 255, 255, 0.92) !important;
+            }
+            .dark .app-sheet-panel { background-color: rgba(28, 25, 23, 0.9) !important; }
+            .app-sheet-head { padding-top: calc(env(safe-area-inset-top, 0px) + 0.5rem) !important; }
+        }
+
+
+        /* iOS-style segmented control (Moments page: Friends / Mine). The selected side
+           is the button with aria-selected="true"; a red dot marks new comments. */
+        .app-segmented {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.125rem;
+            padding: 0.1875rem;
+            border-radius: 9999px;
+            background-color: rgba(127, 85, 57, 0.1);
+        }
+        .dark .app-segmented { background-color: rgba(255, 255, 255, 0.08); }
+        .app-segmented-item {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4375rem;
+            min-width: 7rem;
+            height: 2.5rem;
+            padding: 0 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #8c7365;
+            transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .dark .app-segmented-item { color: #a8a29e; }
+        .app-segmented-item[aria-selected="true"] {
+            background-color: #ffffff;
+            color: #4a3b32;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+        .dark .app-segmented-item[aria-selected="true"] {
+            background-color: #57534e;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+        }
+        .app-segmented-badge {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 9999px;
+            background-color: #ef4444;
+        }
+        /* Mobile: the control spans the page width. */
+        @media (max-width: 639px) {
+            #galleryModal .app-page-head .app-segmented { flex: 1 1 auto; }
+            #galleryModal .app-page-head .app-segmented-item { flex: 1 1 0; min-width: 0; }
+        }
     </style>
 

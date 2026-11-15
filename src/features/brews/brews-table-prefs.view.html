@@ -1,23 +1,18 @@
 <div
     id="brewsTablePrefsModal"
     data-feature-root="brews"
-    class="hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+    class="app-sheet hidden fixed inset-0 z-[90] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
     data-action-click="hideBrewsTablePrefsModal()"
 >
     <div
-        class="bg-white dark:bg-[#292524] rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-coffee-200 dark:border-[#44403c]"
+        class="app-sheet-panel bg-white dark:bg-[#292524] rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-coffee-200 dark:border-[#44403c]"
         data-action-click="event.stopPropagation()"
     >
-        <div class="p-5 border-b border-coffee-200 dark:border-[#44403c] flex justify-between items-center">
-            <h3 class="font-bold text-coffee-900 dark:text-white">
-                <i class="fa-solid fa-table-columns mr-2"></i>Brew table columns
+        <div class="app-sheet-head p-5 border-b border-coffee-200 dark:border-[#44403c] flex justify-between items-center">
+            <button type="button" data-action-click="hideBrewsTablePrefsModal()" class="app-sheet-back" title="Back" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+            <h3 class="app-sheet-type font-bold text-coffee-900 dark:text-white">
+                <i class="fa-solid fa-table-columns"></i>Brew table columns
             </h3>
-            <button
-                data-action-click="hideBrewsTablePrefsModal()"
-                class="text-gray-500 hover:text-gray-700 dark:text-[#78716c] dark:hover:text-white"
-            >
-                <i class="fa-solid fa-xmark"></i>
-            </button>
         </div>
         <div class="p-6 max-h-[60vh] overflow-y-auto">
             <p class="text-xs text-coffee-500 dark:text-[#78716c] mb-3">
