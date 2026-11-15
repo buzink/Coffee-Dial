@@ -474,7 +474,22 @@
         .stats-flip-share { font-size: 0.8125rem; color: #8a6f5c; }
         .dark .stats-flip-share { color: #a8a29e; }
         @media (prefers-reduced-motion: reduce) { .stats-flip-face { transition: none; } }
-        .origins-map-list { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 0.75rem; }
+        .origins-map-list { display: flex; flex-wrap: nowrap; overflow: hidden; gap: 0.375rem; margin-top: 0.75rem; }
+        .origins-map-list > li { flex-shrink: 0; white-space: nowrap; }
+        .origins-map-list[hidden], .origins-map-list > li[hidden] { display: none; }
+        .origins-card { position: relative; }
+        .origins-map-macro { position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.125rem; font-size: 0.6875rem; line-height: 1.25; text-align: right; color: #6f5a4b; pointer-events: none; }
+        .origins-map-macro[hidden] { display: none; }
+        .origins-map-macro li { display: flex; justify-content: flex-end; gap: 0.375rem; }
+        .origins-map-macro strong { color: #2b211b; font-weight: 700; }
+        .dark .origins-map-macro { color: #a8a29e; }
+        .dark .origins-map-macro strong { color: #ffffff; }
+        .origins-map-regions { flex-wrap: wrap; }
+        .origins-map-chip.is-clickable { cursor: pointer; }
+        .origins-map-chip.is-clickable:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+        .origins-map-regions[hidden] { display: none; }
+        .origins-map-region { font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 9999px; color: #4a3b32; background: #ffffff; border: 1px solid #ddb892; }
+        .dark .origins-map-region { color: #e7e5e4; background: #1c1917; border-color: #6b4f3a; }
         .origins-map-chip { font-size: 0.75rem; font-weight: 700; padding: 0.125rem 0.5rem; border-radius: 9999px; color: #2b211b; }
         .origins-map-chip[data-level="3"], .origins-map-chip[data-level="4"] { color: #ffffff; }
         .dark .origins-map-chip { color: #ffffff; }

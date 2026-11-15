@@ -108,10 +108,12 @@
                             <div class="relative w-full h-64"><canvas id="chartBeanMeter"></canvas></div>
                         </div>
 
-                        <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm md:col-span-2">
+                        <div class="origins-card bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm md:col-span-2">
                             <h4 class="text-sm font-bold text-coffee-800 dark:text-white uppercase flex items-center gap-2 mb-4"><i class="fa-solid fa-earth-americas text-coffee-600 dark:text-[#d6ccc2]"></i>Origins</h4>
+                            <ul id="statsOriginsMacro" class="origins-map-macro" aria-label="Coffees per region" hidden></ul>
                             <div id="statsOriginsMap" class="w-full"></div>
                             <p id="statsOriginsCaption" class="text-sm text-coffee-600 dark:text-[#a8a29e] mt-3 min-h-[1.25rem]" aria-live="polite"></p>
+                            <ul id="statsOriginsRegions" class="origins-map-list origins-map-regions" aria-label="Micro-regions of the selected country" hidden></ul>
                             <ul id="statsOriginsList" class="origins-map-list"></ul>
                         </div>
                     </div>
