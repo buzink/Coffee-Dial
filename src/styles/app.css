@@ -601,8 +601,10 @@
         }
         .app-sheet-head > .app-sheet-back,
         .app-sheet-head > .app-sheet-actions { z-index: 1; }
-        /* On item cards the X is the last icon in the capsule, without a glass ring of its own. */
-        .app-sheet-actions > .app-sheet-close {
+        /* On item cards the X is the last icon in the capsule, without a glass ring of its own
+           (more specific than the .dark glass rule further down, which would win otherwise). */
+        .app-sheet-head .app-sheet-actions > .app-sheet-close,
+        .dark .app-sheet-head .app-sheet-actions > .app-sheet-close {
             background-color: transparent;
             border: 0;
             box-shadow: none;
