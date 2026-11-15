@@ -432,13 +432,16 @@
         .app-page-title + * { margin-left: auto; }
         /* A page head with no visible controls left (only the hidden title) takes no space. */
         .app-page-head:not(:has(select:not(.hidden), button:not(.hidden))) { padding: 0 !important; }
-        /* Statistics: the My/Friends and period filters are the same size; on mobile each
-           spans the page like the cards below it. */
-        .stats-filters { display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; }
-        .stats-filters select { width: 12rem; min-width: 0; height: 42px; line-height: 1.25rem; padding: 0 0.75rem; }
-        @media (max-width: 639px) {
-            .stats-filters { width: 100%; flex-direction: column; align-items: stretch; }
-            .stats-filters select { width: 100%; }
+        /* Statistics: the My/Friends and period filters use the grid of the stat cards
+           below them (2 columns, 4 from md, gap 1rem), so each filter is one card wide;
+           they sit above the right-hand cards. */
+        .stats-filters { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+        .stats-filters select { width: 100%; min-width: 0; height: 42px; line-height: 1.25rem; padding: 0 0.75rem; }
+        /* Pinned to the last two columns, so the period filter stays right when My/Friends is hidden. */
+        .stats-filters select:first-child { grid-column: -3; }
+        .stats-filters select:last-child { grid-column: -2; }
+        @media (min-width: 768px) {
+            .stats-filters { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         }
         /* Statistics origins map: countries shaded by how many coffees came from them (level 0-4). */
         .origins-map { display: block; width: 100%; max-width: 52rem; height: auto; margin: 0 auto; }
