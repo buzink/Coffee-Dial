@@ -49,6 +49,23 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="stats-flip-card flavour-card bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center md:col-span-2">
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Flavour</h4>
+                            <button type="button" class="stats-flip-btn" data-stats-flip aria-pressed="false" aria-label="Show what moves the flavour slider" title="Show what moves the slider" data-title-front="Show what moves the slider" data-title-back="Show the slider"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i></button>
+                            <div class="stats-flip flavour-flip w-full">
+                                <div class="stats-flip-face stats-flip-front flavour-front">
+                                    <ol class="flavour-zones" id="statsFlavourZones" aria-hidden="true"></ol>
+                                    <div class="flavour-slider" id="statsFlavourSlider" role="meter" aria-valuemin="0" aria-valuemax="100" aria-label="Flavour of your brews, from Classic to Wild">
+                                        <div class="flavour-track"><span class="flavour-divider" style="left:25%"></span><span class="flavour-divider" style="left:50%"></span><span class="flavour-divider" style="left:75%"></span></div>
+                                        <div class="flavour-thumb" id="statsFlavourThumb" hidden><span></span></div>
+                                    </div>
+                                    <p id="statsFlavourNote" class="flavour-note"></p>
+                                </div>
+                                <div class="stats-flip-face stats-flip-back flavour-back" aria-hidden="true">
+                                    <ul id="statsFlavourFactors" class="flavour-factors"></ul>
+                                </div>
+                            </div>
+                        </div>
                         <div class="stats-flip-card bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
                             <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Roast Profile</h4>
                             <button type="button" class="stats-flip-btn" data-stats-flip aria-pressed="false" aria-label="Show full roast profile distribution" title="Show distribution"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i></button>

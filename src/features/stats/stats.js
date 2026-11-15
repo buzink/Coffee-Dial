@@ -1,6 +1,7 @@
 import { createCoffeeDisplayModule, formatCoffeeWithRoaster } from '../../core/coffee-display.js';
 import { getBrewGrinderName } from '../../core/brew-fields.js';
 import { renderOriginsMap } from './stats-origins-map.js';
+import { renderFlavour } from './stats-flavour.js';
 import { altitudeBand } from '../../core/altitude.js';
 
 export const createStatsModule = ({
@@ -210,7 +211,7 @@ export const createStatsModule = ({
                 const flipped = !card.classList.contains('is-flipped');
                 card.classList.toggle('is-flipped', flipped);
                 btn.setAttribute('aria-pressed', String(flipped));
-                btn.title = flipped ? 'Show most common' : 'Show distribution';
+                btn.title = flipped ? (btn.dataset.titleBack || 'Show most common') : (btn.dataset.titleFront || 'Show distribution');
                 btn.querySelector('i')?.classList.replace(flipped ? 'fa-chart-pie' : 'fa-font', flipped ? 'fa-font' : 'fa-chart-pie');
                 card.querySelector('.stats-flip-front')?.setAttribute('aria-hidden', String(flipped));
                 card.querySelector('.stats-flip-back')?.setAttribute('aria-hidden', String(!flipped));
@@ -422,6 +423,7 @@ export const createStatsModule = ({
             renderTopList('topBrewsList', [], 'No brews found.');
             document.getElementById('uniqueLeaderboardBody').innerHTML = "<tr><td colspan='3' class='text-center py-4 italic text-coffee-400'>No data.</td></tr>";
             document.getElementById('grinderStatsList').innerHTML = '<p class="text-sm text-gray-400 italic">No grinder data.</p>';
+            renderFlavour({ brews: [], getCoffeeTypeDisplay });
             renderOriginsMap({ brews: [], getCoffeeTypeDisplay, getCoffeeTypeForBrew });
             renderAltitude([], getCoffeeTypeDisplay, getCoffeeTypeForBrew);
             await renderCharts({}, {}, {}, {});
@@ -470,6 +472,7 @@ export const createStatsModule = ({
             brewTimes.weekday[(date.getDay() + 6) % 7]++;
             brewTimes.hour[date.getHours()]++;
         });
+        renderFlavour({ brews: dataToUse, getCoffeeTypeDisplay });
         renderOriginsMap({ brews: dataToUse, getCoffeeTypeDisplay, getCoffeeTypeForBrew });
         renderAltitude(dataToUse, getCoffeeTypeDisplay, getCoffeeTypeForBrew);
         await renderCharts(roastData, methodData, drinkData, ratingData, brewTimes, processingData, varietyData);
