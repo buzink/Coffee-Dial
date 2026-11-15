@@ -358,6 +358,13 @@ export const createStatsModule = ({
         });
     };
 
+    const toLocalDayKey = (date) =>
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const parseLocalDayKey = (key) => {
+        const [y, m, d] = key.split('-').map(Number);
+        return new Date(y, m - 1, d);
+    };
+
     const updateBeanMeterInternal = async (period) => {
         const chartCtor = await getChartCtor();
         if (!chartCtor) return;
@@ -382,7 +389,7 @@ export const createStatsModule = ({
         data.forEach((brew) => {
             const date = new Date(brew.createdAt);
             let key;
-            if (currentBeanMeterPeriod === 'day') key = date.toISOString().split('T')[0];
+            if (currentBeanMeterPeriod === 'day') key = toLocalDayKey(date);
             else if (currentBeanMeterPeriod === 'week') {
                 const weekStart = new Date(date);
                 weekStart.setDate(date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1));
@@ -396,11 +403,25 @@ export const createStatsModule = ({
             }
         });
 
-        const sortedKeys = Object.keys(groupedData).sort();
+        let sortedKeys = Object.keys(groupedData).sort();
         if (!sortedKeys.length) return;
+        const isDayPeriod = currentBeanMeterPeriod === 'day';
+        if (isDayPeriod) {
+            // Every calendar day from the first brew to today, so empty days show as gaps.
+            const allDays = [];
+            const cursor = parseLocalDayKey(sortedKeys[0]);
+            const lastKey = sortedKeys[sortedKeys.length - 1];
+            const todayKey = toLocalDayKey(new Date());
+            const endKey = todayKey > lastKey ? todayKey : lastKey;
+            while (toLocalDayKey(cursor) <= endKey) {
+                allDays.push(toLocalDayKey(cursor));
+                cursor.setDate(cursor.getDate() + 1);
+            }
+            sortedKeys = allDays;
+        }
 
         const labels = sortedKeys;
-        const values = sortedKeys.map((key) => groupedData[key]);
+        const values = sortedKeys.map((key) => groupedData[key] || 0);
         const canvas = document.getElementById('chartBeanMeter');
         if (!canvas) return;
         if (chartInstances.chartBeanMeter) chartInstances.chartBeanMeter.destroy();
@@ -410,6 +431,31 @@ export const createStatsModule = ({
         const textColor = isDark ? '#e7e5e4' : '#4a3b32';
         const gridColor = isDark ? '#44403c' : '#e5e7eb';
         const barColor = '#8c7365';
+        const mondayTickColor = isDark ? '#ffffff' : '#000000';
+        const isMondayIndex = (index) => isDayPeriod && parseLocalDayKey(labels[index]).getDay() === 1;
+        const xScale = isDayPeriod
+            ? {
+                ticks: {
+                    color: textColor,
+                    autoSkip: false,
+                    // Only Mondays get a date; returning null also hides that tick's grid line.
+                    callback: (value, index) => (isMondayIndex(index)
+                        ? parseLocalDayKey(labels[index]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+                        : null)
+                },
+                // A short tick line from each Monday's date up to the bottom of its bar
+                // (the other days have no label, so Chart.js draws no line for them).
+                grid: {
+                    display: true,
+                    offset: false,
+                    drawOnChartArea: false,
+                    drawTicks: true,
+                    tickLength: 6,
+                    lineWidth: 1,
+                    color: mondayTickColor
+                }
+            }
+            : { ticks: { color: textColor }, grid: { display: false } };
 
         chartInstances.chartBeanMeter = new chartCtor(ctx, {
             type: 'bar',
@@ -423,7 +469,7 @@ export const createStatsModule = ({
                 },
                 scales: {
                     y: { beginAtZero: true, ticks: { color: textColor, precision: 0 }, grid: { color: gridColor } },
-                    x: { ticks: { color: textColor }, grid: { display: false } }
+                    x: xScale
                 }
             }
         });
