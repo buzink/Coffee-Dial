@@ -1,9 +1,12 @@
+import { formatCoffeeWithRoaster } from '../../core/coffee-display.js';
+
 export const createStatsModule = ({
     getCurrentUser,
     getCurrentView,
     getFollowing,
     dataService,
     getCoffeeTypeDisplay,
+    getBeanCoffeeTypeDisplay,
     getCoffeeTypeForBrew,
     dispatchCommand,
     setCurrentStatsData,
@@ -165,11 +168,10 @@ export const createStatsModule = ({
             const dateObj = typeof value.toDate === 'function' ? value.toDate() : new Date(value);
             return dateObj instanceof Date ? dateObj.getTime() : NaN;
         };
-        const beanName = (bean) => {
-            const roaster = (bean?.roaster || '').toString().trim();
-            const farmer = (bean?.farmer || '').toString().trim();
-            return farmer && roaster ? `${farmer} - ${roaster}` : farmer || roaster || 'Unnamed bag';
-        };
+        const beanName = (bean) => formatCoffeeWithRoaster(
+            typeof getBeanCoffeeTypeDisplay === 'function' ? getBeanCoffeeTypeDisplay(bean) : bean || {},
+            'Unnamed bag'
+        );
         const setText = (id, text) => {
             const el = document.getElementById(id);
             if (el) el.textContent = text;
@@ -251,7 +253,7 @@ export const createStatsModule = ({
             document.getElementById('mostBrewedName').innerText = '-';
             document.getElementById('mostBrewedCount').innerText = '0 brews';
             document.getElementById('topCoffeesList').innerHTML = '<p class="text-sm text-gray-400 italic">No brews found.</p>';
-            document.getElementById('uniqueLeaderboardBody').innerHTML = "<tr><td colspan='4' class='text-center py-4 italic text-coffee-400'>No data.</td></tr>";
+            document.getElementById('uniqueLeaderboardBody').innerHTML = "<tr><td colspan='3' class='text-center py-4 italic text-coffee-400'>No data.</td></tr>";
             document.getElementById('grinderStatsList').innerHTML = '<p class="text-sm text-gray-400 italic">No grinder data.</p>';
             await renderCharts({}, {}, {}, {});
             return;
@@ -292,7 +294,7 @@ export const createStatsModule = ({
             const type = getCoffeeTypeForBrew(c);
             const typeKey = type?.id || c.beanId || '-';
             const typeDisplay = getCoffeeTypeDisplay(c);
-            if (!uniqueMap[typeKey]) uniqueMap[typeKey] = { count: 0, roaster: typeDisplay.roaster, origin: typeDisplay.origin, farmer: typeDisplay.farmer, totalRating: 0, ratingCount: 0 };
+            if (!uniqueMap[typeKey]) uniqueMap[typeKey] = { count: 0, label: formatCoffeeWithRoaster(typeDisplay, 'Unknown'), origin: typeDisplay.origin, totalRating: 0, ratingCount: 0 };
             uniqueMap[typeKey].count++;
             if (c.rating > 0) {
                 uniqueMap[typeKey].totalRating += c.rating;
@@ -305,14 +307,14 @@ export const createStatsModule = ({
         Object.keys(uniqueMap).forEach((k) => { if (!maxKey || uniqueMap[k].count > uniqueMap[maxKey].count) maxKey = k; });
         if (maxKey) {
             const d = uniqueMap[maxKey];
-            document.getElementById('mostBrewedName').innerText = `${d.roaster} - ${d.origin} ${d.farmer !== '-' ? `(${d.farmer})` : ''}`;
+            document.getElementById('mostBrewedName').innerText = d.origin && d.origin !== '-' ? `${d.label} · ${d.origin}` : d.label;
             document.getElementById('mostBrewedCount').innerText = `${d.count} brews`;
         }
 
         const topMap = {};
         dataToUse.filter((c) => c.rating === 5).forEach((c) => {
             const typeDisplay = getCoffeeTypeDisplay(c);
-            const key = `${typeDisplay.roaster}|${typeDisplay.origin}|${typeDisplay.farmer}`;
+            const key = getCoffeeTypeForBrew(c)?.id || `${typeDisplay.roaster}|${typeDisplay.name}|${typeDisplay.farmer}|${typeDisplay.origin}`;
             if (!topMap[key]) topMap[key] = { count: 0, data: typeDisplay };
             topMap[key].count++;
         });
@@ -325,16 +327,16 @@ export const createStatsModule = ({
             const c = item.data;
             const div = document.createElement('div');
             div.className = 'flex justify-between items-center bg-coffee-50 dark:bg-[#1c1917] p-2 rounded border border-coffee-100 dark:border-[#44403c]';
-            div.innerHTML = `<div class="truncate pr-2"><span class="font-bold text-coffee-800 dark:text-white text-sm block truncate">${c.roaster || 'Unknown'}</span><span class="text-xs text-coffee-500 dark:text-[#78716c] truncate">${c.origin || ''} ${c.farmer ? `• ${c.farmer}` : ''}</span></div><span class="text-xs font-bold bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full whitespace-nowrap">${item.count} <i class="fa-solid fa-mug-hot ml-1"></i></span>`;
+            div.innerHTML = `<div class="truncate pr-2"><span class="font-bold text-coffee-800 dark:text-white text-sm block truncate">${formatCoffeeWithRoaster(c, 'Unknown')}</span><span class="text-xs text-coffee-500 dark:text-[#78716c] truncate">${c.origin && c.origin !== '-' ? c.origin : ''}</span></div><span class="text-xs font-bold bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full whitespace-nowrap">${item.count} <i class="fa-solid fa-mug-hot ml-1"></i></span>`;
             listEl.appendChild(div);
         });
 
         const leaderboardData = Object.values(uniqueMap).map((u) => ({ ...u, avg: u.ratingCount > 0 ? (u.totalRating / u.ratingCount).toFixed(1) : '0.0' })).sort((a, b) => b.avg - a.avg);
         const lbBody = document.getElementById('uniqueLeaderboardBody');
-        lbBody.innerHTML = leaderboardData.length ? '' : "<tr><td colspan='4' class='text-center py-4 italic text-coffee-400'>No data.</td></tr>";
+        lbBody.innerHTML = leaderboardData.length ? '' : "<tr><td colspan='3' class='text-center py-4 italic text-coffee-400'>No data.</td></tr>";
         leaderboardData.forEach((item) => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td class="px-4 py-3 font-bold">${item.roaster}</td><td class="px-4 py-3">${item.origin}</td><td class="px-4 py-3">${item.farmer}</td><td class="px-4 py-3 text-center"><span class="px-2 py-1 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 font-bold">${item.avg} ★</span></td>`;
+            tr.innerHTML = `<td class="px-4 py-3 font-bold">${item.label}</td><td class="px-4 py-3">${item.origin}</td><td class="px-4 py-3 text-center"><span class="px-2 py-1 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 font-bold">${item.avg} ★</span></td>`;
             lbBody.appendChild(tr);
         });
 

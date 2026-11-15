@@ -1344,6 +1344,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                         getFollowing: () => getFollowingState(),
                         dataService,
                         getCoffeeTypeDisplay: (brew) => getCoffeeTypeDisplay(brew),
+                        getBeanCoffeeTypeDisplay: (bean) => getBeanCoffeeTypeDisplay(bean),
                         getCoffeeTypeForBrew: (brew) => getCoffeeTypeForBrew(brew),
                         dispatchCommand: (commandName, payload) =>
                             appCommands?.dispatch?.(commandName, payload, { source: 'stats' }),

@@ -12,6 +12,14 @@ export const formatCoffeeLabel = ({ name, farmer } = {}, fallback = '-') => {
     return parts.join(' - ') || fallback;
 };
 
+// "Name - Farmer (Roaster)"; just the roaster when the coffee has no name or farmer.
+export const formatCoffeeWithRoaster = (display = {}, fallback = '-') => {
+    const label = formatCoffeeLabel(display, '');
+    const roaster = cleanPart(display.roaster);
+    if (label && roaster) return `${label} (${roaster})`;
+    return label || roaster || fallback;
+};
+
 // Coffee option in filters: "Roaster - Name - Farmer".
 export const formatCoffeeTypeOption = (type = {}) => {
     const label = formatCoffeeLabel(type, '');
