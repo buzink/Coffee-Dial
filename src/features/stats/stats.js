@@ -1,4 +1,5 @@
 import { formatCoffeeWithRoaster } from '../../core/coffee-display.js';
+import { renderOriginsMap } from './stats-origins-map.js';
 
 export const createStatsModule = ({
     getCurrentUser,
@@ -303,6 +304,7 @@ export const createStatsModule = ({
             document.getElementById('topCoffeesList').innerHTML = '<p class="text-sm text-gray-400 italic">No brews found.</p>';
             document.getElementById('uniqueLeaderboardBody').innerHTML = "<tr><td colspan='3' class='text-center py-4 italic text-coffee-400'>No data.</td></tr>";
             document.getElementById('grinderStatsList').innerHTML = '<p class="text-sm text-gray-400 italic">No grinder data.</p>';
+            renderOriginsMap({ brews: [], getCoffeeTypeDisplay, getCoffeeTypeForBrew });
             await renderCharts({}, {}, {}, {});
             return;
         }
@@ -335,6 +337,7 @@ export const createStatsModule = ({
             if (r > 0) acc[r] = (acc[r] || 0) + 1;
             return acc;
         }, {});
+        renderOriginsMap({ brews: dataToUse, getCoffeeTypeDisplay, getCoffeeTypeForBrew });
         await renderCharts(roastData, methodData, drinkData, ratingData);
         await updateBeanMeterInternal('day');
 

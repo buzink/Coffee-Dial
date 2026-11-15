@@ -55,9 +55,11 @@ export const createCoffeeDisplayModule = ({ getBeans, getCoffeeTypes }) => {
             roaster: type?.roaster || brew?.roaster || '-',
             name: type?.name || '',
             farmer: type?.farmer || brew?.farmer || '-',
-            origin: type?.origin || brew?.origin || '-',
+            // A linked coffee decides the origin, also when it was emptied there: the
+            // brew's own copy of the origin is only for brews without a coffee.
+            origin: (type ? type.origin : brew?.origin) || '-',
             originMicroRegion: type?.originMicroRegion || '',
-            originMacroRegion: getOriginMacroRegion(type?.origin || brew?.origin),
+            originMacroRegion: getOriginMacroRegion(type ? type.origin : brew?.origin),
             processing: type?.processing || brew?.processing || '-',
             variety: type?.variety || brew?.variety || '-',
             roastType: type?.roast || type?.roastType || brew?.roastType || '-',
@@ -78,9 +80,11 @@ export const createCoffeeDisplayModule = ({ getBeans, getCoffeeTypes }) => {
             roaster: type?.roaster || bean?.roaster || '-',
             name: type?.name || '',
             farmer: type?.farmer || bean?.farmer || '-',
-            origin: type?.origin || bean?.origin || '-',
+            // A linked coffee decides the origin, also when it was emptied there: the
+            // bean's own copy of the origin is only for beans without a coffee.
+            origin: (type ? type.origin : bean?.origin) || '-',
             originMicroRegion: type?.originMicroRegion || '',
-            originMacroRegion: getOriginMacroRegion(type?.origin || bean?.origin),
+            originMacroRegion: getOriginMacroRegion(type ? type.origin : bean?.origin),
             processing: type?.processing || bean?.processing || '-',
             variety: type?.variety || bean?.variety || '-',
             roastType: type?.roast || type?.roastType || bean?.roastType || '-',

@@ -440,6 +440,28 @@
             .stats-filters { width: 100%; flex-direction: column; align-items: stretch; }
             .stats-filters select { width: 100%; }
         }
+        /* Statistics origins map: countries shaded by how many coffees came from them (level 0-4). */
+        .origins-map { display: block; width: 100%; max-width: 52rem; height: auto; margin: 0 auto; }
+        .origins-map path { stroke: #ffffff; stroke-width: 0.5; stroke-linejoin: round; transition: fill 0.15s; }
+        .origins-map path:not([data-level="0"]) { cursor: pointer; }
+        .origins-map path.is-selected { stroke: #2b211b; stroke-width: 1.2; }
+        .origins-map [data-level="0"], .origins-map-chip[data-level="0"] { fill: #ede0d4; background: #ede0d4; }
+        .origins-map [data-level="1"], .origins-map-chip[data-level="1"] { fill: #ddb892; background: #ddb892; }
+        .origins-map [data-level="2"], .origins-map-chip[data-level="2"] { fill: #b08968; background: #b08968; }
+        .origins-map [data-level="3"], .origins-map-chip[data-level="3"] { fill: #7f5539; background: #7f5539; }
+        .origins-map [data-level="4"], .origins-map-chip[data-level="4"] { fill: #4a3426; background: #4a3426; }
+        .dark .origins-map path { stroke: #292524; }
+        .dark .origins-map path.is-selected { stroke: #ffffff; }
+        .dark .origins-map [data-level="0"], .dark .origins-map-chip[data-level="0"] { fill: #3a3431; background: #3a3431; }
+        .dark .origins-map [data-level="1"], .dark .origins-map-chip[data-level="1"] { fill: #6b4f3a; background: #6b4f3a; }
+        .dark .origins-map [data-level="2"], .dark .origins-map-chip[data-level="2"] { fill: #9c7353; background: #9c7353; }
+        .dark .origins-map [data-level="3"], .dark .origins-map-chip[data-level="3"] { fill: #c9a27e; background: #c9a27e; }
+        .dark .origins-map [data-level="4"], .dark .origins-map-chip[data-level="4"] { fill: #ecd5b8; background: #ecd5b8; }
+        .origins-map-list { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 0.75rem; }
+        .origins-map-chip { font-size: 0.75rem; font-weight: 700; padding: 0.125rem 0.5rem; border-radius: 9999px; color: #2b211b; }
+        .origins-map-chip[data-level="3"], .origins-map-chip[data-level="4"] { color: #ffffff; }
+        .dark .origins-map-chip { color: #ffffff; }
+        .dark .origins-map-chip[data-level="3"], .dark .origins-map-chip[data-level="4"] { color: #1c1917; }
         .app-header-title { display: none; }
         .app-header-title > span {
             display: none;
