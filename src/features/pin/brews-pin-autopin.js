@@ -10,20 +10,6 @@ export const createBrewsPinAutopinModule = ({
     if (!db || !doc || !writeBatch) {
         throw new Error('createBrewsPinAutopinModule requires dataService { db, doc, writeBatch }');
     }
-    const makeBeanSignature = (data) => {
-        const normalize = (value) => (value || '').toString().toLowerCase().trim();
-        const parts = [
-            data?.roaster,
-            data?.farmer,
-            data?.origin,
-            data?.processing,
-            data?.variety,
-            data?.roastType || data?.roast
-        ].map(normalize);
-        if (parts.every((part) => part === '')) return null;
-        return parts.join('|');
-    };
-
     const isBestPerMethodDrinkEnabled = () => getPinnedBrewsPreferences().pinBestPerMethodDrink !== false;
 
     const getBrewSortScore = (brew) => {
@@ -219,7 +205,6 @@ export const createBrewsPinAutopinModule = ({
     };
 
     return {
-        makeBeanSignature,
         pinBestBrewsForBean,
         pinBestBrewsForAllOpenBags,
         autoPinOpenBagsIfEnabled,

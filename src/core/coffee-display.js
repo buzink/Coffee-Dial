@@ -49,50 +49,31 @@ export const createCoffeeDisplayModule = ({ getBeans, getCoffeeTypes }) => {
         return getCoffeeTypes().find((ct) => ct.id === bean.coffeeTypeId) || null;
     };
 
-    const getCoffeeTypeDisplay = (brew) => {
-        const type = getCoffeeTypeForBrew(brew);
-        return {
-            roaster: type?.roaster || brew?.roaster || '-',
-            name: type?.name || '',
-            farmer: type?.farmer || brew?.farmer || '-',
-            // A linked coffee decides the origin, also when it was emptied there: the
-            // brew's own copy of the origin is only for brews without a coffee.
-            origin: (type ? type.origin : brew?.origin) || '-',
-            originMicroRegion: type?.originMicroRegion || '',
-            originMacroRegion: getOriginMacroRegion(type ? type.origin : brew?.origin),
-            processing: type?.processing || brew?.processing || '-',
-            variety: type?.variety || brew?.variety || '-',
-            roastType: type?.roast || type?.roastType || brew?.roastType || '-',
-            imageUrl: type?.imageUrl || type?.imageURL || '',
-            imageURL: type?.imageURL || type?.imageUrl || '',
-            decaf: !!(type?.decaf || brew?.decaf)
-        };
-    };
+    // Coffee details live only on the coffee: a brew reaches it through its bag, a bag
+    // through coffeeTypeId. Without a linked coffee every field is empty.
+    const displayForType = (type) => ({
+        roaster: type?.roaster || '-',
+        name: type?.name || '',
+        farmer: type?.farmer || '-',
+        origin: type?.origin || '-',
+        originMicroRegion: type?.originMicroRegion || '',
+        originMacroRegion: getOriginMacroRegion(type?.origin),
+        processing: type?.processing || '-',
+        variety: type?.variety || '-',
+        roastType: type?.roast || type?.roastType || '-',
+        imageUrl: type?.imageUrl || type?.imageURL || '',
+        imageURL: type?.imageURL || type?.imageUrl || '',
+        decaf: !!type?.decaf
+    });
+
+    const getCoffeeTypeDisplay = (brew) => displayForType(getCoffeeTypeForBrew(brew));
 
     const getCoffeeTypeForBean = (bean) => {
         if (!bean || !bean.coffeeTypeId) return null;
         return getCoffeeTypes().find((ct) => ct.id === bean.coffeeTypeId) || null;
     };
 
-    const getBeanCoffeeTypeDisplay = (bean) => {
-        const type = getCoffeeTypeForBean(bean);
-        return {
-            roaster: type?.roaster || bean?.roaster || '-',
-            name: type?.name || '',
-            farmer: type?.farmer || bean?.farmer || '-',
-            // A linked coffee decides the origin, also when it was emptied there: the
-            // bean's own copy of the origin is only for beans without a coffee.
-            origin: (type ? type.origin : bean?.origin) || '-',
-            originMicroRegion: type?.originMicroRegion || '',
-            originMacroRegion: getOriginMacroRegion(type ? type.origin : bean?.origin),
-            processing: type?.processing || bean?.processing || '-',
-            variety: type?.variety || bean?.variety || '-',
-            roastType: type?.roast || type?.roastType || bean?.roastType || '-',
-            imageUrl: type?.imageUrl || type?.imageURL || '',
-            imageURL: type?.imageURL || type?.imageUrl || '',
-            decaf: !!(type?.decaf || bean?.decaf)
-        };
-    };
+    const getBeanCoffeeTypeDisplay = (bean) => displayForType(getCoffeeTypeForBean(bean));
 
     return {
         getCoffeeTypeForBrew,

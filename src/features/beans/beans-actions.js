@@ -201,13 +201,8 @@ export const createBeansActionsModule = ({
             return;
         }
         const nowIso = new Date().toISOString();
+        // Coffee details live on the coffee chosen (or created) on the bag card.
         const beanData = {
-            roaster: '',
-            farmer: '',
-            origin: '',
-            processing: '',
-            variety: '',
-            roastType: '',
             shopUrl: '',
             archived: false,
             frozen: false,

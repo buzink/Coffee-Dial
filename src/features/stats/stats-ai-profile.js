@@ -91,7 +91,7 @@ export const createStatsAiProfileModule = ({
                 .slice(0, 100)
                 .map(
                     (c) =>
-                        `Roaster: ${c.roaster || c.name || '-'}, Origin: ${c.origin || c.beanType || '-'}, Farmer: ${c.farmer || '-'}, Process: ${c.processing || '-'}, Roast: ${c.roastType || '-'}, Method: ${c.method || '-'}, Drink: ${c.drink || '-'}, Rating: ${c.rating || 0}/5, Notes: ${c.notes || 'None'}`
+                        `Roaster: ${c.coffee?.roaster || '-'}, Origin: ${c.coffee?.origin || '-'}, Farmer: ${c.coffee?.farmer || '-'}, Process: ${c.coffee?.processing || '-'}, Roast: ${c.coffee?.roastType || '-'}, Method: ${c.method || '-'}, Drink: ${c.drink || '-'}, Rating: ${c.rating || 0}/5, Notes: ${c.notes || 'None'}`
                 )
                 .join('\n');
 

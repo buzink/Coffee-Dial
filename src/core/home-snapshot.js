@@ -32,14 +32,6 @@ const slimBrew = (brew) => {
     return out;
 };
 
-const matchesBean = (bean, brew) =>
-    clean(bean.roaster) === clean(brew.roaster) &&
-    clean(bean.farmer) === clean(brew.farmer) &&
-    clean(bean.origin) === clean(brew.origin) &&
-    clean(bean.processing) === clean(brew.processing) &&
-    clean(bean.variety) === clean(brew.variety) &&
-    clean(bean.roastType) === clean(brew.roastType);
-
 // Picks the subset of the full data that the home tiles (and the cards opened from them) use.
 export const buildHomeSnapshot = ({ coffees = [], beans = [], coffeeTypes = [], gasItems = [], pinnedPrefs = null } = {}) => {
     // New items that are not saved yet (drafts) never go into the snapshot.
@@ -51,7 +43,7 @@ export const buildHomeSnapshot = ({ coffees = [], beans = [], coffeeTypes = [], 
     const beanIds = new Set();
     beans.forEach((bean) => {
         const isOpen = !bean.archived && !bean.frozen;
-        const isLinked = pinnedBrews.some((brew) => brew.beanId === bean.id || (!brew.beanId && matchesBean(bean, brew)));
+        const isLinked = pinnedBrews.some((brew) => brew.beanId === bean.id);
         if (isOpen || isLinked) beanIds.add(bean.id);
     });
     const snapshotBeans = beans.filter((bean) => beanIds.has(bean.id));

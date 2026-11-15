@@ -71,22 +71,7 @@ export const createPinViewModule = ({ getBeanCalculatedStock, getCoffeeTypeDispl
         });
     };
 
-    const resolveLinkedBean = ({ brew, beans }) => {
-        let linkedBean = brew.beanId ? beans.find((b) => b.id === brew.beanId) : null;
-        if (linkedBean) return linkedBean;
-        const clean = (s) => (s || '').toLowerCase().trim();
-        return (
-            beans.find(
-                (b) =>
-                    clean(b.roaster) === clean(brew.roaster) &&
-                    clean(b.farmer) === clean(brew.farmer) &&
-                    clean(b.origin) === clean(brew.origin) &&
-                    clean(b.processing) === clean(brew.processing) &&
-                    clean(b.variety) === clean(brew.variety) &&
-                    clean(b.roastType) === clean(brew.roastType)
-            ) || null
-        );
-    };
+    const resolveLinkedBean = ({ brew, beans }) => (brew.beanId ? beans.find((b) => b.id === brew.beanId) : null) || null;
 
     const getStockOverlay = ({ bean }) => {
         if (!bean || !bean.stock) return { stockOverlay: '', dragIconClass: '', menuBtnClass: '' };
@@ -251,11 +236,8 @@ export const createPinViewModule = ({ getBeanCalculatedStock, getCoffeeTypeDispl
             const linkedBean = bean || resolveLinkedBean({ brew: previewBrew, beans });
             const { stockOverlay, dragIconClass } = getStockOverlay({ bean: linkedBean });
             const typeDisplay = getCoffeeTypeDisplay(previewBrew);
-            const roaster = normalizeDisplayText(typeDisplay.roaster) ||
-                normalizeDisplayText(previewBrew.roaster) ||
-                normalizeDisplayText(previewBrew.name) ||
-                'Unknown Roaster';
-            const farmer = normalizeDisplayText(typeDisplay.farmer) || normalizeDisplayText(previewBrew.farmer);
+            const roaster = normalizeDisplayText(typeDisplay.roaster) || 'Unknown Roaster';
+            const farmer = normalizeDisplayText(typeDisplay.farmer);
             const farmerText = farmer || roaster;
             const roasterText = roaster;
             const titleText = farmerText;

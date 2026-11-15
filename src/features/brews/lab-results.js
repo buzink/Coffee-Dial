@@ -204,7 +204,7 @@ export const createLabResultsModule = ({
 
     const getBrewLabel = (brew, brewIndex = null) => {
         const typeDisplay = getCoffeeTypeDisplay?.(brew) || {};
-        const name = typeDisplay.farmer || brew.farmer || 'Unknown';
+        const name = typeDisplay.farmer || 'Unknown';
         const dateText = formatLabGraphDate(toTimestamp(brew.createdAt)) || '-';
         const indexPrefix = Number.isFinite(brewIndex) ? `${brewIndex + 1}. ` : '';
         return `${indexPrefix}${name} (${dateText})`;
@@ -652,8 +652,8 @@ export const createLabResultsModule = ({
             const brewIndex = visibleBrews.findIndex((item) => item.id === brew.id) + 1;
             const selected = selectedBrewIds.has(brew.id);
             const typeDisplay = getCoffeeTypeDisplay?.(brew) || {};
-            const title = typeDisplay.farmer || brew.farmer || 'Unknown';
-            const subtitle = typeDisplay.roaster || brew.roaster || '-';
+            const title = typeDisplay.farmer || 'Unknown';
+            const subtitle = typeDisplay.roaster || '-';
             const meta = `${brew.method || '-'} • ${brew.drink || '-'}`;
             return `
                 <button

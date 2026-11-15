@@ -1,4 +1,5 @@
 import { isDraftItem, setCardAddingMode, toSavedFields, withoutDrafts } from '../../core/draft-items.js';
+import { isGrinderGear } from '../../core/brew-fields.js';
 
 export const createGasCardModule = ({
     getCurrentUser,
@@ -811,8 +812,7 @@ export const createGasCardModule = ({
         const filterMethod = (methodSelect.value || '').toString();
         const filterDrink = (drinkSelect.value || '').toString();
         const requiredGearIds = [...gasBulkFilterGearSelection];
-        const isSourceGrinder = normalizeType(source.type) === 'Grinder';
-        const sourceName = (source.name || '').toString();
+        const isSourceGrinder = isGrinderGear(source);
 
         const originalLabel = addBtn.innerHTML;
         addBtn.disabled = true;
@@ -823,6 +823,7 @@ export const createGasCardModule = ({
             const coffees = getCoffees();
             const nowIso = new Date().toISOString();
             const updates = [];
+            const gasById = new Map(getGasItems().map((item) => [item.id, item]));
 
             coffees.forEach((brew) => {
                 if (filterMethod && (brew.method || '') !== filterMethod) return;
@@ -832,18 +833,19 @@ export const createGasCardModule = ({
                 const hasAllRequiredGear = requiredGearIds.every((gearId) => currentGearIds.includes(gearId));
                 if (!hasAllRequiredGear) return;
 
-                const nextGearIds = currentGearIds.includes(source.id) ? currentGearIds : [...currentGearIds, source.id];
-                const grinderValue = isSourceGrinder ? sourceName : brew.grinder;
+                // A brew has one grinder: adding a grinder replaces the grinder it linked before.
+                const keptGearIds = isSourceGrinder
+                    ? currentGearIds.filter((id) => id === source.id || !isGrinderGear(gasById.get(id)))
+                    : currentGearIds;
+                const nextGearIds = keptGearIds.includes(source.id) ? keptGearIds : [...keptGearIds, source.id];
                 const gearChanged =
                     nextGearIds.length !== currentGearIds.length ||
                     nextGearIds.some((id, idx) => id !== currentGearIds[idx]);
-                const grinderChanged = isSourceGrinder && (brew.grinder || '') !== sourceName;
-                if (!gearChanged && !grinderChanged) return;
+                if (!gearChanged) return;
 
                 updates.push({
                     brewId: brew.id,
                     gearIds: nextGearIds,
-                    grinder: grinderValue,
                     updatedAt: nowIso
                 });
             });
@@ -861,7 +863,6 @@ export const createGasCardModule = ({
                     gearIds: update.gearIds,
                     updatedAt: update.updatedAt
                 };
-                if (isSourceGrinder) payload.grinder = update.grinder;
                 batch.update(doc(collection(db, 'users', user.uid, 'coffees'), update.brewId), payload);
                 opCount += 1;
                 if (opCount >= batchLimit) {
@@ -880,7 +881,6 @@ export const createGasCardModule = ({
                     return {
                         ...brew,
                         gearIds: patch.gearIds,
-                        grinder: isSourceGrinder ? patch.grinder : brew.grinder,
                         updatedAt: patch.updatedAt
                     };
                 })
@@ -907,8 +907,6 @@ export const createGasCardModule = ({
         const sourceItem = getGasItems().find((item) => item.id === sourceId);
         const targetItem = getGasItems().find((item) => item.id === targetId);
         if (!sourceItem || !targetItem) return;
-        const isTargetGrinder = normalizeType(targetItem.type) === 'Grinder';
-        const targetGrinderName = (targetItem.name || '').toString();
 
         const { mergeBtn } = getGasMergeUi();
         const originalLabel = mergeBtn?.innerHTML;
@@ -933,7 +931,6 @@ export const createGasCardModule = ({
                 updates.push({
                     brewId: brew.id,
                     gearIds: nextIds,
-                    grinder: isTargetGrinder ? targetGrinderName : brew.grinder,
                     updatedAt: nowIso
                 });
             });
@@ -947,7 +944,6 @@ export const createGasCardModule = ({
                         gearIds: update.gearIds,
                         updatedAt: update.updatedAt
                     };
-                    if (isTargetGrinder) payload.grinder = targetGrinderName;
                     batch.update(doc(collection(db, 'users', user.uid, 'coffees'), update.brewId), payload);
                     opCount += 1;
                     if (opCount >= batchLimit) {
@@ -959,7 +955,6 @@ export const createGasCardModule = ({
                 if (opCount > 0) await batch.commit();
 
                 const updateMap = new Map(updates.map((entry) => [entry.brewId, entry.gearIds]));
-                const grinderMap = new Map(updates.map((entry) => [entry.brewId, entry.grinder]));
                 const updatedAtMap = new Map(updates.map((entry) => [entry.brewId, entry.updatedAt]));
                 setCoffeesState(
                     coffees.map((brew) =>
@@ -967,7 +962,6 @@ export const createGasCardModule = ({
                             ? {
                                   ...brew,
                                   gearIds: updateMap.get(brew.id),
-                                  grinder: isTargetGrinder ? grinderMap.get(brew.id) : brew.grinder,
                                   updatedAt: updatedAtMap.get(brew.id)
                               }
                             : brew

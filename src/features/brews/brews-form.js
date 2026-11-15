@@ -193,13 +193,9 @@ export const createBrewsFormModule = ({ setTempMode, setRating, setNotesMode, ge
 
     const populateForm = (c) => {
         refreshBrewGearField();
-        document.getElementById('roaster').value = c.roaster || c.name || '';
-        document.getElementById('farmer').value = c.farmer || '';
-        document.getElementById('origin').value = c.origin || c.beanType || '';
-        document.getElementById('variety').value = c.variety || '';
-        document.getElementById('processing').value = c.processing || '';
-        document.getElementById('roastType').value = c.roastType || '';
-        document.getElementById('grinder').value = c.grinder || '';
+        // Coffee fields are filled from the brew's bag below (fillBeanDetails); the grinder
+        // field is only for typing a new grinder, the brew's own grinder is its linked gear.
+        document.getElementById('grinder').value = '';
         document.getElementById('grind').value = c.grind || '';
         document.getElementById('inputWeight').value = c.weight || '';
         const ratioNum = c.ratio != null ? parseFloat(c.ratio) : null;

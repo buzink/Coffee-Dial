@@ -140,14 +140,8 @@ export const createBrewPinArtModule = ({
             const sortedBrews = [...group.brews].sort((a, b) => (a.customOrder || 0) - (b.customOrder || 0));
             const previewBrew = sortedBrews[0] || null;
             const coffeeType = getCoffeeTypeForBrew?.(previewBrew) || null;
-            const roaster = normalizeDisplayText(coffeeType?.roaster) ||
-                normalizeDisplayText(bean?.roaster) ||
-                normalizeDisplayText(previewBrew?.roaster) ||
-                normalizeDisplayText(previewBrew?.name) ||
-                'Unknown coffee';
-            const farmer = normalizeDisplayText(coffeeType?.farmer) ||
-                normalizeDisplayText(bean?.farmer) ||
-                normalizeDisplayText(previewBrew?.farmer);
+            const roaster = normalizeDisplayText(coffeeType?.roaster) || 'Unknown coffee';
+            const farmer = normalizeDisplayText(coffeeType?.farmer);
             const titleText = farmer || roaster;
             const subtitleText = roaster;
             const imageUrl = coffeeType?.imageUrl || coffeeType?.imageURL || '';

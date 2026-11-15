@@ -227,9 +227,9 @@ async function syncTieme({oldDb, newDb, apply, since}) {
     const beanId = `sr_${recipe.id}`;
     if (!beanIds.has(beanId)) {
       const archived = Date.now() - createdMs > ARCHIVE_AFTER_DAYS * 86400000;
+      // Coffee details live on the coffee type only; the bag just links to it.
       writer.set(newDb.doc(`${base}/beans/${beanId}`), {
         coffeeTypeId: type.id,
-        ...coffee,
         shopUrl: clean(recipe.roasterUrl),
         stock: null,
         beansLeft: null,
@@ -264,18 +264,26 @@ async function syncTieme({oldDb, newDb, apply, since}) {
         const dose = num(r.dose);
         const out = num(r.out);
         const ratio = num(r.ratio) ?? (dose && out ? Math.round((out / dose) * 100) / 100 : null);
+        // The grinder is a link to gear only: found by name, or added to Tieme's gear.
         const grinder = clean(r.gear);
-        const grinderGear = gearByName.get(norm(grinder));
+        let grinderGear = gearByName.get(norm(grinder));
+        if (grinder && !grinderGear) {
+          grinderGear = {id: `sr_grinder_${shortHash(norm(grinder))}`, name: grinder};
+          writer.set(newDb.doc(`${base}/gear/${grinderGear.id}`), {
+            name: grinder, type: "grinder", price: null, methods: [], imageUrl: "", archived: false,
+            purchasedDate: toIso(createdMs), createdAt: toIso(createdMs), updatedAt: toIso(createdMs),
+            importedFrom: {project: OLD_PROJECT, path: `${base}/simpleRecipes/${recipe.id}`},
+          });
+          gearByName.set(norm(grinder), grinderGear);
+        }
         const notes = [clean(r.notes), r.basket ? `Basket: ${clean(r.basket)}` : ""].filter(Boolean).join("\n");
         const at = toIso(createdMs + offset);
         customOrder -= 1;
 
         writer.set(newDb.doc(`${base}/coffees/${id}`), {
-          ...coffee,
           beanId,
           method: METHOD_TO_CD[method] || method,
           drink,
-          grinder,
           grind: num(r.grind) ?? clean(r.grind),
           weight: dose,
           ratio,
@@ -309,7 +317,7 @@ async function syncTieme({oldDb, newDb, apply, since}) {
 // ---------------------------------------------------------------------------------------------
 // Robert: Coffee Dial brews (new project) -> simpleRecipes (old project)
 
-function recipeEntry(brew, basket) {
+function recipeEntry(brew, basket, grinderName) {
   const dose = num(brew.weight);
   const ratio = num(brew.ratio);
   const entry = {
@@ -318,7 +326,7 @@ function recipeEntry(brew, basket) {
     grind: clean(brew.grind),
     time: numStr(brew.time),
     temp: clean(brew.temp),
-    gear: clean(brew.grinder),
+    gear: clean(grinderName),
     ratio: numStr(ratio),
     rating: num(brew.rating) ?? 0,
     notes: clean(brew.notes),
@@ -368,7 +376,8 @@ async function syncRobert({oldDb, newDb, apply, since}) {
   for (const brew of todo) {
     const bean = beanById.get(brew.beanId);
     const type = typeById.get(bean?.coffeeTypeId);
-    const pick = (field, typeField = field) => clean(brew[field]) || clean(bean?.[field]) || clean(type?.[typeField]);
+    // Coffee details come from the coffee type only.
+    const pick = (field, typeField = field) => clean(type?.[typeField]);
     const coffee = {
       roaster: pick("roaster"),
       // Same label as before for coffees without a name, so their recipe documents keep their key.
@@ -407,7 +416,10 @@ async function syncRobert({oldDb, newDb, apply, since}) {
       const basket = (brew.gearIds || [])
         .map((gid) => gearById.get(gid))
         .find((g) => g && /basket/i.test(`${g.type} ${g.name}`))?.name;
-      methods[method][drink] = recipeEntry(brew, basket);
+      const grinderName = (brew.gearIds || [])
+        .map((gid) => gearById.get(gid))
+        .find((g) => g && norm(g.type) === "grinder")?.name;
+      methods[method][drink] = recipeEntry(brew, basket, grinderName);
       if (!methodOrder.includes(method)) methodOrder.push(method);
       drinkOrder[method] = drinkOrder[method] || [];
       if (!drinkOrder[method].includes(drink)) drinkOrder[method].push(drink);

@@ -1,4 +1,5 @@
-import { formatCoffeeWithRoaster } from '../../core/coffee-display.js';
+import { createCoffeeDisplayModule, formatCoffeeWithRoaster } from '../../core/coffee-display.js';
+import { getBrewGrinderName } from '../../core/brew-fields.js';
 import { renderOriginsMap } from './stats-origins-map.js';
 
 export const createStatsModule = ({
@@ -6,9 +7,9 @@ export const createStatsModule = ({
     getCurrentView,
     getFollowing,
     dataService,
-    getCoffeeTypeDisplay,
-    getBeanCoffeeTypeDisplay,
-    getCoffeeTypeForBrew,
+    getCoffeeTypeDisplay: injectedGetCoffeeTypeDisplay,
+    getBeanCoffeeTypeDisplay: injectedGetBeanCoffeeTypeDisplay,
+    getCoffeeTypeForBrew: injectedGetCoffeeTypeForBrew,
     dispatchCommand,
     setCurrentStatsData,
     getCurrentStatsData,
@@ -59,7 +60,12 @@ export const createStatsModule = ({
     const applyStatsPeriod = async () => {
         if (!loadedStats) return;
         const { brews, gear, beans } = filterByPeriod(loadedStats, currentStatsPeriod);
-        await calculateStats(brews, gear, beans);
+        // Look coffees up through all of the person's bags, also those outside the period.
+        const lookup = createCoffeeDisplayModule({
+            getBeans: () => loadedStats.beans,
+            getCoffeeTypes: () => loadedStats.coffeeTypes || []
+        });
+        await calculateStats(brews, gear, beans, lookup);
     };
     const changeStatsPeriod = async (period) => {
         currentStatsPeriod = period || 'all';
@@ -141,32 +147,19 @@ export const createStatsModule = ({
         currentStatsUid = uid;
         const seq = ++loadSeq;
         const user = getCurrentUser();
-        let dataToUse = [];
-        let gearToUse = [];
-        let beansToUse = [];
-        if (uid === 'mine') {
-            const brewsQ = collection(db, 'users', user.uid, 'coffees');
-            const brewsSnap = await getDocs(brewsQ);
-            brewsSnap.forEach((d) => dataToUse.push({ id: d.id, ...d.data() }));
-            const gearQ = collection(db, 'users', user.uid, 'gear');
-            const gearSnap = await getDocs(gearQ);
-            gearSnap.forEach((d) => gearToUse.push({ id: d.id, ...d.data() }));
-            const beansQ = collection(db, 'users', user.uid, 'beans');
-            const beansSnap = await getDocs(beansQ);
-            beansSnap.forEach((d) => beansToUse.push({ id: d.id, ...d.data() }));
-        } else {
-            const brewsQ = collection(db, 'users', uid, 'coffees');
-            const brewsSnap = await getDocs(brewsQ);
-            brewsSnap.forEach((d) => dataToUse.push({ id: d.id, ...d.data() }));
-            const gearQ = collection(db, 'users', uid, 'gear');
-            const gearSnap = await getDocs(gearQ);
-            gearSnap.forEach((d) => gearToUse.push({ id: d.id, ...d.data() }));
-            const beansQ = collection(db, 'users', uid, 'beans');
-            const beansSnap = await getDocs(beansQ);
-            beansSnap.forEach((d) => beansToUse.push({ id: d.id, ...d.data() }));
-        }
+        const ownerUid = uid === 'mine' ? user.uid : uid;
+        const readAll = async (name) => {
+            const snap = await getDocs(collection(db, 'users', ownerUid, name));
+            const rows = [];
+            snap.forEach((d) => rows.push({ id: d.id, ...d.data() }));
+            return rows;
+        };
+        // That person's own bags and coffees too: a brew's coffee details live only there.
+        const [dataToUse, gearToUse, beansToUse, coffeeTypesToUse] = await Promise.all(
+            ['coffees', 'gear', 'beans', 'coffeeTypes'].map(readAll)
+        );
         if (seq !== loadSeq) return;
-        loadedStats = { brews: dataToUse, gear: gearToUse, beans: beansToUse };
+        loadedStats = { brews: dataToUse, gear: gearToUse, beans: beansToUse, coffeeTypes: coffeeTypesToUse };
         await applyStatsPeriod();
     };
 
@@ -204,8 +197,12 @@ export const createStatsModule = ({
         });
     };
 
-    const calculateStats = async (dataToUse, gearToUse = [], beansToUse = []) => {
-        setCurrentStatsData(dataToUse);
+    const calculateStats = async (dataToUse, gearToUse = [], beansToUse = [], lookup = null) => {
+        const getCoffeeTypeDisplay = lookup?.getCoffeeTypeDisplay || injectedGetCoffeeTypeDisplay;
+        const getCoffeeTypeForBrew = lookup?.getCoffeeTypeForBrew || injectedGetCoffeeTypeForBrew;
+        const getBeanCoffeeTypeDisplay = lookup?.getBeanCoffeeTypeDisplay || injectedGetBeanCoffeeTypeDisplay;
+        // Brews with their coffee attached (not saved), for the AI profile.
+        setCurrentStatsData(dataToUse.map((brew) => ({ ...brew, coffee: getCoffeeTypeDisplay(brew) })));
         const gasTotalSpent = gearToUse.reduce((sum, item) => {
             const price = Number(item?.price);
             return Number.isFinite(price) ? sum + price : sum;
@@ -394,7 +391,7 @@ export const createStatsModule = ({
 
         const grinderTotals = {};
         dataToUse.forEach((c) => {
-            const grinder = (c.grinder || 'Unknown').toString().trim() || 'Unknown';
+            const grinder = getBrewGrinderName(c, gearToUse) || 'Unknown';
             const weight = parseFloat(c.weight);
             if (!isNaN(weight) && weight > 0) grinderTotals[grinder] = (grinderTotals[grinder] || 0) + weight;
         });

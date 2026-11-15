@@ -557,19 +557,9 @@ export const createSessionAuthViewModule = ({
                 nextActiveBeans.push(bean);
             });
 
-            const clean = (value) => (value || '').toString().toLowerCase().trim();
             const resolveActiveBeanIdForBrew = (brew) => {
                 const explicitBeanId = typeof brew?.beanId === 'string' ? brew.beanId.trim() : '';
-                if (explicitBeanId && activeBeanMap.has(explicitBeanId)) return explicitBeanId;
-                const matchedBean = nextActiveBeans.find((bean) =>
-                    clean(bean.roaster) === clean(brew?.roaster) &&
-                    clean(bean.farmer) === clean(brew?.farmer) &&
-                    clean(bean.origin) === clean(brew?.origin) &&
-                    clean(bean.processing) === clean(brew?.processing) &&
-                    clean(bean.variety) === clean(brew?.variety) &&
-                    clean(bean.roastType) === clean(brew?.roastType)
-                );
-                return matchedBean?.id || '';
+                return explicitBeanId && activeBeanMap.has(explicitBeanId) ? explicitBeanId : '';
             };
 
             const nextPinnedBrews = [];

@@ -94,10 +94,7 @@ async function main() {
 
   const steps = [
     { name: "Backfill photo paths", path: script("backfill-photo-paths.mjs"), args: buildPhotoArgs(args) },
-    { name: "Migrate grinder text to gear", path: script("migrate-grinder-to-gear.mjs"), args: buildCommonArgs(args) },
-    { name: "Backfill legacy grinder from gear", path: script("fill-legacy-grinder-from-gear.mjs"), args: buildCommonArgs(args) },
-    { name: "Sync legacy beans from brews", path: script("sync-legacy-beans.mjs"), args: buildCommonArgs(args) },
-    { name: "Extract coffee types from beans", path: script("extract-coffee-types-from-beans.mjs"), args: buildCommonArgs(args) },
+    { name: "Keep each field in one place", path: script("migrate-single-source-fields.mjs"), args: buildCommonArgs(args) },
     { name: "Backfill coffee type decaf", path: script("backfill-coffee-type-decaf-from-scan.mjs"), args: buildCommonArgs(args) },
     { name: "Backfill bean dates from brews", path: script("backfill-bean-dates-from-brews.mjs"), args: buildCommonArgs(args) },
     { name: "Migrate missing beansLeft", path: script("maybe-migrate-beans-left.mjs"), args: buildCommonArgs(args) },

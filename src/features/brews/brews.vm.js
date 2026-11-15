@@ -64,13 +64,13 @@ export const createBrewsVmModule = () => {
         };
     };
 
-    const buildCardDisplayViewModel = ({ brew, coffeeType }) => {
+    const buildCardDisplayViewModel = ({ brew, coffeeType, grinderName = '' }) => {
         const titlePrimary =
             coffeeType.farmer !== '-' ? coffeeType.farmer : (coffeeType.roaster !== '-' ? coffeeType.roaster : 'Unknown Blend');
         const titleSecondary = coffeeType.roaster !== '-' ? coffeeType.roaster : 'Unknown Roaster';
         const weightText = brew.weight ? `${brew.weight}g` : '-';
         const ratioText = brew.ratio ? `1:${brew.ratio}` : '-';
-        const grinderTitle = brew.grinder || 'Grind';
+        const grinderTitle = grinderName || 'Grind';
         const grinderValue = brew.grind || '-';
         const notesText = brew.notes ? `"${brew.notes}"` : '';
         const improveText = brew.improve ? `"${brew.improve}"` : '';
@@ -125,7 +125,8 @@ export const createBrewsVmModule = () => {
         timeText,
         tempBadgeHtml,
         ratingHtml,
-        actionsHtml
+        actionsHtml,
+        grinderName = ''
     }) => {
         let rowHtml = '';
         if (columnPreferences.farmer !== false) {
@@ -133,7 +134,7 @@ export const createBrewsVmModule = () => {
             rowHtml += `<td class="px-3 py-1 font-medium text-coffee-900 dark:text-white">${formatCoffeeCellHtml(display)}</td>`;
         }
         if (columnPreferences.method !== false) rowHtml += `<td class="px-3 py-1 text-sm">${brew.method || '-'}</td>`;
-        if (columnPreferences.grinder !== false) rowHtml += `<td class="px-3 py-1 text-sm">${brew.grinder || '-'}</td>`;
+        if (columnPreferences.grinder !== false) rowHtml += `<td class="px-3 py-1 text-sm">${grinderName || '-'}</td>`;
         if (columnPreferences.grind !== false) rowHtml += `<td class="px-3 py-1 font-mono text-coffee-700 dark:text-[#d6ccc2]">${brew.grind || '-'}</td>`;
         if (columnPreferences.recipe !== false) rowHtml += `<td class="px-3 py-1">${rowDisplay.recipeColHtml}</td>`;
         if (columnPreferences.time !== false) rowHtml += `<td class="px-3 py-1 text-right">${timeText}</td>`;

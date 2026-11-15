@@ -189,13 +189,8 @@ export const createBeansCardFormModule = ({
             coffeeTypeIdVal = typeRef.id;
         }
 
+        // The coffee fields on the card only create a new coffee; the bag stores the link.
         const updates = {
-            farmer: document.getElementById('beanEditFarmer').value || '',
-            roaster: document.getElementById('beanEditRoaster').value || '',
-            origin: document.getElementById('beanEditOrigin').value || '',
-            processing: document.getElementById('beanEditProcessing').value || '',
-            variety: document.getElementById('beanEditVariety').value || '',
-            roastType: document.getElementById('beanEditRoastType').value || '',
             coffeeTypeId: coffeeTypeIdVal,
             stock: stockVal,
             price: Number.isFinite(priceVal) ? priceVal : null,

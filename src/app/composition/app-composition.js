@@ -891,7 +891,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
         } = createBrewFormLookupModule({
             getBeans: () => getBeansState(),
             getCoffeeTypes: () => getCoffeeTypesState(),
-            getCoffees: () => getCoffeesState(),
+            getGasItems: () => getGasItemsState(),
             getBeanCoffeeTypeDisplay: (...args) => getBeanCoffeeTypeDisplay(...args),
             updateCoffeeDetailsTitle: (...args) => updateCoffeeDetailsTitle(...args)
         });
@@ -1251,6 +1251,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                         getFollowing: () => getFollowingState(),
                         getCoffees: () => getCoffeesState(),
                         getCoffeeTypeDisplay: (brew) => getCoffeeTypeDisplay(brew),
+                        getGasItems: () => getGasItemsState(),
                         dataService,
                         storageService,
                         functionsService,
@@ -1393,6 +1394,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                         getFilteredCoffees: () => getFilteredCoffees(),
                         getBeans: () => getBeansState(),
                         getCoffeeTypes: () => getCoffeeTypesState(),
+                        getGasItems: () => getGasItemsState(),
                         getCoffeeTypeDisplay: (brew) => getCoffeeTypeDisplay(brew),
                         getCoffeeTypeForBrew: (brew) => getCoffeeTypeForBrew(brew),
                         openAppConfirm
@@ -1430,7 +1432,8 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
 
         const { exportCSV, handleRecipeInput } = createBrewCsvRecipeModule({
             getFilteredCoffees,
-            getCoffeeTypeDisplay
+            getCoffeeTypeDisplay,
+            getGasItems: () => getGasItemsState()
         });
         const { openRatioCalcModal, closeRatioCalcModal, handleRatioCalcInput } = createBrewRatioCalcModule();
         let labResultsModulePromise = null;
@@ -1510,6 +1513,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             getCurrentView: () => getCurrentViewState(),
             getCoffees: () => getCoffeesState(),
             getBeans: () => getBeansState(),
+            getGasItems: () => getGasItemsState(),
             getBrewTableOrderIds: () =>
                 selectVisibleBrewOrderIds({
                     filteredSortedBrews: getFilteredCoffees(),

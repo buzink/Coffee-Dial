@@ -1,4 +1,6 @@
-export const createBrewCsvRecipeModule = ({ getFilteredCoffees, getCoffeeTypeDisplay }) => {
+import { getBrewGrinderName } from '../../core/brew-fields.js';
+
+export const createBrewCsvRecipeModule = ({ getFilteredCoffees, getCoffeeTypeDisplay, getGasItems }) => {
     const exportCSV = () => {
         const brews = getFilteredCoffees();
         if (!brews.length) return alert('No data');
@@ -27,7 +29,7 @@ export const createBrewCsvRecipeModule = ({ getFilteredCoffees, getCoffeeTypeDis
                 esc(type.processing),
                 esc(type.roastType),
                 esc(brew.method),
-                esc(brew.grinder),
+                esc(getBrewGrinderName(brew, getGasItems?.() || [])),
                 esc(brew.grind),
                 esc(brew.weight),
                 brew.weight && brew.ratio ? (brew.weight * brew.ratio).toFixed(1) : '',

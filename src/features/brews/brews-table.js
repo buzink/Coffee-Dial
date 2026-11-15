@@ -1,7 +1,9 @@
 import { formatCoffeeLabel, formatCoffeeTypeOption } from '../../core/coffee-display.js';
 import { createBrewsVmModule } from './brews.vm.js';
+import { getBrewGrinderName } from '../../core/brew-fields.js';
 import {
     createDefaultActiveFilters,
+    formatBagOption,
     selectBrewsQuickFilterValues,
     selectBrewsUniqueValuesForKey,
     selectFilteredSortedBrews
@@ -136,7 +138,7 @@ export const createBrewsTableModule = ({
             method: brew.method || '-',
             drink: brew.drink || '-',
             grind: brew.grind || '-',
-            grinder: brew.grinder || '-',
+            grinder: getBrewGrinderName(brew, getGasItems()) || '-',
             recipe: outText,
             time: formatTime(brew.time) || '-',
             temp: (typeof brew.temp === 'number' || typeof brew.temp === 'string') ? `${brew.temp}` : '-',
@@ -274,7 +276,9 @@ export const createBrewsTableModule = ({
         if (!menu) return;
         const uniqueValues = selectBrewsUniqueValuesForKey({
             coffees: getCoffees(),
-            key
+            key,
+            getCoffeeTypeDisplay,
+            gasItems: getGasItems()
         });
         if (!uniqueValues.length) return;
 
@@ -330,11 +334,7 @@ export const createBrewsTableModule = ({
 
             if (key === 'bean') {
                 const bean = beans.find((b) => b.id === value);
-                if (bean) {
-                    const opened = formatBeanOpenedDate(bean.openedDate);
-                    const suffix = opened ? ` (${opened})` : '';
-                    displayValue = `${bean.roaster || 'Unknown'}${bean.farmer ? ` - ${bean.farmer}` : ''}${suffix}`;
-                }
+                if (bean) displayValue = formatBagOption(bean, coffeeTypes.find((ct) => ct.id === bean.coffeeTypeId), formatBeanOpenedDate);
             }
 
             if (key === 'coffeeType') {
@@ -701,7 +701,8 @@ export const createBrewsTableModule = ({
             beans: getBeans(),
             coffeeTypes: getCoffeeTypes(),
             gasItems: getGasItems(),
-            formatBeanOpenedDate
+            formatBeanOpenedDate,
+            getCoffeeTypeDisplay
         });
 
         if (!uniqueValues.length) {
@@ -750,7 +751,8 @@ export const createBrewsTableModule = ({
             activeFilters: getActiveFilters(),
             currentSort: getCurrentSort(),
             getCoffeeTypeDisplay,
-            getCoffeeTypeForBrew
+            getCoffeeTypeForBrew,
+            gasItems: getGasItems()
         });
     };
 
@@ -837,6 +839,7 @@ export const createBrewsTableModule = ({
             timeText: formatTime(brew.time),
             tempBadgeHtml: getTempBadge(brew.temp),
             ratingHtml: getStarDisplay(brew.rating),
+            grinderName: getBrewGrinderName(brew, getGasItems()),
             actionsHtml: actions
         });
 
@@ -929,7 +932,7 @@ export const createBrewsTableModule = ({
         const headerRatingHtml = ratingValue > 0
             ? `<div class="mt-0.5 leading-none">${renderTinyHeaderStars(ratingValue)}</div>`
             : '';
-        const cardVm = brewsVm.buildCardDisplayViewModel({ brew, coffeeType: typeDisplay });
+        const cardVm = brewsVm.buildCardDisplayViewModel({ brew, coffeeType: typeDisplay, grinderName: getBrewGrinderName(brew, getGasItems()) });
         const graphVm = brewsVm.buildCardGraphData(brew);
         const hasGraph = !!graphVm.hasGraph;
         const weightVal = parseFloat(brew.weight);

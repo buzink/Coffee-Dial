@@ -1,3 +1,4 @@
+import { getBrewGrinderName } from '../../core/brew-fields.js';
 const createGalleryLikesModule = ({
     getCurrentUser,
     db,
@@ -213,6 +214,7 @@ export const createGalleryModule = ({
     getFollowing,
     getCoffees,
     getCoffeeTypeDisplay,
+    getGasItems,
     dataService,
     storageService,
     functionsService,
@@ -285,9 +287,9 @@ export const createGalleryModule = ({
             ? getCoffeeTypeDisplay(coffeeData)
             : null;
         return {
-            roaster: typeDisplay?.roaster || coffeeData?.roaster || coffeeData?.name || 'Unknown',
-            origin: typeDisplay?.origin || coffeeData?.origin || coffeeData?.beanType || 'Unknown',
-            farmer: typeDisplay?.farmer || coffeeData?.farmer || '-',
+            roaster: typeDisplay?.roaster || 'Unknown',
+            origin: typeDisplay?.origin || 'Unknown',
+            farmer: typeDisplay?.farmer || '-',
             method: coffeeData?.method || '-',
             rating: coffeeData?.rating || 0
         };
@@ -1162,7 +1164,8 @@ export const createGalleryModule = ({
             ? (weight * ratio)
             : null;
 
-        const grinderText = normalizeText(brew?.grinder);
+        // A moment keeps its own copy of the details, so the grinder's name is written into it.
+        const grinderText = normalizeText(getBrewGrinderName(brew, getGasItems?.() || []));
         const grindText = normalizeText(brew?.grind);
 
         return {

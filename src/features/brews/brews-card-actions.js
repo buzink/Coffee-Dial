@@ -1,4 +1,5 @@
 import { createBrewsVmModule } from './brews.vm.js';
+import { getBrewGrinderName } from '../../core/brew-fields.js';
 import { createBrewGrinderGearSyncModule } from './brew-grinder-gear-sync.js';
 
 export const createBrewsCardActionsModule = ({
@@ -324,7 +325,7 @@ export const createBrewsCardActionsModule = ({
         applyDrinkValue();
         refreshQuickEditGearFieldVisibility();
         setQuickEditGearSelection(brew.gearIds || []);
-        document.getElementById('quickEditGrinder').value = brew.grinder || '';
+        document.getElementById('quickEditGrinder').value = getBrewGrinderName(brew, getGasItems?.() || []);
         document.getElementById('quickEditGrind').value = brew.grind ?? '';
         document.getElementById('quickEditWeight').value = brew.weight ?? '';
         const outWeight = Number.isFinite(Number(brew.weight)) && Number.isFinite(Number(brew.ratio)) ? (Number(brew.weight) * Number(brew.ratio)).toFixed(1) : '';
@@ -380,7 +381,6 @@ export const createBrewsCardActionsModule = ({
         const updates = {
             method: finalMethod,
             drink: finalDrink,
-            grinder: document.getElementById('quickEditGrinder').value || '',
             grind: parseNum(document.getElementById('quickEditGrind').value),
             weight: weightVal,
             ratio: ratioVal,
@@ -393,10 +393,11 @@ export const createBrewsCardActionsModule = ({
             beanId: selectedBeanId,
             updatedAt: nowIso
         };
-        const grinderNameFromGear = resolveGrinderNameFromGearIds(updates.gearIds);
-        if (grinderNameFromGear) updates.grinder = grinderNameFromGear;
-        else {
-            const syncResult = await grinderGearSync.ensureGrinderGearAssociation(updates);
+        // The grinder is a gear link; a typed name (only offered when no grinder is in gear)
+        // finds or creates that grinder.
+        if (!resolveGrinderNameFromGearIds(updates.gearIds)) {
+            const typed = document.getElementById('quickEditGrinder')?.value || '';
+            const syncResult = await grinderGearSync.setTypedGrinder(updates, typed);
             if (syncResult?.createdGearName) showToast?.(`Added grinder to gear: ${syncResult.createdGearName}.`);
         }
 

@@ -64,7 +64,27 @@ export const createBrewGrinderGearSyncModule = ({ getGasItems, addGear }) => {
         return { createdGearName, gearId: grinderGear?.id || null };
     };
 
+    // A grinder name typed on a brew: replaces the brew's linked grinder gear when it names
+    // another grinder (found or created in gear), removes it when emptied. Brews never
+    // store the name itself.
+    const setTypedGrinder = async (brewPayload, typedName) => {
+        const ids = Array.isArray(brewPayload?.gearIds) ? brewPayload.gearIds.filter(Boolean) : [];
+        const gasById = new Map((Array.isArray(getGasItems?.()) ? getGasItems() : []).map((item) => [item.id, item]));
+        const currentGrinder = ids.map((id) => gasById.get(id)).find((item) => item && isGrinderGear(item));
+        if (normalize(typedName) === normalize(currentGrinder?.name)) {
+            brewPayload.gearIds = [...new Set(ids)];
+            return { createdGearName: '', gearId: currentGrinder?.id || null };
+        }
+        brewPayload.gearIds = ids.filter((id) => !isGrinderGear(gasById.get(id)));
+        if (!normalize(typedName)) return { createdGearName: '', gearId: null };
+        brewPayload.grinder = typedName.toString().trim();
+        const result = await ensureGrinderGearAssociation(brewPayload);
+        delete brewPayload.grinder;
+        return result;
+    };
+
     return {
-        ensureGrinderGearAssociation
+        ensureGrinderGearAssociation,
+        setTypedGrinder
     };
 };

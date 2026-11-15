@@ -1,8 +1,9 @@
 import { formatOriginLabel } from '../../core/origin-regions.js';
+import { isGrinderGear } from '../../core/brew-fields.js';
 export const createBrewFormLookupModule = ({
     getBeans,
     getCoffeeTypes,
-    getCoffees,
+    getGasItems,
     getBeanCoffeeTypeDisplay,
     updateCoffeeDetailsTitle
 }) => {
@@ -129,16 +130,7 @@ export const createBrewFormLookupModule = ({
 
         const coffeeTypes = getCoffeeTypes();
         const type = bean.coffeeTypeId ? coffeeTypes.find((ct) => ct.id === bean.coffeeTypeId) : null;
-        const source =
-            type ||
-            {
-                roaster: bean.roaster || '',
-                farmer: bean.farmer || '',
-                origin: bean.origin || '',
-                variety: bean.variety || '',
-                processing: bean.processing || '',
-                roast: bean.roastType || ''
-            };
+        const source = type || {};
 
         const roaster = document.getElementById('roaster');
         const farmer = document.getElementById('farmer');
@@ -150,12 +142,13 @@ export const createBrewFormLookupModule = ({
         if (roaster) roaster.value = source.roaster || '';
         if (farmer) farmer.value = source.farmer || '';
         // A coffee's fields are locked (and not saved with the brew), so the origin can show the micro-region too.
-        if (origin) origin.value = type ? formatOriginLabel(type) : (source.origin || '');
+        if (origin) origin.value = type ? formatOriginLabel(type) : '';
         if (variety) variety.value = source.variety || '';
         if (processing) processing.value = source.processing || '';
         if (roastType) roastType.value = source.roast || source.roastType || '';
 
-        setCoffeeTypeFieldState(!!type);
+        // The coffee details belong to the bag's coffee: shown here, changed on the coffee card.
+        setCoffeeTypeFieldState(true);
         updateCoffeeDetailsTitle();
         if (editBtn) editBtn.disabled = false;
 
@@ -168,11 +161,12 @@ export const createBrewFormLookupModule = ({
     };
 
     const updateAutocompleteLists = () => {
-        const coffees = getCoffees();
-        const uniqueRoasters = [...new Set(coffees.map((c) => c.roaster || c.name).filter(Boolean))].sort();
-        const uniqueFarmers = [...new Set(coffees.map((c) => c.farmer).filter(Boolean))].sort();
-        const uniqueOrigins = [...new Set(coffees.map((c) => c.origin || c.beanType).filter(Boolean))].sort();
-        const uniqueGrinders = [...new Set(coffees.map((c) => c.grinder).filter(Boolean))].sort();
+        const types = getCoffeeTypes();
+        const uniqueOf = (values) => [...new Set(values.map((v) => (v || '').toString().trim()).filter(Boolean))].sort();
+        const uniqueRoasters = uniqueOf(types.map((t) => t.roaster));
+        const uniqueFarmers = uniqueOf(types.map((t) => t.farmer));
+        const uniqueOrigins = uniqueOf(types.map((t) => t.origin));
+        const uniqueGrinders = uniqueOf((getGasItems?.() || []).filter(isGrinderGear).map((g) => g.name));
 
         const populate = (id, values) => {
             const list = document.getElementById(id);

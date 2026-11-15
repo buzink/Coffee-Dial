@@ -27,31 +27,15 @@ Populates `photoPath` / `thumbPath` in `users/{uid}/photos` from legacy `photoUR
 - Dry run: `npm run backfill:photo-paths:dry`
 - Apply: `npm run backfill:photo-paths:apply`
 
-## 2) Migrate grinder text to gear links
+## 2) Keep each field in one place
 
-Creates missing grinder gear items and links brews via `gearIds`.
+Coffee details live only on the coffee (`coffeeTypes`), bag details on the bag (`beans`, linked by `coffeeTypeId`), brew details on the brew (`coffees`, linked by `beanId` and `gearIds`). Turns a typed grinder into a grinder gear link, gives bags and brews without a coffee one (with a finished bag for orphan brews), and deletes the copied fields from brews and bags. The dry run lists values that differ from the coffee and are dropped.
 
-- Script: `scripts/migrate-grinder-to-gear.mjs`
-- Dry run: `npm run migrate:grinder-to-gear:dry`
-- Apply: `npm run migrate:grinder-to-gear:apply`
+- Script: `scripts/migrate-single-source-fields.mjs`
+- Dry run: `npm run migrate:single-source-fields:dry`
+- Apply: `npm run migrate:single-source-fields:apply`
 
-## 3) Backfill legacy `brew.grinder` from gear
-
-Writes legacy grinder name field from linked grinder gear for compatibility.
-
-- Script: `scripts/fill-legacy-grinder-from-gear.mjs`
-- Dry run: `npm run backfill:legacy-grinder-from-gear:dry`
-- Apply: `npm run backfill:legacy-grinder-from-gear:apply`
-
-## 4) Sync legacy beans from brews
-
-Creates missing bean docs from brew attributes and links brews with `beanId`.
-
-- Script: `scripts/sync-legacy-beans.mjs`
-- Dry run: `npm run backfill:sync-legacy-beans:dry`
-- Apply: `npm run backfill:sync-legacy-beans:apply`
-
-## 5) Backfill bean dates from brews
+## 3) Backfill bean dates from brews
 
 Backfills `openedDate` and `archivedDate` for beans from brew timestamps.
 
@@ -59,7 +43,7 @@ Backfills `openedDate` and `archivedDate` for beans from brew timestamps.
 - Dry run: `npm run backfill:bean-dates-from-brews:dry`
 - Apply: `npm run backfill:bean-dates-from-brews:apply`
 
-## 6) Backfill coffee type decaf flag
+## 4) Backfill coffee type decaf flag
 
 Sets `coffeeTypes.decaf = true` when decaf is detected in linked data.
 
@@ -67,15 +51,7 @@ Sets `coffeeTypes.decaf = true` when decaf is detected in linked data.
 - Dry run: `npm run backfill:coffee-type-decaf:dry`
 - Apply: `npm run backfill:coffee-type-decaf:apply`
 
-## 7) Extract coffee types from beans
-
-Creates missing `coffeeTypes` from beans and links beans with `coffeeTypeId`.
-
-- Script: `scripts/extract-coffee-types-from-beans.mjs`
-- Dry run: `npm run backfill:extract-coffee-types:dry`
-- Apply: `npm run backfill:extract-coffee-types:apply`
-
-## 8) Migrate missing beansLeft
+## 5) Migrate missing beansLeft
 
 One-time backfill for beans with `stock` set but missing `beansLeft`.
 
@@ -83,7 +59,7 @@ One-time backfill for beans with `stock` set but missing `beansLeft`.
 - Dry run: `npm run backfill:beans-left-missing:dry`
 - Apply: `npm run backfill:beans-left-missing:apply`
 
-## 9) Recalculate all beansLeft
+## 6) Recalculate all beansLeft
 
 Recomputes `beansLeft` for all beans from current brew usage.
 
@@ -91,7 +67,7 @@ Recomputes `beansLeft` for all beans from current brew usage.
 - Dry run: `npm run backfill:beans-left-recalculate:dry`
 - Apply: `npm run backfill:beans-left-recalculate:apply`
 
-## 10) Backfill public profiles from users
+## 7) Backfill public profiles from users
 
 Creates/updates `publicProfiles/{uid}` from `users/{uid}` fields:
 - `displayName`
@@ -119,7 +95,7 @@ Examples:
 ## Direct script usage examples
 
 ```bash
-node scripts/sync-legacy-beans.mjs --project coffee-dial-buzink --uid <USER_UID>
+node scripts/migrate-single-source-fields.mjs --project coffee-dial-buzink --uid <USER_UID>
 node scripts/recalculate-all-beans-left.mjs --apply --project coffee-dial-buzink --limit-users 100
 ```
 

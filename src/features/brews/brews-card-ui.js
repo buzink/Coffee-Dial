@@ -1,9 +1,11 @@
 import { createBrewsVmModule } from './brews.vm.js';
+import { getBrewGrinderName } from '../../core/brew-fields.js';
 
 export const createBrewsCardUiModule = ({
     getCurrentView,
     getCoffees,
     getBeans,
+    getGasItems,
     getBrewTableOrderIds,
     getCoffeeTypeForBrew,
     getCoffeeTypeDisplay,
@@ -54,7 +56,7 @@ export const createBrewsCardUiModule = ({
         setCurrentCardGraphData(graphVm.graphData);
 
         const coffeeType = getCoffeeTypeDisplay(c);
-        const cardVm = brewsVm.buildCardDisplayViewModel({ brew: c, coffeeType });
+        const cardVm = brewsVm.buildCardDisplayViewModel({ brew: c, coffeeType, grinderName: getBrewGrinderName(c, getGasItems?.() || []) });
         updateCoffeeCardActionMenu(c);
 
         document.getElementById('cardRoaster').textContent = cardVm.titlePrimary;

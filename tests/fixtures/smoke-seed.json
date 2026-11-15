@@ -41,18 +41,11 @@
     {
       "id": "brew-v60-1",
       "beanId": "bean-ethiopia-1",
-      "roaster": "Seed Roasters",
-      "farmer": "Alemu",
-      "origin": "Ethiopia",
-      "processing": "Washed",
-      "variety": "Heirloom",
-      "roastType": "Light",
       "method": "V60",
       "drink": "Filter Coffee",
       "drinkType": "Filter Coffee",
       "rating": 4,
       "grindSize": "24",
-      "grinder": "Comandante",
       "temp": 93,
       "time": "2:45",
       "coffeeAmount": 15,
@@ -61,23 +54,19 @@
       "isPinned": true,
       "isActive": true,
       "createdAt": "2026-02-11T08:00:00.000Z",
-      "updatedAt": "2026-02-11T08:00:00.000Z"
+      "updatedAt": "2026-02-11T08:00:00.000Z",
+      "gearIds": [
+        "gear-grinder-1"
+      ]
     },
     {
       "id": "brew-espresso-1",
       "beanId": "bean-ethiopia-1",
-      "roaster": "Seed Roasters",
-      "farmer": "Alemu",
-      "origin": "Ethiopia",
-      "processing": "Washed",
-      "variety": "Heirloom",
-      "roastType": "Light",
       "method": "Espresso",
       "drink": "Espresso",
       "drinkType": "Espresso",
       "rating": 5,
       "grindSize": "12",
-      "grinder": "Niche Zero",
       "temp": 94,
       "time": "0:28",
       "coffeeAmount": 18,
@@ -86,7 +75,10 @@
       "isPinned": false,
       "isActive": true,
       "createdAt": "2026-02-12T08:00:00.000Z",
-      "updatedAt": "2026-02-12T08:00:00.000Z"
+      "updatedAt": "2026-02-12T08:00:00.000Z",
+      "gearIds": [
+        "gear-grinder-1"
+      ]
     }
   ],
   "gasItems": [

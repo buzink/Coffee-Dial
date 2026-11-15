@@ -1,18 +1,4 @@
-const resolveLinkedBeanId = ({ brew, beans = [] }) => {
-    if (!brew) return null;
-    if (brew.beanId) return brew.beanId;
-    const clean = (value) => (value || '').toString().toLowerCase().trim();
-    const linkedBean = beans.find(
-        (bean) =>
-            clean(bean.roaster) === clean(brew.roaster) &&
-            clean(bean.farmer) === clean(brew.farmer) &&
-            clean(bean.origin) === clean(brew.origin) &&
-            clean(bean.processing) === clean(brew.processing) &&
-            clean(bean.variety) === clean(brew.variety) &&
-            clean(bean.roastType) === clean(brew.roastType)
-    );
-    return linkedBean?.id || null;
-};
+const resolveLinkedBeanId = ({ brew }) => brew?.beanId || null;
 
 const sortByPinnedOrder = (a, b) => {
     const orderDelta = (a.customOrder || 0) - (b.customOrder || 0);

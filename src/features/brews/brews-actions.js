@@ -1,6 +1,7 @@
 import { createBrewsVmModule } from './brews.vm.js';
 import { withDetectedDecaf } from '../../core/coffee-decaf.js';
 import { createBrewGrinderGearSyncModule } from './brew-grinder-gear-sync.js';
+import { BAG_DUPLICATE_FIELDS, BREW_DUPLICATE_FIELDS, getBrewGrinderName, withoutFields } from '../../core/brew-fields.js';
 
 export const createBrewsActionsModule = ({
     getCurrentUser,
@@ -95,12 +96,13 @@ export const createBrewsActionsModule = ({
         const bean = source.beanId ? getBeans().find((item) => item.id === source.beanId) : null;
         const beanDisplay = bean && getBeanCoffeeTypeDisplay ? getBeanCoffeeTypeDisplay(bean) : null;
         const resolved = {
-            roaster: normalizeValue(beanDisplay?.roaster) || source.roaster || source.name || '',
+            // A friend's repeat draft carries the friend's coffee details (see buildFriendRepeatSource).
+            roaster: normalizeValue(beanDisplay?.roaster) || source.roaster || '',
             farmer: normalizeValue(beanDisplay?.farmer) || source.farmer || '',
-            origin: normalizeValue(beanDisplay?.origin) || source.origin || source.beanType || '',
+            origin: normalizeValue(beanDisplay?.origin) || source.origin || '',
             variety: normalizeValue(beanDisplay?.variety) || source.variety || '',
             processing: normalizeValue(beanDisplay?.processing) || source.processing || '',
-            roastType: normalizeValue(beanDisplay?.roastType) || source.roastType || source.roast || ''
+            roastType: normalizeValue(beanDisplay?.roastType) || source.roastType || ''
         };
         const setValue = (id, value) => {
             const el = document.getElementById(id);
@@ -132,12 +134,14 @@ export const createBrewsActionsModule = ({
         const keepCuppingFields = shouldKeepRepeatCuppingFields();
         return {
             ...base,
-            roaster: normalizeValue(base.roaster) || normalizeValue(base.name) || normalizeValue(beanDisplay?.roaster),
-            farmer: normalizeValue(base.farmer) || normalizeValue(beanDisplay?.farmer),
-            origin: normalizeValue(base.origin) || normalizeValue(base.beanType) || normalizeValue(beanDisplay?.origin),
-            variety: normalizeValue(base.variety) || normalizeValue(beanDisplay?.variety),
-            processing: normalizeValue(base.processing) || normalizeValue(beanDisplay?.processing),
-            roastType: normalizeValue(base.roastType) || normalizeValue(base.roast) || normalizeValue(beanDisplay?.roastType),
+            // The friend's coffee, read now while their bags and coffees are loaded; only
+            // used to fill the form, never saved on the brew.
+            roaster: normalizeValue(beanDisplay?.roaster),
+            farmer: normalizeValue(beanDisplay?.farmer),
+            origin: normalizeValue(beanDisplay?.origin),
+            variety: normalizeValue(beanDisplay?.variety),
+            processing: normalizeValue(beanDisplay?.processing),
+            roastType: normalizeValue(beanDisplay?.roastType),
             notes: keepCuppingFields ? (base.notes || '') : '',
             improve: keepCuppingFields ? (base.improve || '') : '',
             rating: keepCuppingFields ? (parseInt(base.rating, 10) || 0) : 0
@@ -173,7 +177,7 @@ export const createBrewsActionsModule = ({
     };
 
     const buildDuplicateBrewData = (brew) => {
-        const d = stripBrewGraphFields(brew);
+        const d = withoutFields(stripBrewGraphFields(brew), BREW_DUPLICATE_FIELDS);
         const keepCuppingFields = shouldKeepRepeatCuppingFields();
         delete d.id;
         d.createdAt = new Date().toISOString();
@@ -203,7 +207,7 @@ export const createBrewsActionsModule = ({
         if (!sourceBean?.archived) return null;
 
         const nowIso = new Date().toISOString();
-        const newBeanData = { ...sourceBean };
+        const newBeanData = withoutFields(sourceBean, BAG_DUPLICATE_FIELDS);
         delete newBeanData.id;
         delete newBeanData.stock;
         delete newBeanData.beansLeft;
@@ -246,12 +250,12 @@ export const createBrewsActionsModule = ({
 
         const newBagBeanId = await createNewBagForArchivedBrew(sourceBrew);
         if (newBagBeanId) d.beanId = newBagBeanId;
-        const grinderNameFromGear = resolveGrinderNameFromGearIds(d.gearIds);
-        if (grinderNameFromGear) d.grinder = grinderNameFromGear;
-        else {
+        // A typed grinder becomes (or finds) a grinder in gear and is linked by gearIds only.
+        if (!resolveGrinderNameFromGearIds(d.gearIds)) {
             const syncResult = await grinderGearSync.ensureGrinderGearAssociation(d);
             if (syncResult?.createdGearName) showToast?.(`Added grinder to gear: ${syncResult.createdGearName}.`);
         }
+        delete d.grinder;
         try {
             const newId = await addCoffee(d);
             if (d.beanId) {
@@ -458,13 +462,17 @@ export const createBrewsActionsModule = ({
 
         let selectedBeanId = document.getElementById('savedBeanSelect').value;
 
+        // Coffee details typed in the form are only used to find or create the coffee
+        // (when no bag is chosen); the brew itself stores only brew data and links.
+        const coffeeFields = {
+            roaster: f.get('roaster') || '',
+            farmer: f.get('farmer') || '',
+            origin: f.get('origin') || '',
+            variety: f.get('variety') || '',
+            processing: f.get('processing') || '',
+            roastType: f.get('roastType') || ''
+        };
         const d = {
-            roaster: f.get('roaster'),
-            farmer: f.get('farmer'),
-            origin: f.get('origin'),
-            variety: f.get('variety'),
-            processing: f.get('processing'),
-            roastType: f.get('roastType'),
             method: finalMethod,
             grinder: f.get('grinder'),
             grind: parseNum(f.get('grind')),
@@ -479,12 +487,12 @@ export const createBrewsActionsModule = ({
             gearIds: getSelectedBrewGearIds(),
             updatedAt: new Date().toISOString()
         };
-        const grinderNameFromGear = resolveGrinderNameFromGearIds(d.gearIds);
-        if (grinderNameFromGear) d.grinder = grinderNameFromGear;
-        else {
+        // A typed grinder becomes (or finds) a grinder in gear and is linked by gearIds only.
+        if (!resolveGrinderNameFromGearIds(d.gearIds)) {
             const syncResult = await grinderGearSync.ensureGrinderGearAssociation(d);
             if (syncResult?.createdGearName) showToast?.(`Added grinder to gear: ${syncResult.createdGearName}.`);
         }
+        delete d.grinder;
 
         const firstDripEl = document.getElementById('graphFirstDrip');
         const maxFlowEl = document.getElementById('graphMaxFlow');
@@ -533,15 +541,7 @@ export const createBrewsActionsModule = ({
         const recipeSteps = scale()?.getRecipeSteps?.();
         d.recipeSteps = recipeSteps && recipeSteps.length ? recipeSteps : [];
 
-        const beanData = {
-            roaster: d.roaster,
-            farmer: d.farmer,
-            origin: d.origin,
-            variety: d.variety,
-            processing: d.processing,
-            roastType: d.roastType,
-            updatedAt: new Date().toISOString()
-        };
+        const beanData = { ...coffeeFields, updatedAt: new Date().toISOString() };
 
         try {
             const existingBrewForUpdate = eid ? coffees.find((c) => c.id === eid) : null;
@@ -585,52 +585,38 @@ export const createBrewsActionsModule = ({
             };
 
             if (!selectedBeanId) {
-                const existingBean = beans.find(
-                    (b) =>
-                        clean(b.roaster) === clean(beanData.roaster) &&
-                        clean(b.farmer) === clean(beanData.farmer) &&
-                        clean(b.origin) === clean(beanData.origin) &&
-                        clean(b.processing) === clean(beanData.processing) &&
-                        clean(b.variety) === clean(beanData.variety) &&
-                        clean(b.roastType) === clean(beanData.roastType)
-                );
-
-                if (existingBean) {
-                    selectedBeanId = existingBean.id;
-                    let coffeeTypeId = existingBean.coffeeTypeId || null;
-                    if (!coffeeTypeId) {
-                        const coffeeTypeInfo = await ensureCoffeeTypeId();
-                        coffeeTypeId = coffeeTypeInfo?.id || null;
-                        if (coffeeTypeInfo?.created) dispatchCommand?.('beans.showCoffeeTypeCreatedToast', { coffeeTypeId });
-                    }
-                    const updates = { updatedAt: beanData.updatedAt };
-                    if (!existingBean.coffeeTypeId && coffeeTypeId) updates.coffeeTypeId = coffeeTypeId;
-                    await updateBean(selectedBeanId, updates);
+                const coffeeTypeInfo = await ensureCoffeeTypeId();
+                const coffeeTypeId = coffeeTypeInfo?.id || null;
+                if (coffeeTypeInfo?.created) dispatchCommand?.('beans.showCoffeeTypeCreatedToast', { coffeeTypeId });
+                // An existing coffee reuses its open bag; otherwise the brew gets a new bag.
+                const openBag = coffeeTypeId && !coffeeTypeInfo?.created
+                    ? beans.find((b) => b.coffeeTypeId === coffeeTypeId && !b.archived && !b.frozen)
+                    : null;
+                if (openBag) {
+                    selectedBeanId = openBag.id;
+                    await updateBean(selectedBeanId, { updatedAt: beanData.updatedAt });
                     await uploadPendingCoffeeTypeImage(coffeeTypeId);
-                } else {
-                    const coffeeTypeInfo = await ensureCoffeeTypeId();
-                    const coffeeTypeId = coffeeTypeInfo?.id || null;
-                    if (coffeeTypeInfo?.created) dispatchCommand?.('beans.showCoffeeTypeCreatedToast', { coffeeTypeId });
-                    if (beanData.roaster || beanData.origin) {
-                        const nowIso = new Date().toISOString();
-                        beanData.createdAt = nowIso;
-                        beanData.updatedAt = nowIso;
-                        beanData.archived = false;
-                        beanData.frozen = false;
-                        beanData.price = (await takePendingAIBagPrice()) ?? null;
-                        beanData.stock = 250;
-                        beanData.beansLeft = 250;
-                        beanData.openedDate = nowIso;
-                        beanData.archivedDate = null;
-                        if (coffeeTypeId) beanData.coffeeTypeId = coffeeTypeId;
-                        selectedBeanId = await addBean(beanData);
-                        dispatchCommand?.('beans.showBeanCreatedToast', {
-                            beanId: selectedBeanId,
-                            roaster: beanData.roaster,
-                            farmer: beanData.farmer
-                        });
-                        await uploadPendingCoffeeTypeImage(coffeeTypeId);
-                    }
+                } else if (coffeeTypeId) {
+                    const nowIso = new Date().toISOString();
+                    const newBag = {
+                        coffeeTypeId,
+                        createdAt: nowIso,
+                        updatedAt: nowIso,
+                        archived: false,
+                        frozen: false,
+                        price: (await takePendingAIBagPrice()) ?? null,
+                        stock: 250,
+                        beansLeft: 250,
+                        openedDate: nowIso,
+                        archivedDate: null
+                    };
+                    selectedBeanId = await addBean(newBag);
+                    dispatchCommand?.('beans.showBeanCreatedToast', {
+                        beanId: selectedBeanId,
+                        roaster: beanData.roaster,
+                        farmer: beanData.farmer
+                    });
+                    await uploadPendingCoffeeTypeImage(coffeeTypeId);
                 }
             } else {
                 const selectedBean = beans.find((b) => b.id === selectedBeanId);
@@ -650,7 +636,6 @@ export const createBrewsActionsModule = ({
 
             const hasBrewData =
                 d.method ||
-                d.grinder ||
                 d.grind ||
                 d.weight ||
                 d.ratio ||
@@ -780,7 +765,7 @@ export const createBrewsActionsModule = ({
         populateBrewQuickEditBeanOptions(brew.beanId || '');
         document.getElementById('quickEditMethod').value = brew.method || '';
         document.getElementById('quickEditDrink').value = brew.drink || '';
-        document.getElementById('quickEditGrinder').value = brew.grinder || '';
+        document.getElementById('quickEditGrinder').value = getBrewGrinderName(brew, getGasItems?.() || []);
         document.getElementById('quickEditGrind').value = brew.grind ?? '';
         document.getElementById('quickEditWeight').value = brew.weight ?? '';
         const outWeight =
@@ -836,7 +821,6 @@ export const createBrewsActionsModule = ({
         const updates = {
             method: document.getElementById('quickEditMethod').value || '',
             drink: document.getElementById('quickEditDrink').value || '',
-            grinder: document.getElementById('quickEditGrinder').value || '',
             grind: parseNum(document.getElementById('quickEditGrind').value),
             weight: weightVal,
             ratio: ratioVal,
@@ -849,7 +833,7 @@ export const createBrewsActionsModule = ({
             beanId: selectedBeanId,
             updatedAt: nowIso
         };
-        const quickEditSync = await grinderGearSync.ensureGrinderGearAssociation(updates);
+        const quickEditSync = await grinderGearSync.setTypedGrinder(updates, document.getElementById('quickEditGrinder')?.value || '');
         if (quickEditSync?.createdGearName) showToast?.(`Added grinder to gear: ${quickEditSync.createdGearName}.`);
 
         try {

@@ -1,4 +1,11 @@
 import { encodeBrewGraphDoc, splitBrewGraph } from '../../core/brew-graphs.js';
+import { BREW_DUPLICATE_FIELDS, getBrewGrinderName, isGrinderGear, withoutFields } from '../../core/brew-fields.js';
+
+const cleanText = (value) => {
+    const text = (value ?? '').toString().trim();
+    return text && text !== '-' ? text : '';
+};
+const keyOf = (value) => cleanText(value).toLowerCase();
 
 export const createImportExportModule = ({
     loadBrewsWithGraphs = null,
@@ -11,6 +18,7 @@ export const createImportExportModule = ({
     getFilteredCoffees,
     getBeans,
     getCoffeeTypes,
+    getGasItems,
     getCoffeeTypeDisplay,
     getCoffeeTypeForBrew,
     openAppConfirm
@@ -88,7 +96,7 @@ export const createImportExportModule = ({
                 <tr class="border-t border-coffee-100 dark:border-[#44403c]">
                     <td class="px-2 py-2 whitespace-nowrap">${date}</td>
                     <td class="px-2 py-2">${brew.method || ''}</td>
-                    <td class="px-2 py-2">${brew.farmer || ''}</td>
+                    <td class="px-2 py-2">${brew.coffeeType?.farmer || brew.farmer || ''}</td>
                     <td class="px-2 py-2">${brew.grinder || ''}</td>
                     <td class="px-2 py-2 text-right">${grind}</td>
                     <td class="px-2 py-2 text-right">${weight}</td>
@@ -160,6 +168,86 @@ export const createImportExportModule = ({
         }
     };
 
+    // Imported brews (Beanconqueror CSV or our JSON export) carry their coffee and grinder as
+    // text. Those become (or match) a coffee with one finished bag per coffee, and a grinder
+    // in gear; the brew keeps only the links.
+    const prepareImportedBrews = (pendingBrews, uid) => {
+        const coffeeTypes = [...(getCoffeeTypes?.() || [])];
+        const beans = [...(getBeans?.() || [])];
+        const gasItems = [...(getGasItems?.() || [])];
+        const newDocs = [];
+        const nowIso = new Date().toISOString();
+        const newId = (name) => doc(collection(db, 'users', uid, name)).id;
+        const coffeeKey = (c) => [c.roaster, c.name, c.farmer, c.origin, c.processing, c.roast].map(keyOf).join('|');
+        const bagForCoffee = new Map();
+
+        const findOrCreateCoffee = (fields) => {
+            const key = coffeeKey(fields);
+            if (!key.replace(/\|/g, '')) return null;
+            const existing = coffeeTypes.find((t) => coffeeKey({ ...t, roast: t.roast || t.roastType }) === key);
+            if (existing) return existing.id;
+            const id = newId('coffeeTypes');
+            const data = { uid, ...fields, rating: 0, tasteNotes: '', webshopUrl: '', imageUrl: '', createdAt: nowIso, updatedAt: nowIso };
+            coffeeTypes.push({ id, ...data });
+            newDocs.push({ path: ['users', uid, 'coffeeTypes', id], data });
+            return id;
+        };
+        const findOrCreateBag = (coffeeTypeId, openedDate) => {
+            if (bagForCoffee.has(coffeeTypeId)) return bagForCoffee.get(coffeeTypeId);
+            const existing = beans.find((b) => b.coffeeTypeId === coffeeTypeId);
+            if (existing) {
+                bagForCoffee.set(coffeeTypeId, existing.id);
+                return existing.id;
+            }
+            const id = newId('beans');
+            const data = {
+                coffeeTypeId, archived: true, frozen: false, stock: null, beansLeft: null, price: null,
+                openedDate: openedDate || nowIso, archivedDate: nowIso, frozenDate: null, roastDate: null,
+                shopUrl: '', createdAt: nowIso, updatedAt: nowIso
+            };
+            beans.push({ id, ...data });
+            newDocs.push({ path: ['users', uid, 'beans', id], data });
+            bagForCoffee.set(coffeeTypeId, id);
+            return id;
+        };
+        const findOrCreateGrinder = (name) => {
+            const target = keyOf(name);
+            if (!target) return null;
+            const existing = gasItems.find((g) => isGrinderGear(g) && keyOf(g.name) === target);
+            if (existing) return existing.id;
+            const id = newId('gear');
+            const data = { name: cleanText(name), price: null, type: 'grinder', methods: [], imageUrl: '', purchasedDate: nowIso, archived: false, createdAt: nowIso, updatedAt: nowIso };
+            gasItems.push({ id, ...data });
+            newDocs.push({ path: ['users', uid, 'gear', id], data });
+            return id;
+        };
+
+        const brews = pendingBrews.map((raw) => {
+            const src = raw?.coffeeType || raw || {};
+            const fields = {
+                roaster: cleanText(src.roaster ?? raw.roaster),
+                name: cleanText(src.name ?? raw.coffeeName),
+                farmer: cleanText(src.farmer ?? raw.farmer),
+                origin: cleanText(src.origin ?? raw.origin),
+                variety: cleanText(src.variety ?? raw.variety),
+                processing: cleanText(src.processing ?? raw.processing),
+                roast: cleanText(src.roastType ?? src.roast ?? raw.roastType)
+            };
+            const brew = withoutFields(raw, [...BREW_DUPLICATE_FIELDS, 'coffeeType', 'coffeeName']);
+            const linkedBag = raw.beanId && beans.find((b) => b.id === raw.beanId);
+            if (!linkedBag) {
+                delete brew.beanId;
+                const coffeeTypeId = findOrCreateCoffee(fields);
+                if (coffeeTypeId) brew.beanId = findOrCreateBag(coffeeTypeId, raw.createdAt);
+            }
+            const ids = Array.isArray(raw.gearIds) ? raw.gearIds.filter((id) => gasItems.some((g) => g.id === id)) : [];
+            const grinderId = ids.some((id) => isGrinderGear(gasItems.find((g) => g.id === id))) ? null : findOrCreateGrinder(raw.grinder);
+            brew.gearIds = grinderId ? [...new Set([...ids, grinderId])] : ids;
+            return brew;
+        });
+        return { brews, newDocs };
+    };
+
     const performImport = async () => {
         const user = getCurrentUser();
         if (!user) return alert('Please sign in.');
@@ -182,12 +270,13 @@ export const createImportExportModule = ({
 
         try {
             const col = collection(db, 'users', user.uid, 'coffees');
+            const { brews: preparedBrews, newDocs } = prepareImportedBrews(getPendingImportBrews(), user.uid);
             // Brews from a JSON export can carry scale captures. Those go into the brew's graph
             // document, like everywhere else. A batch is limited in size as well as in number of
             // writes, so batches are closed early when captures make them large.
             const MAX_BATCH_WRITES = 400;
             const MAX_BATCH_CHARS = 1500000;
-            const pending = getPendingImportBrews();
+            const pending = preparedBrews;
             let batch = writeBatch(db);
             let batchWrites = 0;
             let batchChars = 0;
@@ -198,6 +287,12 @@ export const createImportExportModule = ({
                 batchWrites = 0;
                 batchChars = 0;
             };
+            // New coffees, bags and grinders the imported brews link to go in first.
+            for (const { path, data } of newDocs) {
+                if (batchWrites + 1 > MAX_BATCH_WRITES) await flush();
+                batch.set(doc(db, ...path), data);
+                batchWrites += 1;
+            }
             for (const pendingBrew of pending) {
                 const { brew, graph } = splitBrewGraph(pendingBrew);
                 const graphChars = graph ? JSON.stringify(graph).length : 0;
@@ -271,7 +366,7 @@ export const createImportExportModule = ({
         const r = brews.map((c) => {
             const type = getCoffeeTypeDisplay(c);
             return [
-                c.createdAt || '', esc(type.roaster), esc(type.origin), esc(type.farmer), esc(type.variety), esc(type.processing), esc(type.roastType), esc(c.method), esc(c.grinder), esc(c.grind), esc(c.weight),
+                c.createdAt || '', esc(type.roaster), esc(type.origin), esc(type.farmer), esc(type.variety), esc(type.processing), esc(type.roastType), esc(c.method), esc(getBrewGrinderName(c, getGasItems?.() || [])), esc(c.grind), esc(c.weight),
                 c.weight && c.ratio ? (c.weight * c.ratio).toFixed(1) : '', esc(c.time), esc(c.temp), esc(c.drink), esc(c.rating), esc(c.notes), esc(c.improve)
             ];
         });
@@ -298,7 +393,7 @@ export const createImportExportModule = ({
         const rows = brews.map((c) => {
             const type = getCoffeeTypeDisplay(c);
             return [
-                esc(c.grind || ''), esc(c.weight || ''), esc(c.temp || ''), esc(c.method || ''), esc(type.farmer || ''), esc(c.grinder || ''), '', '', '', '', '', esc(c.time || ''), '', '',
+                esc(c.grind || ''), esc(c.weight || ''), esc(c.temp || ''), esc(c.method || ''), esc(type.farmer || ''), esc(getBrewGrinderName(c, getGasItems?.() || [])), '', '', '', '', '', esc(c.time || ''), '', '',
                 c.weight && c.ratio ? (c.weight * c.ratio).toFixed(1) : '', '', '', esc(c.rating || ''), esc(c.notes || ''), '', '', '', esc(c.createdAt || ''), esc(c.ratio ? `1 / ${c.ratio.toFixed(2)}` : ''), '', '', '', '', ''
             ];
         });
@@ -334,14 +429,10 @@ export const createImportExportModule = ({
         const normalized = brews.map((brew) => {
             const typeDisplay = getCoffeeTypeDisplay(brew);
             const type = getCoffeeTypeForBrew(brew);
+            // The export is self-contained: the brew's coffee and grinder are written into it.
             return {
-                ...brew,
-                roaster: typeDisplay.roaster,
-                farmer: typeDisplay.farmer,
-                origin: typeDisplay.origin,
-                variety: typeDisplay.variety,
-                processing: typeDisplay.processing,
-                roastType: typeDisplay.roastType,
+                ...withoutFields(brew, BREW_DUPLICATE_FIELDS),
+                grinder: getBrewGrinderName(brew, getGasItems?.() || []),
                 coffeeType: {
                     id: type?.id || null,
                     roaster: typeDisplay.roaster,
@@ -373,8 +464,9 @@ export const createImportExportModule = ({
             if (str.includes(';') || str.includes('"') || str.includes('\n')) return `"${str.replace(/"/g, '""')}"`;
             return str;
         };
-        const rows = sourceBeans.map((coffee) => [
-            esc(coffee.farmer || ''), esc(coffee.roaster || ''), '', '', esc(coffee.roastType || ''), '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', esc(coffee.origin || ''), '', '', '', '', esc(coffee.variety || ''), esc(coffee.processing || ''), '', '', '', '', ''
+        const typeFor = (bean) => (getCoffeeTypes?.() || []).find((ct) => ct.id === bean.coffeeTypeId) || {};
+        const rows = sourceBeans.map((bean) => typeFor(bean)).map((coffee) => [
+            esc(coffee.farmer || ''), esc(coffee.roaster || ''), '', '', esc(coffee.roast || coffee.roastType || ''), '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', esc(coffee.origin || ''), '', '', '', '', esc(coffee.variety || ''), esc(coffee.processing || ''), '', '', '', '', ''
         ]);
         const csvContent = `data:text/csv;charset=utf-8,${headers.join(';')}\n${rows.map((e) => e.join(';')).join('\n')}`;
         const encodedUri = encodeURI(csvContent);
@@ -390,16 +482,15 @@ export const createImportExportModule = ({
         const sourceBeans = getBeans().map((bean) => {
             const type = bean.coffeeTypeId ? getCoffeeTypes().find((ct) => ct.id === bean.coffeeTypeId) : null;
             const normalized = {
-                roaster: type?.roaster || bean.roaster || null,
-                farmer: type?.farmer || bean.farmer || null,
-                origin: type?.origin || bean.origin || null,
-                variety: type?.variety || bean.variety || null,
-                processing: type?.processing || bean.processing || null,
-                roastType: type?.roast || type?.roastType || bean.roastType || null
+                roaster: type?.roaster || null,
+                farmer: type?.farmer || null,
+                origin: type?.origin || null,
+                variety: type?.variety || null,
+                processing: type?.processing || null,
+                roastType: type?.roast || type?.roastType || null
             };
             return {
                 ...bean,
-                ...normalized,
                 coffeeType: {
                     id: type?.id || null,
                     roaster: normalized.roaster,
