@@ -3,6 +3,7 @@ import { createCoffeeTypesTableModule } from '../../features/coffees/coffee-type
 import { createCoffeesRepoModule } from '../../features/coffees/coffees.repo.js';
 import { withDetectedDecaf } from '../../core/coffee-decaf.js';
 import { createDraftId, withoutDrafts } from '../../core/draft-items.js';
+import { showToast } from '../../core/notify.js';
 
 export const createCoffeesCoordinator = ({
     dataService,
@@ -95,6 +96,51 @@ export const createCoffeesCoordinator = ({
         setCoffeeTypesState([...withoutDrafts(getCoffeeTypes()), newType]);
         // The card mounts lazily, so open it for edit in one command (open, then edit mode).
         await dispatchOnly('coffees.openCardForEdit', { id: newType.id, event: null });
+    };
+
+    // Copies a friend's coffee into the user's own coffees. The rating stays behind (it is the
+    // friend's opinion). The photo is copied into the user's own storage, never linked: photos
+    // are deleted by their URL, so a shared link would let the copy delete the friend's file.
+    const COPIED_COFFEE_FIELDS = ['name', 'farmer', 'roaster', 'origin', 'originMicroRegion', 'processing', 'variety', 'roast', 'decaf', 'tasteNotes', 'webshopUrl'];
+    const copyCoffeePhoto = async ({ uid, typeId, sourceUrl }) => {
+        const { storage, ref, uploadBytes, getDownloadURL } = storageService || {};
+        const { db, doc, updateDoc } = dataService || {};
+        if (!storage || !ref || !uploadBytes || !getDownloadURL || !doc || !updateDoc) return;
+        try {
+            const response = await fetch(sourceUrl, { cache: 'no-store' });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const blob = await response.blob();
+            const photoRef = ref(storage, `photos/${uid}/coffee_type_${typeId}_${Date.now()}`);
+            const snapshot = await uploadBytes(photoRef, blob, { contentType: blob.type || 'image/jpeg' });
+            const imageUrl = await getDownloadURL(snapshot.ref);
+            await updateDoc(doc(db, 'users', uid, 'coffeeTypes', typeId), { imageUrl, updatedAt: new Date().toISOString() });
+        } catch (err) {
+            // The coffee itself is already cloned; only the photo is missing.
+            console.warn('[Coffees] Copying the photo of a cloned coffee failed', err);
+        }
+    };
+
+    const cloneCoffeeTypeToMine = async (typeId) => {
+        document.querySelectorAll('.action-menu').forEach((menu) => menu.classList.add('hidden'));
+        const user = getCurrentUser();
+        if (!user) return alert('Please sign in.');
+        const type = getCoffeeTypes().find((ct) => ct.id === typeId);
+        if (!type) return;
+        const nowIso = new Date().toISOString();
+        const data = { uid: user.uid, rating: 0, imageUrl: '', createdAt: nowIso, updatedAt: nowIso };
+        COPIED_COFFEE_FIELDS.forEach((key) => {
+            data[key] = key === 'decaf' ? !!type[key] : (type[key] || '');
+        });
+        try {
+            const newRef = await repo.createCoffeeType({ uid: user.uid, data: withDetectedDecaf(data) });
+            const label = type.name || type.farmer || 'coffee';
+            showToast(`${label} cloned to My coffees.`);
+            const sourceUrl = type.imageUrl || type.imageURL || '';
+            if (sourceUrl) await copyCoffeePhoto({ uid: user.uid, typeId: newRef.id, sourceUrl });
+        } catch (err) {
+            console.error('Error cloning coffee:', err);
+            alert('Failed to clone coffee.');
+        }
     };
 
     const openCoffeeTypeShopUrl = (typeId, ev) => {
@@ -273,6 +319,7 @@ export const createCoffeesCoordinator = ({
         openCoffeeTypes,
         closeCoffeeTypes,
         createCoffeeTypeFromModal,
+        cloneCoffeeTypeToMine,
         openCoffeeTypeShopUrl,
         openNewBagForCoffeeType,
         showBeansForCoffeeType,

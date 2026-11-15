@@ -147,6 +147,9 @@ export const createCoffeeTypesTableModule = ({
                 <button data-action-click="showBrewsForCoffeeTypeFromTable('${type.id}');" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
                     <i class="fa-solid fa-mug-hot text-indigo-600 w-4"></i> Go to brews
                 </button>
+                ${isMine ? '' : `<button data-action-click="cloneCoffeeTypeToMine('${type.id}');" class="w-full text-left px-4 py-2 text-sm hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-700 dark:text-[#d6ccc2] flex items-center gap-3">
+                    <i class="fa-solid fa-file-import text-green-500 w-4"></i> Clone to my coffees
+                </button>`}
                 ${isMine ? `<hr class="border-coffee-100 dark:border-[#44403c]">
                 <button data-action-click="deleteCoffeeTypeFromTable('${type.id}');" class="w-full text-left px-4 py-2 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-3">
                     <i class="fa-solid fa-trash w-4"></i> Delete
