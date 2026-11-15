@@ -6,8 +6,8 @@
             </h3>
         </div>
         <div>
-            <div class="bg-white dark:bg-[#292524] rounded-xl shadow-lg border border-coffee-100 dark:border-[#44403c] overflow-hidden">
-                <div class="bg-coffee-100/50 dark:bg-[#1c1917] p-1.5 space-y-1.5 border-b border-coffee-200 dark:border-[#44403c]">
+            <div class="app-table-frame bg-white dark:bg-[#292524] rounded-xl shadow-lg border border-coffee-100 dark:border-[#44403c] overflow-hidden">
+                <div class="app-table-tools bg-coffee-100/50 dark:bg-[#1c1917] p-1.5 space-y-1.5 border-b border-coffee-200 dark:border-[#44403c]">
                     <div class="flex items-center gap-1.5">
                         <select id="gasViewSelect" aria-label="Gear view" data-action-change="gasChangeView(this.value)" class="bg-white dark:bg-[#292524] border border-coffee-100 dark:border-[#44403c] text-coffee-900 dark:text-white text-sm rounded-lg block p-2.5 shadow-sm font-bold min-w-[150px]">
                             <option value="mine">My gear</option>
@@ -32,7 +32,7 @@
                         <button data-action-click="clearGasFilters()" class="text-xs text-coffee-600 dark:text-[#a8a29e] hover:text-red-500 whitespace-nowrap px-2 py-1 rounded hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors">Clear all</button>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="app-table-body overflow-x-auto">
                     <table class="w-full text-sm text-left text-coffee-900 dark:text-[#e7e5e4]">
                         <thead class="text-xs text-coffee-700 dark:text-[#a8a29e] uppercase bg-coffee-100/50 dark:bg-[#1c1917] border-b border-coffee-200 dark:border-[#44403c]">
                             <tr>

@@ -330,6 +330,43 @@
         .app-card:has(.app-card-edit:not(.hidden)) .app-card-title-block { display: none; }
         [data-adding] .app-when-editing { display: none; }
         [data-adding] .app-when-adding { display: inline; }
+        /* Brews, bags, coffees and gear pages: the filter/search bar (.app-table-tools) and the
+           list (.app-table-body) used to share one framed box (.app-table-frame).
+           Mobile (card rows, below 768px like the tables' own switch): no frame at all; the
+           cards fill the page width, so they line up with the page margin like the rest.
+           Desktop: the filters sit above the table, and only the table keeps the frame. */
+        .app-table-frame {
+            background-color: transparent !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+        }
+        .app-table-tools {
+            background-color: transparent !important;
+            border-bottom: 0 !important;
+        }
+        @media (max-width: 767px) {
+            .app-table-tools { padding: 0 0 6px !important; }
+            .app-table-body tr {
+                background-color: transparent !important;
+                border-bottom-width: 0 !important;
+            }
+            .app-table-body td { padding-left: 0 !important; padding-right: 0 !important; }
+            .app-table-body td > div.rounded-lg { background-color: #ffffff !important; }
+            .dark .app-table-body td > div.rounded-lg { background-color: #292524 !important; }
+        }
+        @media (min-width: 768px) {
+            .app-table-tools { padding: 0 0 12px !important; }
+            .app-table-body {
+                background-color: #ffffff;
+                border: 1px solid #f2e8e5;
+                border-radius: 0.75rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            }
+            .dark .app-table-body { background-color: #292524; border-color: #44403c; }
+        }
+
         /* Add/Edit brew form: the same 12px margins as the brew table's header (p-3), instead
            of 8px + 24px around the sections, 16px inside them and 24px between them. */
         #brewFormModalBody { padding: 12px !important; }
