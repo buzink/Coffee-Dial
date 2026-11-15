@@ -330,6 +330,17 @@
         .app-card:has(.app-card-edit:not(.hidden)) .app-card-title-block { display: none; }
         [data-adding] .app-when-editing { display: none; }
         [data-adding] .app-when-adding { display: inline; }
+        /* Add/Edit brew form: the same 12px margins as the brew table's header (p-3), instead
+           of 8px + 24px around the sections, 16px inside them and 24px between them. */
+        #brewFormModalBody { padding: 12px !important; }
+        #brewFormModalBody #formContent { padding: 0 !important; }
+        #brewFormModalBody #coffeeForm { margin-top: 0 !important; }
+        #brewFormModalBody #coffeeForm > :not([hidden]) ~ :not([hidden]) { margin-top: 12px !important; }
+        #brewFormModalBody #coffeeForm > div.rounded-lg { padding: 12px !important; }
+        #brewFormModalBody #coffeeForm > div.rounded-lg:first-of-type:not([hidden]) { margin-top: 0 !important; }
+        /* The form's own Discard/Save row is empty here (the dialog footer has the buttons). */
+        #brewFormModalBody #coffeeForm > div:has(> #formActionButtons.hidden) { display: none !important; }
+
         /* Spinner over an Add card while Extract (AI) is reading a photo or page. */
         .app-card-busy {
             position: absolute;
