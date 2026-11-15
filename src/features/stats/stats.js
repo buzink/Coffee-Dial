@@ -163,7 +163,35 @@ export const createStatsModule = ({
         await applyStatsPeriod();
     };
 
-    const renderCharts = async (roast, method, drink, stars) => {
+    // The most common value as a word; Unknown only when nothing else was recorded.
+    const renderTopShare = (id, dataObj = {}) => {
+        const wordEl = document.getElementById(id);
+        const shareEl = document.getElementById(`${id}Share`);
+        if (!wordEl) return;
+        const entries = Object.entries(dataObj).filter(([, count]) => count > 0);
+        const total = entries.reduce((sum, [, count]) => sum + count, 0);
+        const known = entries.filter(([label]) => label !== 'Unknown');
+        const [label, count] = [...(known.length ? known : entries)].sort((a, b) => b[1] - a[1])[0] || [];
+        wordEl.textContent = label || '-';
+        if (shareEl) shareEl.textContent = label ? `${Math.round((count / total) * 100)}% of brews` : '';
+    };
+    const wireFlipCards = () => {
+        document.querySelectorAll('[data-stats-flip]').forEach((btn) => {
+            if (btn.dataset.flipWired) return;
+            btn.dataset.flipWired = '1';
+            btn.addEventListener('click', () => {
+                const card = btn.closest('.stats-flip-card');
+                const flipped = !card.classList.contains('is-flipped');
+                card.classList.toggle('is-flipped', flipped);
+                btn.setAttribute('aria-pressed', String(flipped));
+                btn.title = flipped ? 'Show most common' : 'Show distribution';
+                btn.querySelector('i')?.classList.replace(flipped ? 'fa-chart-pie' : 'fa-font', flipped ? 'fa-font' : 'fa-chart-pie');
+                card.querySelector('.stats-flip-front')?.setAttribute('aria-hidden', String(flipped));
+                card.querySelector('.stats-flip-back')?.setAttribute('aria-hidden', String(!flipped));
+            });
+        });
+    };
+    const renderCharts = async (roast, method, drink, stars, brewTimes = { weekday: Array(7).fill(0), hour: Array(24).fill(0) }) => {
         const chartCtor = await getChartCtor();
         if (!chartCtor) return;
         const isDark = document.documentElement.classList.contains('dark');
@@ -186,6 +214,10 @@ export const createStatsModule = ({
         createPie('chartRoast', roast, roastColors);
         createPie('chartMethod', method, methodColors);
         createPie('chartDrink', drink, drinkColors);
+        renderTopShare('statTopRoast', roast);
+        renderTopShare('statTopMethod', method);
+        renderTopShare('statTopDrink', drink);
+        wireFlipCards();
 
         if (chartInstances.chartStars) chartInstances.chartStars.destroy();
         const ctxStars = document.getElementById('chartStars').getContext('2d');
@@ -194,6 +226,65 @@ export const createStatsModule = ({
             type: 'bar',
             data: { labels: ['1★', '2★', '3★', '4★', '5★'], datasets: [{ label: 'Count', data: starCounts, backgroundColor: '#fbbf24', borderRadius: 4 }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: textColor, precision: 0 }, grid: { color: gridColor } }, x: { ticks: { color: textColor }, grid: { display: false } } } }
+        });
+
+        const createBar = (ctxId, labels, data, color, autoSkip = false) => {
+            if (chartInstances[ctxId]) chartInstances[ctxId].destroy();
+            const canvas = document.getElementById(ctxId);
+            if (!canvas) return;
+            chartInstances[ctxId] = new chartCtor(canvas.getContext('2d'), {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'Brews', data, backgroundColor: color, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: textColor, precision: 0 }, grid: { color: gridColor } }, x: { ticks: { color: textColor, autoSkip, maxRotation: 0 }, grid: { display: false } } } }
+            });
+        };
+        createBar('chartWeekday', ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], brewTimes.weekday, '#a78bfa');
+        // Hours from the earliest to the latest hour with a brew, so the night does not take up the chart.
+        const usedHours = brewTimes.hour.map((count, h) => (count > 0 ? h : null)).filter((h) => h !== null);
+        const firstHour = usedHours.length ? usedHours[0] : 6;
+        const lastHour = usedHours.length ? usedHours[usedHours.length - 1] : 22;
+        const hours = Array.from({ length: lastHour - firstHour + 1 }, (_, i) => firstHour + i);
+        createBar('chartHour', hours.map(String), hours.map((h) => brewTimes.hour[h]), '#60a5fa', true);
+    };
+
+    const renderTopList = (id, items, emptyText) => {
+        const listEl = document.getElementById(id);
+        if (!listEl) return;
+        listEl.replaceChildren();
+        if (!items.length) {
+            const empty = document.createElement('li');
+            empty.className = 'text-sm text-gray-400 italic';
+            empty.textContent = emptyText;
+            listEl.appendChild(empty);
+            return;
+        }
+        items.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.className = 'flex items-center gap-3 bg-coffee-50 dark:bg-[#1c1917] p-2 rounded border border-coffee-100 dark:border-[#44403c]';
+            if (item.onClick) {
+                li.classList.add('cursor-pointer', 'hover:border-coffee-300', 'dark:hover:border-[#78716c]');
+                li.setAttribute('role', 'button');
+                li.tabIndex = 0;
+                li.onclick = item.onClick;
+                li.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.onClick(); } };
+            }
+            const rank = document.createElement('span');
+            rank.className = 'text-sm font-bold text-coffee-400 dark:text-[#78716c] w-4 text-center';
+            rank.textContent = String(index + 1);
+            const text = document.createElement('div');
+            text.className = 'min-w-0 flex-1';
+            const title = document.createElement('span');
+            title.className = 'font-bold text-coffee-800 dark:text-white text-sm block truncate';
+            title.textContent = item.title;
+            const subtitle = document.createElement('span');
+            subtitle.className = 'text-xs text-coffee-500 dark:text-[#78716c] block truncate';
+            subtitle.textContent = item.subtitle || '';
+            text.append(title, subtitle);
+            const badge = document.createElement('span');
+            badge.className = 'text-xs font-bold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 px-2 py-1 rounded-full whitespace-nowrap';
+            badge.textContent = item.badge;
+            li.append(rank, text, badge);
+            listEl.appendChild(li);
         });
     };
 
@@ -293,12 +384,12 @@ export const createStatsModule = ({
         if (total === 0) {
             document.getElementById('statTotalBrews').innerText = '0';
             document.getElementById('statMonthBrews').innerText = '∞';
-            document.getElementById('statWeekBrews').innerText = '0';
             document.getElementById('statAvgBrews').innerText = '0';
             document.getElementById('statUniqueCoffees').innerText = '0';
             document.getElementById('mostBrewedName').innerText = '-';
             document.getElementById('mostBrewedCount').innerText = '0 brews';
-            document.getElementById('topCoffeesList').innerHTML = '<p class="text-sm text-gray-400 italic">No brews found.</p>';
+            renderTopList('topCoffeesList', [], 'No brews found.');
+            renderTopList('topBrewsList', [], 'No brews found.');
             document.getElementById('uniqueLeaderboardBody').innerHTML = "<tr><td colspan='3' class='text-center py-4 italic text-coffee-400'>No data.</td></tr>";
             document.getElementById('grinderStatsList').innerHTML = '<p class="text-sm text-gray-400 italic">No grinder data.</p>';
             renderOriginsMap({ brews: [], getCoffeeTypeDisplay, getCoffeeTypeForBrew });
@@ -307,7 +398,6 @@ export const createStatsModule = ({
         }
 
         const now = new Date();
-        const last7 = dataToUse.filter((c) => now - new Date(c.createdAt) < 7 * oneDay).length;
         const periodStart = getPeriodStart(currentStatsPeriod, now);
         const firstDate = periodStart || new Date(Math.min(...dataToUse.map((c) => new Date(c.createdAt || now))));
         const diffDays = Math.max(1, Math.round(Math.abs((now - firstDate) / oneDay)));
@@ -317,7 +407,6 @@ export const createStatsModule = ({
 
         document.getElementById('statTotalBrews').innerText = total;
         document.getElementById('statMonthBrews').innerText = hoursSinceLastBrew;
-        document.getElementById('statWeekBrews').innerText = last7;
         document.getElementById('statAvgBrews').innerText = avg;
 
         const agg = (key, getValue) => dataToUse.reduce((acc, c) => {
@@ -334,8 +423,16 @@ export const createStatsModule = ({
             if (r > 0) acc[r] = (acc[r] || 0) + 1;
             return acc;
         }, {});
+        const brewTimes = { weekday: Array(7).fill(0), hour: Array(24).fill(0) };
+        dataToUse.forEach((c) => {
+            const ms = toMs(c.createdAt);
+            if (!Number.isFinite(ms)) return;
+            const date = new Date(ms);
+            brewTimes.weekday[(date.getDay() + 6) % 7]++;
+            brewTimes.hour[date.getHours()]++;
+        });
         renderOriginsMap({ brews: dataToUse, getCoffeeTypeDisplay, getCoffeeTypeForBrew });
-        await renderCharts(roastData, methodData, drinkData, ratingData);
+        await renderCharts(roastData, methodData, drinkData, ratingData, brewTimes);
         await updateBeanMeterInternal('day');
 
         const uniqueMap = {};
@@ -343,7 +440,7 @@ export const createStatsModule = ({
             const type = getCoffeeTypeForBrew(c);
             const typeKey = type?.id || c.beanId || '-';
             const typeDisplay = getCoffeeTypeDisplay(c);
-            if (!uniqueMap[typeKey]) uniqueMap[typeKey] = { count: 0, label: formatCoffeeWithRoaster(typeDisplay, 'Unknown'), origin: typeDisplay.origin, totalRating: 0, ratingCount: 0 };
+            if (!uniqueMap[typeKey]) uniqueMap[typeKey] = { typeId: type?.id || null, count: 0, label: formatCoffeeWithRoaster(typeDisplay, 'Unknown'), origin: typeDisplay.origin, totalRating: 0, ratingCount: 0 };
             uniqueMap[typeKey].count++;
             if (c.rating > 0) {
                 uniqueMap[typeKey].totalRating += c.rating;
@@ -360,25 +457,48 @@ export const createStatsModule = ({
             document.getElementById('mostBrewedCount').innerText = `${d.count} brews`;
         }
 
-        const topMap = {};
-        dataToUse.filter((c) => c.rating === 5).forEach((c) => {
-            const typeDisplay = getCoffeeTypeDisplay(c);
-            const key = getCoffeeTypeForBrew(c)?.id || `${typeDisplay.roaster}|${typeDisplay.name}|${typeDisplay.farmer}|${typeDisplay.origin}`;
-            if (!topMap[key]) topMap[key] = { count: 0, data: typeDisplay };
-            topMap[key].count++;
-        });
+        const coffeeKeyForBrew = (c) => getCoffeeTypeForBrew(c)?.id || c.beanId || '-';
+        const canOpen = currentStatsUid === 'mine';
 
-        const sortedTopList = Object.values(topMap).sort((a, b) => b.count - a.count);
-        const listEl = document.getElementById('topCoffeesList');
-        listEl.innerHTML = '';
-        if (!sortedTopList.length) listEl.innerHTML = '<p class="text-sm text-gray-400 italic">No 5-star brews yet.</p>';
-        else sortedTopList.forEach((item) => {
-            const c = item.data;
-            const div = document.createElement('div');
-            div.className = 'flex justify-between items-center bg-coffee-50 dark:bg-[#1c1917] p-2 rounded border border-coffee-100 dark:border-[#44403c]';
-            div.innerHTML = `<div class="truncate pr-2"><span class="font-bold text-coffee-800 dark:text-white text-sm block truncate">${formatCoffeeWithRoaster(c, 'Unknown')}</span><span class="text-xs text-coffee-500 dark:text-[#78716c] truncate">${c.origin && c.origin !== '-' ? c.origin : ''}</span></div><span class="text-xs font-bold bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full whitespace-nowrap">${item.count} <i class="fa-solid fa-mug-hot ml-1"></i></span>`;
-            listEl.appendChild(div);
-        });
+        const topCoffees = Object.values(uniqueMap)
+            .filter((u) => u.ratingCount > 0)
+            .map((u) => ({ ...u, avg: u.totalRating / u.ratingCount }))
+            .sort((a, b) => b.avg - a.avg || b.ratingCount - a.ratingCount || b.count - a.count)
+            .slice(0, 3)
+            .map((u) => ({
+                title: u.label,
+                subtitle: `${u.origin && u.origin !== '-' ? `${u.origin} · ` : ''}${u.count} ${u.count === 1 ? 'brew' : 'brews'}`,
+                badge: `${u.avg.toFixed(1)} ★`,
+                onClick: canOpen && u.typeId
+                    ? () => dispatchCommand?.('coffees.openCard', { id: u.typeId, event: null })
+                    : null
+            }));
+        renderTopList('topCoffeesList', topCoffees, 'No rated brews yet.');
+
+        const seenCoffees = new Set();
+        const topBrews = dataToUse
+            .filter((c) => Number(c.rating) > 0)
+            .sort((a, b) => Number(b.rating) - Number(a.rating) || (toMs(b.createdAt) || 0) - (toMs(a.createdAt) || 0))
+            .filter((c) => {
+                const key = coffeeKeyForBrew(c);
+                if (seenCoffees.has(key)) return false;
+                seenCoffees.add(key);
+                return true;
+            })
+            .slice(0, 3)
+            .map((c) => {
+                const createdMs = toMs(c.createdAt);
+                const date = Number.isFinite(createdMs)
+                    ? new Date(createdMs).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+                    : '';
+                return {
+                    title: uniqueMap[coffeeKeyForBrew(c)]?.label || formatCoffeeWithRoaster(getCoffeeTypeDisplay(c), 'Unknown'),
+                    subtitle: [c.method, c.drink, date].filter((v) => v && v !== '-').join(' · '),
+                    badge: `${Number(c.rating)} ★`,
+                    onClick: canOpen && c.id ? () => dispatchCommand?.('brews.openCard', { id: c.id, event: null }) : null
+                };
+            });
+        renderTopList('topBrewsList', topBrews, 'No rated brews yet.');
 
         const leaderboardData = Object.values(uniqueMap).map((u) => ({ ...u, avg: u.ratingCount > 0 ? (u.totalRating / u.ratingCount).toFixed(1) : '0.0' })).sort((a, b) => b.avg - a.avg);
         const lbBody = document.getElementById('uniqueLeaderboardBody');

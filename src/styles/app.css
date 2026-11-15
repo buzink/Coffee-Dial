@@ -457,6 +457,23 @@
         .dark .origins-map [data-level="2"], .dark .origins-map-chip[data-level="2"] { fill: #9c7353; background: #9c7353; }
         .dark .origins-map [data-level="3"], .dark .origins-map-chip[data-level="3"] { fill: #c9a27e; background: #c9a27e; }
         .dark .origins-map [data-level="4"], .dark .origins-map-chip[data-level="4"] { fill: #ecd5b8; background: #ecd5b8; }
+        .stats-flip-card { position: relative; }
+        .stats-flip-btn { position: absolute; top: 0.625rem; right: 0.625rem; width: 2rem; height: 2rem; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8125rem; color: #8a6f5c; background: #f5efe9; border: 1px solid #eadfd5; cursor: pointer; transition: background 0.15s, color 0.15s; }
+        .stats-flip-btn:hover, .stats-flip-btn[aria-pressed="true"] { color: #4a3b32; background: #eadfd5; }
+        .dark .stats-flip-btn { color: #a8a29e; background: #1c1917; border-color: #44403c; }
+        .dark .stats-flip-btn:hover, .dark .stats-flip-btn[aria-pressed="true"] { color: #ffffff; background: #44403c; }
+        .stats-flip { display: grid; grid-template-rows: minmax(0, 100%); grid-template-columns: minmax(0, 100%); perspective: 900px; }
+        .stats-flip-face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; transition: transform 0.45s ease; min-width: 0; }
+        .stats-flip-front { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 0.25rem; padding: 0 0.5rem; }
+        .stats-flip-back { transform: rotateY(180deg); height: 100%; }
+        .stats-flip-chart { position: relative; width: 100%; height: 100%; }
+        .stats-flip-card.is-flipped .stats-flip-front { transform: rotateY(-180deg); }
+        .stats-flip-card.is-flipped .stats-flip-back { transform: rotateY(0deg); }
+        .stats-flip-word { font-size: 2.25rem; line-height: 1.1; font-weight: 700; color: #2b211b; overflow-wrap: anywhere; }
+        .dark .stats-flip-word { color: #ffffff; }
+        .stats-flip-share { font-size: 0.8125rem; color: #8a6f5c; }
+        .dark .stats-flip-share { color: #a8a29e; }
+        @media (prefers-reduced-motion: reduce) { .stats-flip-face { transition: none; } }
         .origins-map-list { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 0.75rem; }
         .origins-map-chip { font-size: 0.75rem; font-weight: 700; padding: 0.125rem 0.5rem; border-radius: 9999px; color: #2b211b; }
         .origins-map-chip[data-level="3"], .origins-map-chip[data-level="4"] { color: #ffffff; }

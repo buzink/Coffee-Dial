@@ -34,31 +34,65 @@
                             <div id="statTotalBrews" class="text-3xl font-bold text-coffee-900 dark:text-white">-</div>
                         </div>
                         <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm text-center">
-                            <div class="text-xs text-coffee-500 dark:text-[#78716c] uppercase font-bold mb-1">Last 7 Days</div>
-                            <div id="statWeekBrews" class="text-3xl font-bold text-coffee-900 dark:text-white">-</div>
+                            <div class="text-xs text-coffee-500 dark:text-[#78716c] uppercase font-bold mb-1">Unique Coffees</div>
+                            <div id="statUniqueCoffees" data-action-click="toggleStatsUniqueTable(true)" class="text-3xl font-bold text-coffee-900 dark:text-white cursor-pointer hover:underline">-</div>
                         </div>
                         <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm text-center">
                             <div class="text-xs text-coffee-500 dark:text-[#78716c] uppercase font-bold mb-1">Daily Avg</div>
                             <div id="statAvgBrews" class="text-3xl font-bold text-coffee-900 dark:text-white">-</div>
                         </div>
+                        <div id="statMostBrewed" class="col-span-2 md:col-span-4 bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm text-center">
+                            <div class="text-xs text-coffee-500 dark:text-[#78716c] uppercase font-bold mb-1">Most Frequent</div>
+                            <div id="mostBrewedName" class="text-lg font-bold text-coffee-900 dark:text-white truncate">-</div>
+                            <div id="mostBrewedCount" class="text-xs text-coffee-500 dark:text-[#78716c]">0 brews</div>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
+                        <div class="stats-flip-card bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
                             <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Roast Profile</h4>
-                            <div class="relative w-full h-48"><canvas id="chartRoast"></canvas></div>
+                            <button type="button" class="stats-flip-btn" data-stats-flip aria-pressed="false" aria-label="Show full roast profile distribution" title="Show distribution"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i></button>
+                            <div class="stats-flip w-full h-48">
+                                <div class="stats-flip-face stats-flip-front">
+                                    <div id="statTopRoast" class="stats-flip-word">-</div>
+                                    <div id="statTopRoastShare" class="stats-flip-share"></div>
+                                </div>
+                                <div class="stats-flip-face stats-flip-back" aria-hidden="true"><div class="stats-flip-chart"><canvas id="chartRoast"></canvas></div></div>
+                            </div>
                         </div>
-                        <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
+                        <div class="stats-flip-card bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
                             <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Brew Method</h4>
-                            <div class="relative w-full h-48"><canvas id="chartMethod"></canvas></div>
+                            <button type="button" class="stats-flip-btn" data-stats-flip aria-pressed="false" aria-label="Show full brew method distribution" title="Show distribution"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i></button>
+                            <div class="stats-flip w-full h-48">
+                                <div class="stats-flip-face stats-flip-front">
+                                    <div id="statTopMethod" class="stats-flip-word">-</div>
+                                    <div id="statTopMethodShare" class="stats-flip-share"></div>
+                                </div>
+                                <div class="stats-flip-face stats-flip-back" aria-hidden="true"><div class="stats-flip-chart"><canvas id="chartMethod"></canvas></div></div>
+                            </div>
                         </div>
-                        <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
+                        <div class="stats-flip-card bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
                             <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Drink Type</h4>
-                            <div class="relative w-full h-48"><canvas id="chartDrink"></canvas></div>
+                            <button type="button" class="stats-flip-btn" data-stats-flip aria-pressed="false" aria-label="Show full drink type distribution" title="Show distribution"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i></button>
+                            <div class="stats-flip w-full h-48">
+                                <div class="stats-flip-face stats-flip-front">
+                                    <div id="statTopDrink" class="stats-flip-word">-</div>
+                                    <div id="statTopDrinkShare" class="stats-flip-share"></div>
+                                </div>
+                                <div class="stats-flip-face stats-flip-back" aria-hidden="true"><div class="stats-flip-chart"><canvas id="chartDrink"></canvas></div></div>
+                            </div>
                         </div>
                         <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
                             <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Star Rating Frequency</h4>
                             <div class="relative w-full h-48"><canvas id="chartStars"></canvas></div>
+                        </div>
+                        <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Brews per Weekday</h4>
+                            <div class="relative w-full h-48"><canvas id="chartWeekday"></canvas></div>
+                        </div>
+                        <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col items-center">
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase">Brews per Hour</h4>
+                            <div class="relative w-full h-48"><canvas id="chartHour"></canvas></div>
                         </div>
 
                         <div class="bg-white dark:bg-[#292524] p-4 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm md:col-span-2">
@@ -83,28 +117,13 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm">
-                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase border-b border-coffee-100 dark:border-[#44403c] pb-2">Variety Analysis</h4>
-                            <div class="space-y-4">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-coffee-600 dark:text-[#a8a29e]">Unique Coffees Tried:</span>
-                                    <span id="statUniqueCoffees" data-action-click="toggleStatsUniqueTable(true)" class="font-bold text-xl text-blue-500 dark:text-blue-400 cursor-pointer hover:underline">-</span>
-                                </div>
-                                <div class="text-xs text-gray-400 italic mb-2">*One entry per coffee.</div>
-                                
-                                <div>
-                                    <span class="block text-sm text-coffee-600 dark:text-[#a8a29e] mb-1">Most Frequently Brewed:</span>
-                                    <div id="statMostBrewed" class="p-3 bg-coffee-50 dark:bg-[#1c1917] rounded-lg border border-coffee-100 dark:border-[#44403c]">
-                                        <div class="font-bold text-coffee-800 dark:text-white text-sm" id="mostBrewedName">-</div>
-                                        <div class="text-xs text-coffee-500 dark:text-[#78716c]" id="mostBrewedCount">0 brews</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col">
-                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase border-b border-coffee-100 dark:border-[#44403c] pb-2"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Hall of Fame (5 Stars)</h4>
-                            <div id="topCoffeesList" class="overflow-y-auto max-h-48 space-y-2 pr-1"></div>
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase border-b border-coffee-100 dark:border-[#44403c] pb-2"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Top Coffees</h4>
+                            <ol id="topCoffeesList" class="space-y-2"></ol>
+                        </div>
+                        <div class="bg-white dark:bg-[#292524] p-5 rounded-xl border border-coffee-100 dark:border-[#44403c] shadow-sm flex flex-col">
+                            <h4 class="text-sm font-bold text-coffee-800 dark:text-white mb-4 uppercase border-b border-coffee-100 dark:border-[#44403c] pb-2"><i class="fa-solid fa-mug-hot text-yellow-500 mr-2"></i>Top Brews</h4>
+                            <ol id="topBrewsList" class="space-y-2"></ol>
                         </div>
                     </div>
 
