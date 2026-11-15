@@ -394,6 +394,7 @@ export const createStatsModule = ({
             document.getElementById('grinderStatsList').innerHTML = '<p class="text-sm text-gray-400 italic">No grinder data.</p>';
             renderOriginsMap({ brews: [], getCoffeeTypeDisplay, getCoffeeTypeForBrew });
             await renderCharts({}, {}, {}, {});
+            await updateBeanMeterInternal();
             return;
         }
 
@@ -551,47 +552,68 @@ export const createStatsModule = ({
             }
         });
 
-        const currentStatsData = getCurrentStatsData();
-        if (!currentStatsData || !currentStatsData.length) return;
-        const data = currentStatsData.filter((c) => c.weight && c.createdAt);
-        if (!data.length) return;
+        const currentStatsData = getCurrentStatsData() || [];
+        const data = currentStatsData.filter((c) => c.weight && c.createdAt && Number.isFinite(dateMs(c.createdAt)));
+
+        // The start of the day, week (Monday), month or year a date falls in.
+        const bucketStart = (date) => {
+            const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            if (currentBeanMeterPeriod === 'week') d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+            else if (currentBeanMeterPeriod === 'month') d.setDate(1);
+            else if (currentBeanMeterPeriod === 'year') d.setMonth(0, 1);
+            return d;
+        };
+        const bucketKey = (date) => {
+            const d = bucketStart(date);
+            if (currentBeanMeterPeriod === 'month') return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            if (currentBeanMeterPeriod === 'year') return String(d.getFullYear());
+            return toLocalDayKey(d);
+        };
+        const nextBucket = (d) => {
+            if (currentBeanMeterPeriod === 'week') d.setDate(d.getDate() + 7);
+            else if (currentBeanMeterPeriod === 'month') d.setMonth(d.getMonth() + 1);
+            else if (currentBeanMeterPeriod === 'year') d.setFullYear(d.getFullYear() + 1);
+            else d.setDate(d.getDate() + 1);
+        };
 
         const groupedData = {};
         data.forEach((brew) => {
-            const date = new Date(brew.createdAt);
-            let key;
-            if (currentBeanMeterPeriod === 'day') key = toLocalDayKey(date);
-            else if (currentBeanMeterPeriod === 'week') {
-                const weekStart = new Date(date);
-                weekStart.setDate(date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1));
-                key = weekStart.toISOString().split('T')[0];
-            } else if (currentBeanMeterPeriod === 'month') key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            else if (currentBeanMeterPeriod === 'year') key = date.getFullYear().toString();
-
-            if (key) {
-                if (!groupedData[key]) groupedData[key] = 0;
-                groupedData[key] += (brew.weight || 0) * 10;
-            }
+            const key = bucketKey(new Date(dateMs(brew.createdAt)));
+            groupedData[key] = (groupedData[key] || 0) + (brew.weight || 0) * 10;
         });
 
-        let sortedKeys = Object.keys(groupedData).sort();
-        if (!sortedKeys.length) return;
-        const isDayPeriod = currentBeanMeterPeriod === 'day';
-        if (isDayPeriod) {
-            // Every calendar day from the first brew to today, so empty days show as gaps.
-            const allDays = [];
-            const cursor = parseLocalDayKey(sortedKeys[0]);
-            const lastKey = sortedKeys[sortedKeys.length - 1];
-            const todayKey = toLocalDayKey(new Date());
-            const endKey = todayKey > lastKey ? todayKey : lastKey;
-            while (toLocalDayKey(cursor) <= endKey) {
-                allDays.push(toLocalDayKey(cursor));
-                cursor.setDate(cursor.getDate() + 1);
+        // Every day, week, month or year from the start of the chosen period (or the first brew
+        // when all time is shown) up to today, so periods without brews show as empty.
+        const now = new Date();
+        const periodStart = getPeriodStart(currentStatsPeriod, now);
+        const brewTimes = data.map((c) => dateMs(c.createdAt));
+        const rangeStart = periodStart || (brewTimes.length ? new Date(Math.min(...brewTimes)) : null);
+        if (!rangeStart) {
+            if (chartInstances.chartBeanMeter) {
+                chartInstances.chartBeanMeter.destroy();
+                delete chartInstances.chartBeanMeter;
             }
-            sortedKeys = allDays;
+            return;
         }
+        const rangeEnd = new Date(Math.max(now.getTime(), ...brewTimes));
+        const endKey = bucketKey(rangeEnd);
+        const sortedKeys = [];
+        const cursor = bucketStart(rangeStart);
+        for (let key = bucketKey(cursor); key <= endKey; nextBucket(cursor), key = bucketKey(cursor)) {
+            sortedKeys.push(key);
+        }
+        const isDayPeriod = currentBeanMeterPeriod === 'day';
 
-        const labels = sortedKeys;
+        // ISO week of a Monday key, as "2026-52" (the year the week's Thursday falls in).
+        const isoWeekLabel = (key) => {
+            const thursday = parseLocalDayKey(key);
+            thursday.setDate(thursday.getDate() + 3);
+            const firstThursday = new Date(thursday.getFullYear(), 0, 4);
+            firstThursday.setDate(firstThursday.getDate() + 3 - ((firstThursday.getDay() + 6) % 7));
+            const week = 1 + Math.round((thursday - firstThursday) / (7 * 24 * 60 * 60 * 1000));
+            return `${thursday.getFullYear()}-${String(week).padStart(2, '0')}`;
+        };
+        const labels = currentBeanMeterPeriod === 'week' ? sortedKeys.map(isoWeekLabel) : sortedKeys;
         const values = sortedKeys.map((key) => groupedData[key] || 0);
         const canvas = document.getElementById('chartBeanMeter');
         if (!canvas) return;
@@ -602,31 +624,36 @@ export const createStatsModule = ({
         const textColor = isDark ? '#e7e5e4' : '#4a3b32';
         const gridColor = isDark ? '#44403c' : '#e5e7eb';
         const barColor = '#8c7365';
-        const mondayTickColor = isDark ? '#ffffff' : '#000000';
-        const isMondayIndex = (index) => isDayPeriod && parseLocalDayKey(labels[index]).getDay() === 1;
-        const xScale = isDayPeriod
-            ? {
-                ticks: {
-                    color: textColor,
-                    autoSkip: false,
-                    // Only Mondays get a date; returning null also hides that tick's grid line.
-                    callback: (value, index) => (isMondayIndex(index)
-                        ? parseLocalDayKey(labels[index]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-                        : null)
-                },
-                // A short tick line from each Monday's date up to the bottom of its bar
-                // (the other days have no label, so Chart.js draws no line for them).
-                grid: {
-                    display: true,
-                    offset: false,
-                    drawOnChartArea: false,
-                    drawTicks: true,
-                    tickLength: 6,
-                    lineWidth: 1,
-                    color: mondayTickColor
+        const tickLineColor = isDark ? '#ffffff' : '#000000';
+        // The first bar always gets a label; after that every bar when fewer than 8 are shown,
+        // otherwise every 7th.
+        const labelEvery = labels.length < 8 ? 1 : 7;
+        const showsLabel = (index) => index % labelEvery === 0;
+        const xScale = {
+            ticks: {
+                color: textColor,
+                autoSkip: false,
+                // Dates in the day view are always slanted; other labels only when they do not fit.
+                ...(isDayPeriod ? { minRotation: 45, maxRotation: 45 } : {}),
+                // Returning null hides the label and that tick's line.
+                callback: (value, index) => {
+                    if (!showsLabel(index)) return null;
+                    return isDayPeriod
+                        ? parseLocalDayKey(sortedKeys[index]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+                        : labels[index];
                 }
+            },
+            // A short tick line from each label up to the bottom of its bar.
+            grid: {
+                display: true,
+                offset: false,
+                drawOnChartArea: false,
+                drawTicks: true,
+                tickLength: 6,
+                lineWidth: 1,
+                color: tickLineColor
             }
-            : { ticks: { color: textColor }, grid: { display: false } };
+        };
 
         chartInstances.chartBeanMeter = new chartCtor(ctx, {
             type: 'bar',
