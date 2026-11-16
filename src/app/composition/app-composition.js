@@ -1655,6 +1655,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 showToast,
                 getPinnedBrewsPreferences: () => getPinnedBrewsPreferencesState(),
                 openBrewFormModal: dispatchBrewOpenForm,
+                openGraphModal: () => openGraphModal(),
                 ensureBrewsFormModalMounted: () => ensureBrewsFormModalMounted(),
                 addBeanToLocalState: (bean) => setBeansState([...getBeansState(), bean])
             },

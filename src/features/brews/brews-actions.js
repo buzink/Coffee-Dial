@@ -40,6 +40,7 @@ export const createBrewsActionsModule = ({
     getCoffeeScale,
     showToast,
     getPinnedBrewsPreferences,
+    openGraphModal = null,
     getSelectedBrewGearIds,
     setSelectedBrewGearIds,
     openBrewFormModal,
@@ -62,6 +63,18 @@ export const createBrewsActionsModule = ({
     const clean = (value) => (value || '').toString().toLowerCase().trim();
     const shouldKeepRepeatCuppingFields = () => getPinnedBrewsPreferences?.()?.keepCuppingNotesWhenRepeatingBrew === true;
     const shouldKeepRepeatInOutTimeFields = () => getPinnedBrewsPreferences?.()?.keepInOutTimeWhenRepeatingBrew === true;
+    // Repeat brew with "Jump to graph after repeat" on: open the graph right away. openGraphModal itself
+    // opens Connect Devices (and starts scale 1) when the graph is empty and nothing is connected.
+    const jumpToGraphAfterRepeat = async (title) => {
+        if (title !== 'Repeat brew') return;
+        if (getPinnedBrewsPreferences?.()?.jumpToGraphAfterRepeat !== true) return;
+        if (typeof openGraphModal !== 'function') return;
+        try {
+            await openGraphModal();
+        } catch (error) {
+            console.error('Jump to graph after repeat failed:', error);
+        }
+    };
     const grinderGearSync = createBrewGrinderGearSyncModule({
         getGasItems,
         addGear
@@ -85,7 +98,7 @@ export const createBrewsActionsModule = ({
         document.querySelectorAll('.action-menu').forEach((el) => el.classList.add('hidden'));
     };
     const presentPreparedForm = ({ title = null, syncTitleFromForm = true } = {}) => {
-        openBrewFormModal?.(null, {
+        return openBrewFormModal?.(null, {
             reset: false,
             title,
             syncTitleFromForm
@@ -349,7 +362,8 @@ export const createBrewsActionsModule = ({
         document.getElementById('formTitle').innerHTML = `<span>${title}</span>`;
         document.getElementById('submitBtn').innerHTML = '<span>Save copy</span>';
         setAiAddVisibility(false);
-        presentPreparedForm({ title, syncTitleFromForm: true });
+        await presentPreparedForm({ title, syncTitleFromForm: true });
+        await jumpToGraphAfterRepeat(title);
     };
     const showFriendRepeatInForm = async ({ brew, title }) => {
         await ensureBrewsFormModalMounted?.();
@@ -396,7 +410,8 @@ export const createBrewsActionsModule = ({
         document.getElementById('formTitle').innerHTML = `<span>${title}</span>`;
         document.getElementById('submitBtn').innerHTML = '<span>Save copy</span>';
         setAiAddVisibility(false);
-        presentPreparedForm({ title, syncTitleFromForm: true });
+        await presentPreparedForm({ title, syncTitleFromForm: true });
+        await jumpToGraphAfterRepeat(title);
     };
 
     const resetFormState = (e) => {

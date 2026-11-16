@@ -27,7 +27,8 @@ export const DEFAULT_PINNED_BREWS_PREFERENCES = {
     showTilesInsteadOfCoffeeArt: false,
     pinBestPerMethodDrink: true,
     keepCuppingNotesWhenRepeatingBrew: false,
-    keepInOutTimeWhenRepeatingBrew: false
+    keepInOutTimeWhenRepeatingBrew: false,
+    jumpToGraphAfterRepeat: false
 };
 
 export const createBrewsPreferencesModule = ({
@@ -61,6 +62,7 @@ export const createBrewsPreferencesModule = ({
         'pinBestPerMethodDrinkToggle',
         'keepCuppingNotesWhenRepeatingBrewToggle',
         'keepInOutTimeWhenRepeatingBrewToggle',
+        'jumpToGraphAfterRepeatToggle',
         'notificationsPushEnabledToggle',
         'notificationsFriendMomentsToggle',
         'notificationsCommentsMyToggle',
@@ -126,7 +128,8 @@ export const createBrewsPreferencesModule = ({
                 pinOpenBagsBestOnly: true,
                 pinBestPerMethodDrink: !!document.getElementById('pinBestPerMethodDrinkToggle')?.checked,
                 keepCuppingNotesWhenRepeatingBrew: !!document.getElementById('keepCuppingNotesWhenRepeatingBrewToggle')?.checked,
-                keepInOutTimeWhenRepeatingBrew: !!document.getElementById('keepInOutTimeWhenRepeatingBrewToggle')?.checked
+                keepInOutTimeWhenRepeatingBrew: !!document.getElementById('keepInOutTimeWhenRepeatingBrewToggle')?.checked,
+                jumpToGraphAfterRepeat: !!document.getElementById('jumpToGraphAfterRepeatToggle')?.checked
             },
             notificationPrefs,
             integrationPrefs
@@ -706,6 +709,7 @@ export const createBrewsPreferencesModule = ({
         document.getElementById('pinBestPerMethodDrinkToggle').checked = pinnedPrefs.pinBestPerMethodDrink !== false;
         document.getElementById('keepCuppingNotesWhenRepeatingBrewToggle').checked = pinnedPrefs.keepCuppingNotesWhenRepeatingBrew === true;
         document.getElementById('keepInOutTimeWhenRepeatingBrewToggle').checked = pinnedPrefs.keepInOutTimeWhenRepeatingBrew === true;
+        document.getElementById('jumpToGraphAfterRepeatToggle').checked = pinnedPrefs.jumpToGraphAfterRepeat === true;
         const notificationPrefs = normalizeNotificationPreferences(getNotificationPreferences?.());
         document.getElementById('notificationsPushEnabledToggle').checked = !!notificationPrefs.pushEnabled;
         document.getElementById('notificationsFriendMomentsToggle').checked = !!notificationPrefs.friendMoments;
