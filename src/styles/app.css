@@ -180,7 +180,28 @@
         }
         .graph-toggle-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: 3rem;
         }
+        /* Scale buttons in the brew form: one full-width row at the bottom of Extraction. */
+        .brew-scale-actions { grid-column: 1 / -1; }
+        /* Graph modal buttons look raised (filled, shadow) so they stand apart from the
+           recessed, outlined input fields. */
+        .graph-action-btn {
+            background-color: #f2e8e5;
+            border: 1px solid #e0ccbb;
+            color: #4a3b32;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            transition: background-color 0.15s, transform 0.1s;
+        }
+        .graph-action-btn:hover { background-color: #eaddd7; }
+        .graph-action-btn:active { transform: scale(0.97); }
+        .dark .graph-action-btn {
+            background-color: #44403c;
+            border-color: #57534e;
+            color: #f5f5f4;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+        .dark .graph-action-btn:hover { background-color: #57534e; }
         @media (max-width: 350px) {
             .graph-action-grid {
                 grid-template-columns: 1fr;
@@ -538,7 +559,7 @@
         .origins-map-chip.is-clickable { cursor: pointer; }
         .origins-map-chip.is-clickable:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
         .origins-map-regions[hidden] { display: none; }
-        .origins-map-region { font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 9999px; color: #4a3b32; background: #ffffff; border: 1px solid #ddb892; }
+        .origins-map-region { font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 9999px; color: #4a3b32; background: #ffffff; border: 1px solid #e0ccbb; }
         .dark .origins-map-region { color: #e7e5e4; background: #1c1917; border-color: #6b4f3a; }
         .origins-map-chip { font-size: 0.75rem; font-weight: 700; padding: 0.125rem 0.5rem; border-radius: 9999px; color: #2b211b; }
         .origins-map-chip[data-level="3"], .origins-map-chip[data-level="4"] { color: #ffffff; }

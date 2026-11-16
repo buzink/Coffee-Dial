@@ -81,20 +81,20 @@
                 </div>
             </div>
             <div class="p-6 text-coffee-800 dark:text-[#d6ccc2] space-y-4 overflow-y-auto ios-scroll">
-                <div class="bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg p-2">
+                <div>
                     <canvas id="graph" class="w-full h-40"></canvas>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-coffee-50 dark:bg-[#1c1917] rounded-lg border border-coffee-200 dark:border-[#44403c] p-3 flex items-center justify-between">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="py-1 flex items-center justify-between">
                         <div class="text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase">Flow</div>
                         <div id="flow" class="text-lg font-semibold text-coffee-900 dark:text-white">--.- g/s</div>
                     </div>
-                    <div class="bg-coffee-50 dark:bg-[#1c1917] rounded-lg border border-coffee-200 dark:border-[#44403c] p-3 flex items-center justify-between">
+                    <div class="py-1 flex items-center justify-between">
                         <div class="text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase">Time</div>
                         <div id="graphTime" class="text-lg font-semibold text-coffee-900 dark:text-white">0 s</div>
                     </div>
                 </div>
-                <div class="bg-coffee-50/50 dark:bg-[#201d1b] p-3 rounded-lg border border-coffee-100 dark:border-[#44403c]">
+                <div>
                     <div class="grid grid-cols-3 gap-2">
                         <div>
                             <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">In (g)</label>
@@ -110,7 +110,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-coffee-50/50 dark:bg-[#201d1b] p-3 rounded-lg border border-coffee-100 dark:border-[#44403c]">
+                <div>
                     <div class="grid grid-cols-3 gap-2">
                         <div>
                             <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">First drip</label>
@@ -126,19 +126,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="graph-action-grid grid gap-2 w-full">
-                    <button id="graphWeighBtn" type="button" class="w-full px-3 py-2 rounded-lg border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] bg-white dark:bg-[#1c1917] hover:bg-coffee-50 dark:hover:bg-[#34302e] text-sm font-medium flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-scale-balanced"></i> IN
-                    </button>
-                    <button id="graphTimerBtn" type="button" class="w-full px-3 py-2 rounded-lg border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] bg-white dark:bg-[#1c1917] hover:bg-coffee-50 dark:hover:bg-[#34302e] text-sm font-medium flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-play"></i> <span>Start</span>
-                    </button>
-                    <button id="graphResetScaleBtn" type="button" class="w-full px-3 py-2 rounded-lg border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] bg-white dark:bg-[#1c1917] hover:bg-coffee-50 dark:hover:bg-[#34302e] text-sm font-medium flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-rotate-left"></i> Reset
-                    </button>
-                </div>
                 <div class="graph-toggle-grid grid gap-2 w-full">
-                    <div class="w-full flex items-center justify-between gap-2 bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2">
+                    <div class="w-full flex items-center justify-between gap-2 py-2">
                         <span class="text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase flex items-center gap-1">
                             <i class="fa-solid fa-play text-[10px]"></i>
                             <span>Auto</span>
@@ -148,7 +137,7 @@
                             <label for="graphAutoStartToggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 dark:bg-gray-700 cursor-pointer"></label>
                         </div>
                     </div>
-                    <div class="w-full flex items-center justify-between gap-2 bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2">
+                    <div class="w-full flex items-center justify-between gap-2 py-2">
                         <span class="text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase flex items-center gap-1">
                             <i class="fa-solid fa-magnifying-glass text-[10px]"></i>
                             <span>Swirls</span>
@@ -158,7 +147,7 @@
                             <label for="graphUnswirlToggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 dark:bg-gray-700 cursor-pointer"></label>
                         </div>
                     </div>
-                    <div class="w-full flex items-center justify-between gap-2 bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2">
+                    <div class="w-full flex items-center justify-between gap-2 py-2">
                         <span class="text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase flex items-center gap-1">
                             <i class="fa-solid fa-magnifying-glass text-[10px]"></i>
                             <span>Pours</span>
@@ -168,6 +157,17 @@
                             <label for="graphCountPoursToggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 dark:bg-gray-700 cursor-pointer"></label>
                         </div>
                     </div>
+                </div>
+                <div class="graph-action-grid grid gap-2 w-full">
+                    <button id="graphWeighBtn" type="button" class="graph-action-btn w-full px-3 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-scale-balanced"></i> IN
+                    </button>
+                    <button id="graphTimerBtn" type="button" class="graph-action-btn w-full px-3 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i> <span>Start</span>
+                    </button>
+                    <button id="graphResetScaleBtn" type="button" class="graph-action-btn w-full px-3 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
                 </div>
                 <div class="text-[10px] text-gray-400 dark:text-[#78716c]">
                     <div id="graphEventLog" class="space-y-0.5"></div>

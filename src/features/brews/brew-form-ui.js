@@ -192,9 +192,6 @@ export const createBrewFormUiModule = ({
         if (header) {
             header.classList.toggle('mb-4', !collapsed);
             header.classList.toggle('pb-2', !collapsed);
-            header.classList.toggle('border-b', !collapsed);
-            header.classList.toggle('border-coffee-200', !collapsed);
-            header.classList.toggle('dark:border-[#44403c]', !collapsed);
             header.classList.toggle('mb-0', collapsed);
             header.classList.toggle('pb-0', collapsed);
         }
@@ -220,9 +217,6 @@ export const createBrewFormUiModule = ({
         if (header) {
             header.classList.toggle('mb-4', !collapsed);
             header.classList.toggle('pb-2', !collapsed);
-            header.classList.toggle('border-b', !collapsed);
-            header.classList.toggle('border-coffee-200', !collapsed);
-            header.classList.toggle('dark:border-[#44403c]', !collapsed);
             header.classList.toggle('mb-0', collapsed);
             header.classList.toggle('pb-0', collapsed);
         }
@@ -255,9 +249,6 @@ export const createBrewFormUiModule = ({
                 cuppingIcon.classList.toggle('fa-chevron-down', collapsed);
                 cuppingHeader.classList.toggle('mb-4', !collapsed);
                 cuppingHeader.classList.toggle('pb-2', !collapsed);
-                cuppingHeader.classList.toggle('border-b', !collapsed);
-                cuppingHeader.classList.toggle('border-coffee-200', !collapsed);
-                cuppingHeader.classList.toggle('dark:border-[#44403c]', !collapsed);
                 cuppingHeader.classList.toggle('mb-0', collapsed);
                 cuppingHeader.classList.toggle('pb-0', collapsed);
             };

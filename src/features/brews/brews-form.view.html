@@ -19,7 +19,7 @@
                     
                     <!-- SECTION 1: COFFEE DETAILS -->
                     <div class="bg-coffee-50 dark:bg-[#1c1917]/50 p-4 rounded-lg border border-coffee-100 dark:border-[#44403c] relative">
-                         <div id="coffeeDetailsHeader" data-action-click="toggleCoffeeDetails(event)" class="flex justify-between items-center mb-4 pb-2 border-b border-coffee-200 dark:border-[#44403c] cursor-pointer select-none" title="Collapse or expand coffee details">
+                         <div id="coffeeDetailsHeader" data-action-click="toggleCoffeeDetails(event)" class="flex justify-between items-center mb-4 pb-2 cursor-pointer select-none" title="Collapse or expand coffee details">
                                       <h3 class="text-sm font-bold text-coffee-800 dark:text-white uppercase tracking-wide flex items-center gap-2">
                                           <i class="fa-solid fa-coffee-bag text-coffee-600 dark:text-[#a8a29e]"></i> <span id="coffeeDetailsTitle">Bag</span>
                                       </h3>
@@ -88,7 +88,7 @@
 
                     <!-- SECTION 2: BREW PARAMETERS -->
                     <div class="bg-white dark:bg-[#292524] p-4 rounded-lg border border-coffee-100 dark:border-[#44403c]">
-                         <div id="extractionHeader" data-action-click="toggleExtractionSection(event)" class="relative mb-4 pb-2 border-b border-coffee-200 dark:border-[#44403c] flex flex-wrap items-center gap-2 pr-14 cursor-pointer select-none">
+                         <div id="extractionHeader" data-action-click="toggleExtractionSection(event)" class="relative mb-4 pb-2 flex flex-wrap items-center gap-2 pr-14 cursor-pointer select-none">
                              <!-- Title: natural width, flush left -->
                              <h3 class="text-sm font-bold text-coffee-800 dark:text-white uppercase tracking-wide flex items-center gap-2 flex-shrink-0">
                                  <i class="fa-solid fa-flask text-coffee-600 dark:text-[#a8a29e]"></i> Extraction
@@ -197,27 +197,27 @@
                                 <input type="hidden" id="tempMode" name="tempMode" value="numeric">
                             </div>
                             
-                            <!-- Scale control buttons: own grid cell, above In/Ratio/Out on mobile -->
-                            <div class="grid grid-cols-3 gap-2 self-end">
-                                 <button id="brewWeighBtn" type="button" title="Weigh" class="w-full h-11 rounded-md border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-50 dark:hover:bg-[#1c1917] transition-colors flex items-center justify-center gap-1.5 text-xs font-medium">
-                                     <i class="fa-solid fa-scale-balanced"></i><span>Weigh</span>
-                                 </button>
-                                 <button id="brewTimerBtn" type="button" title="Start timer" class="w-full h-11 rounded-md border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-50 dark:hover:bg-[#1c1917] transition-colors flex items-center justify-center gap-1.5 text-xs font-medium">
-                                     <i class="fa-solid fa-play"></i><span>Timer</span>
-                                 </button>
-                                 <button id="brewResetScaleBtn" type="button" title="Reset scale" class="w-full h-11 rounded-md border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-50 dark:hover:bg-[#1c1917] transition-colors flex items-center justify-center gap-1.5 text-xs font-medium">
-                                     <i class="fa-solid fa-rotate-left"></i><span>Reset</span>
-                                 </button>
-                             </div>
-
                             <!-- Recipe block: own grid cell, spans 2 cols on lg like Gear -->
-                            <div class="grid grid-cols-3 gap-2 bg-coffee-50/50 dark:bg-[#201d1b] p-2 rounded-lg border border-coffee-100 dark:border-[#44403c] lg:col-span-2">
+                            <div class="grid grid-cols-3 gap-2 lg:col-span-2">
                                 <div><label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">In (g)</label><input type="number" step="any" id="inputWeight" name="weight" data-action-input="handleRecipeInput('weight')" placeholder="18" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-1 focus:ring-coffee-500"></div>
                                 <div class="relative" data-action-click="event.stopPropagation(); openRatioCalcModal()" style="cursor:pointer;"><label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center cursor-pointer">Ratio</label><div id="inputRatio" class="w-full grid grid-cols-3 items-center text-center font-mono text-sm text-coffee-500 dark:text-[#78716c] py-1.5 select-none"><span>1</span><span>:</span><span></span></div><input type="hidden" id="inputRatioHidden" name="ratio"></div>
                                 <div><label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Out (g)</label><input type="number" step="any" id="inputYield" name="yield" data-action-input="handleRecipeInput('yield')" placeholder="288" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-1 focus:ring-coffee-500"></div>
                             </div>
                             
                             <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Time (sec)</label><input type="number" step="any" id="time" name="time" placeholder="e.g. 180" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09]"></div>
+
+                            <!-- Scale control buttons: full-width row at the bottom of Extraction -->
+                            <div class="brew-scale-actions grid grid-cols-3 gap-2">
+                                 <button id="brewWeighBtn" type="button" title="Weigh" class="graph-action-btn w-full h-11 rounded-lg flex items-center justify-center gap-1.5 text-sm font-semibold">
+                                     <i class="fa-solid fa-scale-balanced"></i><span>Weigh</span>
+                                 </button>
+                                 <button id="brewTimerBtn" type="button" title="Start timer" class="graph-action-btn w-full h-11 rounded-lg flex items-center justify-center gap-1.5 text-sm font-semibold">
+                                     <i class="fa-solid fa-play"></i><span>Timer</span>
+                                 </button>
+                                 <button id="brewResetScaleBtn" type="button" title="Reset scale" class="graph-action-btn w-full h-11 rounded-lg flex items-center justify-center gap-1.5 text-sm font-semibold">
+                                     <i class="fa-solid fa-rotate-left"></i><span>Reset</span>
+                                 </button>
+                             </div>
                             
                         </div>
                     </div>
@@ -225,7 +225,7 @@
                     <!-- SECTION 3: CUPPING NOTES -->
                     <div class="bg-white dark:bg-[#292524] p-4 rounded-lg border border-coffee-100 dark:border-[#44403c]">
                         <details id="cuppingNotesAccordion" open>
-                            <summary id="cuppingNotesHeader" class="list-none cursor-pointer flex items-center justify-between mb-4 pb-2 border-b border-coffee-200 dark:border-[#44403c]">
+                            <summary id="cuppingNotesHeader" class="list-none cursor-pointer flex items-center justify-between mb-4 pb-2">
                                 <span class="text-sm font-bold text-coffee-800 dark:text-white uppercase tracking-wide flex items-center gap-2">
                                     <i class="fa-solid fa-mug-hot text-coffee-600 dark:text-[#a8a29e]"></i> Cupping
                                 </span>
