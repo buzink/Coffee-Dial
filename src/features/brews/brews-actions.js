@@ -1,5 +1,6 @@
 import { createBrewsVmModule } from './brews.vm.js';
 import { withDetectedDecaf } from '../../core/coffee-decaf.js';
+import { formatCoffeeLabel } from '../../core/coffee-display.js';
 import { createBrewGrinderGearSyncModule } from './brew-grinder-gear-sync.js';
 import { BAG_DUPLICATE_FIELDS, BREW_DUPLICATE_FIELDS, getBrewGrinderName, withoutFields } from '../../core/brew-fields.js';
 
@@ -235,8 +236,7 @@ export const createBrewsActionsModule = ({
 
         const display = getBeanCoffeeTypeDisplay ? getBeanCoffeeTypeDisplay({ id: newBeanId, ...newBeanData }) : newBeanData;
         const roaster = display.roaster !== '-' ? (display.roaster || '') : '';
-        const farmer = display.farmer !== '-' ? (display.farmer || '') : '';
-        const label = [roaster, farmer].filter(Boolean).join(' ');
+        const label = [roaster, formatCoffeeLabel(display, '')].filter(Boolean).join(' - ');
         showToast?.(`New bag of ${label} opened.`);
 
         return newBeanId;
@@ -614,6 +614,7 @@ export const createBrewsActionsModule = ({
                     dispatchCommand?.('beans.showBeanCreatedToast', {
                         beanId: selectedBeanId,
                         roaster: beanData.roaster,
+                        name: getCoffeeTypes?.()?.find((t) => t.id === coffeeTypeId)?.name || '',
                         farmer: beanData.farmer
                     });
                     await uploadPendingCoffeeTypeImage(coffeeTypeId);

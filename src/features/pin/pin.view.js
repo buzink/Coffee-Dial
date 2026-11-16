@@ -1,3 +1,5 @@
+import { formatCoffeeLabel } from '../../core/coffee-display.js';
+
 export const createPinViewModule = ({ getBeanCalculatedStock, getCoffeeTypeDisplay }) => {
     const LONG_PRESS_MS = 420;
     let chooserOpenFor = null;
@@ -237,7 +239,7 @@ export const createPinViewModule = ({ getBeanCalculatedStock, getCoffeeTypeDispl
             const { stockOverlay, dragIconClass } = getStockOverlay({ bean: linkedBean });
             const typeDisplay = getCoffeeTypeDisplay(previewBrew);
             const roaster = normalizeDisplayText(typeDisplay.roaster) || 'Unknown Roaster';
-            const farmer = normalizeDisplayText(typeDisplay.farmer);
+            const farmer = normalizeDisplayText(formatCoffeeLabel(typeDisplay, ''));
             const farmerText = farmer || roaster;
             const roasterText = roaster;
             const titleText = farmerText;

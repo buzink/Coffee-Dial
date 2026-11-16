@@ -1,3 +1,5 @@
+import { formatCoffeeLabel } from '../../core/coffee-display.js';
+
 export const createBrewPinArtModule = ({
     resolveLinkedBean,
     getCoffeeTypeForBrew,
@@ -141,7 +143,7 @@ export const createBrewPinArtModule = ({
             const previewBrew = sortedBrews[0] || null;
             const coffeeType = getCoffeeTypeForBrew?.(previewBrew) || null;
             const roaster = normalizeDisplayText(coffeeType?.roaster) || 'Unknown coffee';
-            const farmer = normalizeDisplayText(coffeeType?.farmer);
+            const farmer = normalizeDisplayText(formatCoffeeLabel(coffeeType || {}, ''));
             const titleText = farmer || roaster;
             const subtitleText = roaster;
             const imageUrl = coffeeType?.imageUrl || coffeeType?.imageURL || '';

@@ -1,4 +1,4 @@
-import { formatCoffeeCellHtml } from '../../core/coffee-display.js';
+import { formatCoffeeCellHtml, formatCoffeeLabel } from '../../core/coffee-display.js';
 import { brewHasGraph, hasInlineBrewGraph } from '../../core/brew-graphs.js';
 export const createBrewsVmModule = () => {
     const formatOutWeight = (weight, ratio) => {
@@ -36,9 +36,9 @@ export const createBrewsVmModule = () => {
 
     const buildBeanLabel = (bean, beanDisplay) => {
         if (!bean) return 'Unknown bag';
-        const farmer = beanDisplay?.farmer && beanDisplay.farmer !== '-' ? beanDisplay.farmer : '';
+        const coffee = formatCoffeeLabel(beanDisplay || {}, '');
         const roaster = beanDisplay?.roaster && beanDisplay.roaster !== '-' ? beanDisplay.roaster : '';
-        const baseLabel = farmer && roaster ? `${farmer} - ${roaster}` : farmer || roaster || 'Unknown bag';
+        const baseLabel = coffee && roaster ? `${coffee} - ${roaster}` : coffee || roaster || 'Unknown bag';
         const opened = formatOpenedDate(bean.openedDate);
         return opened ? `${baseLabel} (${opened})` : baseLabel;
     };
@@ -66,7 +66,7 @@ export const createBrewsVmModule = () => {
 
     const buildCardDisplayViewModel = ({ brew, coffeeType, grinderName = '' }) => {
         const titlePrimary =
-            coffeeType.farmer !== '-' ? coffeeType.farmer : (coffeeType.roaster !== '-' ? coffeeType.roaster : 'Unknown Blend');
+            formatCoffeeLabel(coffeeType, '') || (coffeeType.roaster !== '-' ? coffeeType.roaster : 'Unknown Blend');
         const titleSecondary = coffeeType.roaster !== '-' ? coffeeType.roaster : 'Unknown Roaster';
         const weightText = brew.weight ? `${brew.weight}g` : '-';
         const ratioText = brew.ratio ? `1:${brew.ratio}` : '-';

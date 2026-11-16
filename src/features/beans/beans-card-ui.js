@@ -100,7 +100,7 @@ export const createBeansCardUiModule = ({
             stockLeft: getBeanCalculatedStock(bean)
         });
 
-        document.getElementById('beanCardTitle').textContent = cardVm.farmer;
+        document.getElementById('beanCardTitle').textContent = cardVm.label;
         document.getElementById('beanCardSubtitle').textContent = cardVm.roaster;
         document.getElementById('beanCardPrice').textContent = cardVm.price;
         document.getElementById('beanCardStock').textContent = cardVm.stock;

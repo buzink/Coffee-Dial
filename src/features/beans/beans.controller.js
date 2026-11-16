@@ -114,13 +114,14 @@ export const createBeansController = (deps = {}) => {
 
     appCommands.registerCommand(
         'beans.showBeanCreatedToast',
-        ({ beanId, roaster = '', farmer = '' } = {}) =>
-            beans.showBeanCreatedToast({ beanId, roaster, farmer }),
+        ({ beanId, roaster = '', name = '', farmer = '' } = {}) =>
+            beans.showBeanCreatedToast({ beanId, roaster, name, farmer }),
         {
             owner: 'beans',
             schema: {
                 beanId: 'string',
                 roaster: 'string?',
+                name: 'string?',
                 farmer: 'string?'
             }
         }

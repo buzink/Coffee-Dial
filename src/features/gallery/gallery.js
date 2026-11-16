@@ -1,4 +1,5 @@
 import { getBrewGrinderName } from '../../core/brew-fields.js';
+import { formatCoffeeLabel } from '../../core/coffee-display.js';
 const createGalleryLikesModule = ({
     getCurrentUser,
     db,
@@ -289,6 +290,7 @@ export const createGalleryModule = ({
         return {
             roaster: typeDisplay?.roaster || 'Unknown',
             origin: typeDisplay?.origin || 'Unknown',
+            name: typeDisplay?.name || '',
             farmer: typeDisplay?.farmer || '-',
             method: coffeeData?.method || '-',
             rating: coffeeData?.rating || 0
@@ -304,6 +306,7 @@ export const createGalleryModule = ({
         return {
             ...snapshot,
             roaster: isMissingValue(snapshot.roaster) ? resolved.roaster : snapshot.roaster,
+            name: isMissingValue(snapshot.name) ? resolved.name : snapshot.name,
             farmer: isMissingValue(snapshot.farmer) ? resolved.farmer : snapshot.farmer,
             origin: isMissingValue(snapshot.origin) ? resolved.origin : snapshot.origin,
             method: isMissingValue(snapshot.method) ? resolved.method : snapshot.method,
@@ -1070,7 +1073,7 @@ export const createGalleryModule = ({
             parts.push(data.message.trim());
             parts.push('');
         }
-        parts.push(`Farmer: ${cardSnapshot?.farmer || '-'}`);
+        parts.push(`Coffee: ${formatCoffeeLabel(cardSnapshot || {})}`);
         parts.push(`Roaster: ${cardSnapshot?.roaster || '-'}`);
         parts.push(`Method: ${cardSnapshot?.method || '-'}`);
         const numericRating = Number(cardSnapshot?.rating) || 0;
@@ -1549,7 +1552,7 @@ export const createGalleryModule = ({
         // Farmer
         ctx.fillStyle = '#ffffff';
         ctx.font = '700 14px system-ui';
-        ctx.fillText(cardSnapshot?.farmer || '-', 32, infoY + 28);
+        ctx.fillText(formatCoffeeLabel(cardSnapshot || {}), 32, infoY + 28);
         
         // Roaster
         ctx.fillStyle = '#d6d3d1';
@@ -2137,7 +2140,7 @@ export const createGalleryModule = ({
             accent.className = `absolute top-0 left-0 right-0 h-1 z-[1] ${momentTypeMeta.accentClass}`;
             card.appendChild(accent);
 
-            const primaryInfo = cardSnapshot.farmer || '-';
+            const primaryInfo = formatCoffeeLabel(cardSnapshot);
             const secondaryInfo = cardSnapshot.roaster || cardSnapshot.origin || '-';
             const graphSnapshot = data?.graphSnapshot || null;
             const hasGraphSnapshot = hasRenderableMomentGraph(graphSnapshot);

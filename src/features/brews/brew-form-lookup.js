@@ -1,5 +1,6 @@
 import { formatOriginLabel } from '../../core/origin-regions.js';
 import { isGrinderGear } from '../../core/brew-fields.js';
+import { formatCoffeeLabel } from '../../core/coffee-display.js';
 export const createBrewFormLookupModule = ({
     getBeans,
     getCoffeeTypes,
@@ -58,7 +59,8 @@ export const createBrewFormLookupModule = ({
                 option.value = bean.id;
                 const display = getBeanCoffeeTypeDisplay(bean);
                 const roaster = display.roaster !== '-' ? display.roaster : 'Unknown';
-                const farmer = display.farmer !== '-' ? ` - ${display.farmer}` : '';
+                const coffee = formatCoffeeLabel(display, '');
+                const farmer = coffee ? ` - ${coffee}` : '';
                 const roastDate = formatRoastDate(bean.openedDate);
                 const roastDateLabel = roastDate ? ` (${roastDate})` : '';
                 option.text = `${roaster}${farmer}${roastDateLabel}`;
@@ -89,7 +91,8 @@ export const createBrewFormLookupModule = ({
                 const option = document.createElement('option');
                 option.value = type.id;
                 const roaster = type.roaster || 'Unknown';
-                const farmer = type.farmer ? ` - ${type.farmer}` : '';
+                const coffee = formatCoffeeLabel(type, '');
+                const farmer = coffee ? ` - ${coffee}` : '';
                 const roast = type.roast ? ` (${type.roast})` : '';
                 option.text = `${roaster}${farmer}${roast}`;
                 select.appendChild(option);

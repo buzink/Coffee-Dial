@@ -1,4 +1,5 @@
 import { createBrewsVmModule } from './brews.vm.js';
+import { formatCoffeeLabel } from '../../core/coffee-display.js';
 
 export const createBrewsCardGraphModule = ({
     getCurrentCardGraphData,
@@ -92,7 +93,7 @@ export const createBrewsCardGraphModule = ({
         if (subtitleEl) {
             const typeDisplay = getCoffeeTypeDisplay(c);
             const roaster = typeDisplay.roaster !== '-' ? typeDisplay.roaster : 'Unknown Roaster';
-            const farmer = typeDisplay.farmer !== '-' ? typeDisplay.farmer : '-';
+            const farmer = formatCoffeeLabel(typeDisplay);
             const method = c.method || '-';
             subtitleEl.textContent = `${roaster} ${farmer} (${method})`;
         }

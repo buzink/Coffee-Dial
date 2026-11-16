@@ -1,3 +1,4 @@
+import { formatCoffeeLabel } from './coffee-display.js';
 let autoPinToastTimer = null;
 const AUTO_TOAST_DURATION_MULTIPLIER = 2;
 const withExtendedDuration = (ms) => Math.round(ms * AUTO_TOAST_DURATION_MULTIPLIER);
@@ -106,7 +107,8 @@ export const createNotificationUxModule = ({
         const textEl = document.getElementById('autoCoffeeTypeToastText');
         if (textEl) {
             const type = getCoffeeTypes()?.find((ct) => ct.id === coffeeTypeId);
-            const name = type ? `${type.roaster || 'New coffee'}${type.farmer ? ` - ${type.farmer}` : ''}` : 'New coffee';
+            const label = type ? formatCoffeeLabel(type, '') : '';
+            const name = type ? `${type.roaster || 'New coffee'}${label ? ` - ${label}` : ''}` : 'New coffee';
             textEl.textContent = `Coffee created: ${name}.`;
         }
         showToastInStack(toast);
@@ -125,15 +127,15 @@ export const createNotificationUxModule = ({
         }
     };
 
-    const showBeanCreatedToast = ({ beanId = null, roaster = '', farmer = '' } = {}) => {
+    const showBeanCreatedToast = ({ beanId = null, roaster = '', name = '', farmer = '' } = {}) => {
         const toast = document.getElementById('autoBeanCreatedToast');
         if (!toast) return;
         beanCreatedToastBeanId = beanId || null;
         const textEl = document.getElementById('autoBeanCreatedToastText');
         if (textEl) {
             const roasterPart = (roaster || '').toString().trim();
-            const farmerPart = (farmer || '').toString().trim();
-            const suffix = `${roasterPart}${roasterPart && farmerPart ? ' ' : ''}${farmerPart}`.trim();
+            const coffeePart = formatCoffeeLabel({ name, farmer }, '');
+            const suffix = [roasterPart, coffeePart].filter(Boolean).join(' - ');
             textEl.textContent = suffix
                 ? `Added a coffee bag of 250 gr for ${suffix}.`
                 : 'Added a coffee bag of 250 gr.';

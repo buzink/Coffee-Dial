@@ -1,4 +1,5 @@
 import { formatOriginLabel } from '../../core/origin-regions.js';
+import { formatCoffeeLabel } from '../../core/coffee-display.js';
 export const createBeansVmModule = () => {
     const formatCardDate = (value) => {
         if (!value) return '-';
@@ -24,6 +25,7 @@ export const createBeansVmModule = () => {
         return {
             archivedDate: formatCardDate(bean.archivedDate),
             farmer: coffeeDisplay.farmer,
+            label: formatCoffeeLabel(coffeeDisplay),
             frozenDate: formatCardDate(bean.frozenDate),
             openedDate: formatCardDate(bean.openedDate),
             origin: formatOriginLabel(coffeeDisplay, '-'),
