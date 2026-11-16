@@ -59,7 +59,7 @@
                             <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Ratio</div><div id="cardRatio" class="font-mono font-bold text-coffee-900 dark:text-white"></div></div>
                             <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Out</div><div id="cardOut" class="font-mono font-bold text-coffee-900 dark:text-white"></div></div>
                         </div>
-                        <div class="grid grid-cols-3 gap-2 text-center border-t border-coffee-200 dark:border-[#44403c] pt-2">
+                        <div class="grid grid-cols-3 gap-2 text-center pt-2">
                             <div><div id="cardGrindTitle" class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase truncate px-1">Grind</div><div id="cardGrindValue" class="font-bold text-coffee-800 dark:text-[#d6ccc2]"></div></div>
                             <div><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Time</div><div id="cardTime" class="font-bold text-coffee-800 dark:text-[#d6ccc2]"></div></div>
                             <div><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Temp</div><div id="cardTemp" class="font-bold text-coffee-800 dark:text-[#d6ccc2]"></div></div>
@@ -77,16 +77,13 @@
                     <div><span class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase mb-1">Notes</span><p id="cardNotes" class="text-sm text-coffee-800 dark:text-[#d6ccc2] italic bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-lg border border-yellow-100 dark:border-yellow-900/20"></p></div>
                     <div id="cardImproveContainer" class="hidden"><span class="block text-xs font-bold text-red-500 dark:text-red-400 uppercase mb-1">To Improve</span><p id="cardImprove" class="text-sm text-coffee-800 dark:text-[#d6ccc2] bg-red-50 dark:bg-red-900/10 p-2 rounded-lg border border-red-100 dark:border-red-900/20"></p></div>
                 </div>
-                <div id="cardBottomBar" class="bg-coffee-50 dark:bg-[#1c1917] p-4 border-t border-coffee-200 dark:border-[#44403c] flex justify-between items-center text-xs text-coffee-400 dark:text-[#57534e]">
-                    <span id="cardDate"></span>
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center gap-2">
-                            <div class="flex gap-3 bg-coffee-100 dark:bg-[#44403c] rounded p-0.5">
-                                   <button data-action-click="fastDuplicateFromCard()" class="px-2 py-0.5 text-xs font-bold text-coffee-700 dark:text-[#d6ccc2] hover:bg-white dark:hover:bg-[#292524] rounded transition-all shadow-sm">Fast repeat</button>
-                                 <div class="w-px bg-coffee-200 dark:bg-[#57534e] my-0.5"></div>
-                                   <button data-action-click="duplicateFromCard()" class="px-2 py-0.5 text-xs font-bold text-coffee-700 dark:text-[#d6ccc2] hover:bg-white dark:hover:bg-[#292524] rounded transition-all shadow-sm">Repeat</button>
-                            </div>
-                        </div>
+                <div id="cardBottomBar" class="bg-coffee-50 dark:bg-[#1c1917] p-4 flex justify-between items-center text-xs text-coffee-400 dark:text-[#57534e]">
+                    <div class="flex flex-wrap items-center gap-2 min-w-0">
+                        <button type="button" data-action-click="fastDuplicateFromCard()" class="px-3 py-1.5 text-xs font-bold rounded bg-coffee-700 hover:bg-coffee-800 text-white flex items-center gap-2"><i class="fa-solid fa-bolt"></i> Fast repeat</button>
+                        <button type="button" data-action-click="duplicateFromCard()" class="px-3 py-1.5 text-xs font-bold rounded bg-coffee-700 hover:bg-coffee-800 text-white flex items-center gap-2"><i class="fa-solid fa-rotate-right"></i> Repeat</button>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-3">
+                        <span id="cardDate" class="text-right"></span>
                         <div class="flex items-center gap-2">
                             <button id="coffeeCardPrevBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Previous" data-action-click="navigateCoffeeCard(-1)">
                                 <i class="fa-solid fa-arrow-left"></i>
@@ -200,7 +197,7 @@
                             <input id="quickEditImprove" type="text" class="w-full text-sm border border-coffee-200 dark:border-[#44403c] rounded p-2 bg-white dark:bg-[#1c1917] text-coffee-900 dark:text-white">
                         </div>
                     </div>
-                    <div class="flex justify-end gap-2 pt-3 border-t border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
+                    <div class="flex justify-end gap-2 pt-3 bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
                         <button data-action-click="cancelBrewQuickEditMode()" class="px-3 py-1.5 text-xs font-bold rounded border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e]">Cancel</button>
                         <button data-action-click="saveBrewQuickEdits()" class="px-3 py-1.5 text-xs font-bold rounded bg-indigo-600 hover:bg-indigo-700 text-white">Save</button>
                     </div>

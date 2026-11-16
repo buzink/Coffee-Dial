@@ -962,7 +962,7 @@ export const createGalleryModule = ({
         panel.dataset.momentAction = 'true';
 
         const header = document.createElement('div');
-        header.className = 'p-3 border-b border-coffee-200 dark:border-[#44403c] flex items-center justify-between gap-2';
+        header.className = 'p-3 flex items-center justify-between gap-2';
         header.innerHTML = '<span class="text-sm font-bold text-coffee-800 dark:text-white">Choose emoji reaction</span>';
         const closeBtn = document.createElement('button');
         closeBtn.type = 'button';

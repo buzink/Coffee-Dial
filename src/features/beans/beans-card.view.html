@@ -108,21 +108,23 @@
                     </div>
                 </div>
                 </div>
-                <div class="pt-3 border-t border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
-                    <div class="flex flex-wrap gap-2">
-                        <button id="beanCardBrewBtn" class="px-3 py-1.5 text-xs font-bold rounded bg-coffee-700 hover:bg-coffee-800 text-white flex items-center gap-2">
-                            <i class="fa-solid fa-mug-hot"></i> Brew
-                        </button>
-                        <button id="beanCardFreezeBtn" aria-label="Toggle frozen status" class="px-3 py-1.5 text-xs font-bold rounded bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-2"></button>
-                        <button id="beanCardArchiveBtn" aria-label="Toggle finished status" class="px-3 py-1.5 text-xs font-bold rounded bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"></button>
-                    </div>
-                    <div class="flex justify-end gap-2 mt-3">
-                        <button id="beanCardPrevBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Previous" data-action-click="navigateBeanCard(-1)">
-                            <i class="fa-solid fa-arrow-left"></i>
-                        </button>
-                        <button id="beanCardNextBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Next" data-action-click="navigateBeanCard(1)">
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </button>
+                <div class="pt-3 bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex flex-wrap items-center gap-2 min-w-0">
+                            <button id="beanCardBrewBtn" class="px-3 py-1.5 text-xs font-bold rounded bg-coffee-700 hover:bg-coffee-800 text-white flex items-center gap-2">
+                                <i class="fa-solid fa-mug-hot"></i> Brew
+                            </button>
+                            <button id="beanCardFreezeBtn" aria-label="Toggle frozen status" class="px-3 py-1.5 text-xs font-bold rounded bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-2"></button>
+                            <button id="beanCardArchiveBtn" aria-label="Toggle finished status" class="px-3 py-1.5 text-xs font-bold rounded bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"></button>
+                        </div>
+                        <div class="flex shrink-0 gap-2">
+                            <button id="beanCardPrevBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Previous" data-action-click="navigateBeanCard(-1)">
+                                <i class="fa-solid fa-arrow-left"></i>
+                            </button>
+                            <button id="beanCardNextBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Next" data-action-click="navigateBeanCard(1)">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -196,7 +198,7 @@
                         <label for="beanEditArchived" class="text-sm text-coffee-700 dark:text-[#d6ccc2]">Finished</label>
                     </div>
                 </div>
-                <div class="flex justify-end gap-2 pt-3 border-t border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
+                <div class="flex justify-end gap-2 pt-3 bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
                     <button data-action-click="cancelBeanEditMode()" class="px-3 py-1.5 text-xs font-bold rounded border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e]"><span class="app-when-editing">Cancel</span><span class="app-when-adding" hidden>Discard</span></button>
                     <button data-action-click="saveBeanCardEdits()" class="px-3 py-1.5 text-xs font-bold rounded bg-indigo-600 hover:bg-indigo-700 text-white"><span class="app-when-editing">Save</span><span class="app-when-adding" hidden>Save bag</span></button>
                 </div>

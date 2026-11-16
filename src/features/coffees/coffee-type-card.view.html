@@ -139,22 +139,24 @@
                     <p id="coffeeTypeCardTasteNotes" class="text-sm text-coffee-700 dark:text-[#d6ccc2] italic bg-yellow-50 dark:bg-yellow-900/10 p-2 rounded-lg border border-yellow-100 dark:border-yellow-900/20"></p>
                 </div>
                 </div>
-                <div class="pt-3 border-t border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
-                    <div class="flex flex-wrap gap-2">
-                        <button id="coffeeTypeCardBuyBtn" class="px-3 py-1.5 text-xs font-bold rounded bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2">
-                            <i class="fa-solid fa-cart-shopping"></i> Buy
-                        </button>
-                        <button id="coffeeTypeCardNewBagBtn" data-action-click="openNewBagForCoffeeType()" class="px-3 py-1.5 text-xs font-bold rounded bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-2">
-                            <i class="fa-solid fa-bag-shopping"></i> Open bag
-                        </button>
-                    </div>
-                    <div class="flex justify-end gap-2 mt-3">
-                        <button id="coffeeTypeCardPrevBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Previous" data-action-click="navigateCoffeeTypeCard(-1)">
-                            <i class="fa-solid fa-arrow-left"></i>
-                        </button>
-                        <button id="coffeeTypeCardNextBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Next" data-action-click="navigateCoffeeTypeCard(1)">
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </button>
+                <div class="pt-3 bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex flex-wrap items-center gap-2 min-w-0">
+                            <button id="coffeeTypeCardBuyBtn" class="px-3 py-1.5 text-xs font-bold rounded bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2">
+                                <i class="fa-solid fa-cart-shopping"></i> Buy
+                            </button>
+                            <button id="coffeeTypeCardNewBagBtn" data-action-click="openNewBagForCoffeeType()" class="px-3 py-1.5 text-xs font-bold rounded bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-2">
+                                <i class="fa-solid fa-bag-shopping"></i> Open bag
+                            </button>
+                        </div>
+                        <div class="flex shrink-0 gap-2">
+                            <button id="coffeeTypeCardPrevBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Previous" data-action-click="navigateCoffeeTypeCard(-1)">
+                                <i class="fa-solid fa-arrow-left"></i>
+                            </button>
+                            <button id="coffeeTypeCardNextBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-50 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Next" data-action-click="navigateCoffeeTypeCard(1)">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -220,7 +222,7 @@
                         <textarea id="coffeeTypeEditTasteNotes" rows="3" class="w-full text-sm border border-coffee-200 dark:border-[#44403c] rounded p-2 bg-white dark:bg-[#1c1917] text-coffee-900 dark:text-white"></textarea>
                     </div>
                 </div>
-                <div class="flex justify-end gap-2 pt-3 border-t border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
+                <div class="flex justify-end gap-2 pt-3 bg-coffee-50 dark:bg-[#1c1917] px-4 pb-4">
                     <button data-action-click="cancelCoffeeTypeEditMode()" class="px-3 py-1.5 text-xs font-bold rounded border border-coffee-200 dark:border-[#44403c] text-coffee-700 dark:text-[#d6ccc2] hover:bg-coffee-50 dark:hover:bg-[#34302e]"><span class="app-when-editing">Cancel</span><span class="app-when-adding" hidden>Discard</span></button>
                     <button data-action-click="saveCoffeeTypeEdits()" class="px-3 py-1.5 text-xs font-bold rounded bg-indigo-600 hover:bg-indigo-700 text-white"><span class="app-when-editing">Save</span><span class="app-when-adding" hidden>Save coffee</span></button>
                 </div>

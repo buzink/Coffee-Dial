@@ -2,7 +2,7 @@
             
             <!-- Add brew form section -->
             <div id="formContainer" class="hidden transition-all duration-300 group overflow-hidden" aria-expanded="false">
-                <div id="formContainerHeader" class="hidden p-6 flex justify-between items-center bg-coffee-50/50 dark:bg-[#292524] border-b border-coffee-100 dark:border-[#44403c] rounded-t-xl">
+                <div id="formContainerHeader" class="hidden p-6 flex justify-between items-center bg-coffee-50/50 dark:bg-[#292524] rounded-t-xl">
                 <div data-action-click="toggleForm()" class="flex-1 cursor-pointer flex items-center gap-2">
                     <h2 id="formTitle" class="text-lg font-semibold flex items-center gap-2 text-coffee-900 dark:text-white select-none">
                         <i class="fa-solid fa-mug-hot text-coffee-700 dark:text-[#d6ccc2]"></i> <span>Add brew</span>
@@ -18,7 +18,7 @@
                     <input type="hidden" id="editId" name="editId" value="">
                     
                     <!-- SECTION 1: COFFEE DETAILS -->
-                    <div class="bg-coffee-50 dark:bg-[#1c1917]/50 p-4 rounded-lg border border-coffee-100 dark:border-[#44403c] relative">
+                    <div class="bg-white dark:bg-[#292524] p-4 rounded-lg border border-coffee-100 dark:border-[#44403c] relative">
                          <div id="coffeeDetailsHeader" data-action-click="toggleCoffeeDetails(event)" class="flex justify-between items-center mb-4 pb-2 cursor-pointer select-none" title="Collapse or expand coffee details">
                                       <h3 class="text-sm font-bold text-coffee-800 dark:text-white uppercase tracking-wide flex items-center gap-2">
                                           <i class="fa-solid fa-coffee-bag text-coffee-600 dark:text-[#a8a29e]"></i> <span id="coffeeDetailsTitle">Bag</span>
@@ -58,7 +58,7 @@
                                          <i class="fa-solid fa-pen-to-square"></i>
                                      </button>
                                  </div>
-                                 <select id="savedBeanSelect" aria-label="Select saved bag" data-action-change="fillBeanDetails(this.value)" class="w-full bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:ring-1 focus:ring-coffee-500 cursor-pointer shadow-sm">
+                                 <select id="savedBeanSelect" aria-label="Select saved bag" data-action-change="fillBeanDetails(this.value)" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] cursor-pointer">
                                      <option value="">-- create new bag and coffee --</option>
                                  </select>
                              </div>
@@ -66,22 +66,22 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Roaster</label>
-                                <input type="text" id="roaster" name="roaster" list="roasterList" placeholder="e.g. La Cabra" class="w-full bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:border-coffee-500 transition-colors">
+                                <input type="text" id="roaster" name="roaster" list="roasterList" placeholder="e.g. La Cabra" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                                 <datalist id="roasterList"></datalist>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Blend/farmer</label>
-                                <input type="text" id="farmer" name="farmer" list="farmerList" placeholder="e.g. Felipe Arcila" class="w-full bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:border-coffee-500 transition-colors">
+                                <input type="text" id="farmer" name="farmer" list="farmerList" placeholder="e.g. Felipe Arcila" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                                 <datalist id="farmerList"></datalist>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Origin</label>
-                                <input type="text" id="origin" name="origin" list="originList" placeholder="e.g. Ethiopia" class="w-full bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:border-coffee-500 transition-colors">
+                                <input type="text" id="origin" name="origin" list="originList" placeholder="e.g. Ethiopia" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors">
                                 <datalist id="originList"></datalist>
                             </div>
-                            <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Variety</label><input type="text" id="variety" name="variety" placeholder="e.g. Geisha" class="w-full bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:border-coffee-500 transition-colors"></div>
-                            <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Processing</label><input type="text" id="processing" name="processing" placeholder="e.g. Natural" class="w-full bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:border-coffee-500 transition-colors"></div>
-                            <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Roast type</label><select id="roastType" aria-label="Roast type" name="roastType" class="w-full bg-white dark:bg-[#292524] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:border-coffee-500 cursor-pointer"><option value="" disabled selected>Select roast</option><option value="Ultralight">Ultralight</option><option value="Light">Light</option><option value="Medium">Medium</option><option value="Medium-Dark">Medium-Dark</option><option value="Dark">Dark</option></select></div>
+                            <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Variety</label><input type="text" id="variety" name="variety" placeholder="e.g. Geisha" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors"></div>
+                            <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Processing</label><input type="text" id="processing" name="processing" placeholder="e.g. Natural" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] transition-colors"></div>
+                            <div><label class="block text-xs font-medium text-coffee-600 dark:text-[#a8a29e] mb-1 uppercase tracking-wide">Roast type</label><select id="roastType" aria-label="Roast type" name="roastType" class="w-full bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg px-3 py-2 text-sm text-coffee-900 dark:text-white focus:bg-white dark:focus:bg-[#0c0a09] cursor-pointer"><option value="" disabled selected>Select roast</option><option value="Ultralight">Ultralight</option><option value="Light">Light</option><option value="Medium">Medium</option><option value="Medium-Dark">Medium-Dark</option><option value="Dark">Dark</option></select></div>
                             </div>
                         </div>
                     </div>
@@ -275,7 +275,7 @@
             <!-- Ratio Calculator Modal -->
             <div id="ratioCalcModal" class="hidden fixed inset-0 z-[10055] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" data-action-click="closeRatioCalcModal()">
                 <div class="bg-white dark:bg-[#292524] rounded-2xl shadow-2xl w-full max-w-sm mx-auto border border-coffee-200 dark:border-[#44403c]" data-action-click="event.stopPropagation()">
-                    <div class="flex justify-between items-center px-5 pt-5 pb-3 border-b border-coffee-100 dark:border-[#44403c]">
+                    <div class="flex justify-between items-center px-5 pt-5 pb-3">
                         <h2 class="text-base font-bold text-coffee-900 dark:text-white">Ratio calculator</h2>
                         <button type="button" data-action-click="closeRatioCalcModal()" aria-label="Close ratio calculator" title="Close" class="w-11 h-11 flex items-center justify-center rounded-full text-coffee-500 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#44403c] transition-colors"><i class="fa-solid fa-xmark"></i></button>
                     </div>
