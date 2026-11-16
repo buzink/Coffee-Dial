@@ -24,6 +24,20 @@ export const closeDeviceTroubleshootModal = () => {
 export const openConnectDevicesModal = () => {
     document.getElementById('connectDevicesModal')?.classList.remove('hidden');
     DeviceManager.autoConnectAll();
+    // Opened over the brew graph with nothing connected: start scale 1 right away so the
+    // Bluetooth chooser appears, and return to the graph once it is connected.
+    const graphModal = document.getElementById('graphModal');
+    const graphOpen = !!graphModal && !graphModal.classList.contains('hidden');
+    if (graphOpen && !DeviceManager.hasAnyConnection()) {
+        void connectScaleFromGraph();
+    }
+};
+
+const connectScaleFromGraph = async () => {
+    await connectDevice('scale');
+    if (DeviceManager.isConnected('scale')) {
+        closeConnectDevicesModal();
+    }
 };
 
 export const closeConnectDevicesModal = () => {
