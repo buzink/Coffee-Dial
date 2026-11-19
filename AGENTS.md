@@ -39,3 +39,10 @@ re-read whole files.
 After big code changes, refresh the graph with `trail build` (deterministic,
 no API key, $0).
 <!-- trail:end -->
+
+## Werkafspraken voor dit project
+
+- Verhoog de service-worker-versie (`sw.js`) in de eerste commit van elke release; nieuwe bestanden horen ook in de vaste bestandslijst van de service worker.
+- Gebruik alleen Tailwind-classes die al in de gebouwde stylesheet staan en herbouw die niet mee; nieuwe stijlen gaan in `src/styles/app.css`.
+- Bouw geen backwards compatibility, tenzij de gebruiker erom vraagt.
+- Is een wijziging in de preview niet zichtbaar, controleer dan eerst de service-worker-cache.

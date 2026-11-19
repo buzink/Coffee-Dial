@@ -39,3 +39,9 @@ re-read whole files.
 After big code changes, refresh the graph with `trail build` (deterministic,
 no API key, $0).
 <!-- trail:end -->
+
+## Werkafspraken voor dit project
+
+Zie de sectie "Werkafspraken voor dit project" in `AGENTS.md`:
+
+@./AGENTS.md
