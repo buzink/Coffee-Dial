@@ -196,6 +196,28 @@
         /* Brew graph, capture toggles and event log in the Extraction section span the whole row. */
         .brew-full-row { grid-column: 1 / -1; }
         #graphEventLog:empty { display: none; }
+        /* Brew graph dialog: the canvas keeps its height when a brew has no graph, the message
+           sits on top of it, so the dialog does not jump while paging between brews. */
+        .card-graph-frame { position: relative; }
+        #cardGraphEmpty {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 1rem;
+        }
+        #cardGraphEmpty.hidden { display: none; }
+        /* The brew's name below the graph always takes two lines, and never more. */
+        #cardGraphSubtitle {
+            line-height: 1rem;
+            min-height: 2rem;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            overflow: hidden;
+        }
         /* Temp field: native number arrows hidden, minus/plus buttons behind the field instead. */
         .temp-input { -moz-appearance: textfield; appearance: textfield; }
         .temp-input::-webkit-inner-spin-button,
