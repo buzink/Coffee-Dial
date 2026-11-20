@@ -18,7 +18,6 @@ export const createBrewsActionsModule = ({
     brewsRepo,
     openAppConfirm,
     parseNum,
-    setTempMode,
     setNotesMode,
     resetSca,
     setRating,
@@ -41,7 +40,7 @@ export const createBrewsActionsModule = ({
     getCoffeeScale,
     showToast,
     getPinnedBrewsPreferences,
-    openGraphModal = null,
+    showBrewGraph = null,
     getSelectedBrewGearIds,
     setSelectedBrewGearIds,
     openBrewFormModal,
@@ -64,14 +63,14 @@ export const createBrewsActionsModule = ({
     const clean = (value) => (value || '').toString().toLowerCase().trim();
     const shouldKeepRepeatCuppingFields = () => getPinnedBrewsPreferences?.()?.keepCuppingNotesWhenRepeatingBrew === true;
     const shouldKeepRepeatInOutTimeFields = () => getPinnedBrewsPreferences?.()?.keepInOutTimeWhenRepeatingBrew === true;
-    // Repeat brew with "Jump to graph after repeat" on: open the graph right away. openGraphModal itself
-    // opens Connect Devices (and starts scale 1) when the graph is empty and nothing is connected.
+    // Repeat brew with "Jump to graph after repeat" on: scroll to the graph in the form right away.
+    // showBrewGraph opens Connect Devices (and starts scale 1) when the graph is empty and nothing is connected.
     const jumpToGraphAfterRepeat = async (title) => {
         if (title !== 'Repeat brew') return;
         if (getPinnedBrewsPreferences?.()?.jumpToGraphAfterRepeat !== true) return;
-        if (typeof openGraphModal !== 'function') return;
+        if (typeof showBrewGraph !== 'function') return;
         try {
-            await openGraphModal();
+            await showBrewGraph();
         } catch (error) {
             console.error('Jump to graph after repeat failed:', error);
         }
@@ -350,7 +349,6 @@ export const createBrewsActionsModule = ({
             const coffeeScale = scale();
             document.getElementById('inputYield')?.dispatchEvent(new Event('input', { bubbles: true }));
             document.getElementById('time')?.dispatchEvent(new Event('input', { bubbles: true }));
-            if (coffeeScale?.syncGraphFormFields) coffeeScale.syncGraphFormFields();
             if (coffeeScale?.setFirstDripSeconds) coffeeScale.setFirstDripSeconds(null);
         };
         document.getElementById('editId').value = '';
@@ -397,7 +395,6 @@ export const createBrewsActionsModule = ({
             const coffeeScale = scale();
             document.getElementById('inputYield')?.dispatchEvent(new Event('input', { bubbles: true }));
             document.getElementById('time')?.dispatchEvent(new Event('input', { bubbles: true }));
-            if (coffeeScale?.syncGraphFormFields) coffeeScale.syncGraphFormFields();
             if (coffeeScale?.setFirstDripSeconds) coffeeScale.setFirstDripSeconds(null);
         };
         delete d.beanId;
@@ -419,7 +416,6 @@ export const createBrewsActionsModule = ({
         if (e) e.stopPropagation();
         document.getElementById('coffeeForm').reset();
         document.getElementById('editId').value = '';
-        setTempMode('numeric');
         setNotesMode('manual');
         resetSca();
         setRating(0);
@@ -442,7 +438,6 @@ export const createBrewsActionsModule = ({
         clearPendingAIBeanImageFile();
         if (scale()?.resetCaptureData) scale().resetCaptureData();
         if (scale()?.setRecipeSteps) scale().setRecipeSteps([]);
-        if (scale()?.syncGraphFormFields) scale().syncGraphFormFields();
         if (scale()?.applyGraphTogglePrefsForMethod) scale().applyGraphTogglePrefsForMethod();
         setAiAddVisibility(true);
     };
@@ -460,8 +455,7 @@ export const createBrewsActionsModule = ({
 
         const f = new FormData(e.target);
         const eid = f.get('editId');
-        const tMode = f.get('tempMode');
-        const finalTemp = tMode === 'profile' ? f.get('tempProfile') : f.get('tempNumeric') || 'M';
+        const finalTemp = f.get('tempNumeric') || '';
         const finalNotes = f.get('notes') || '';
         const rawDrinkType = f.get('drinkType');
         const rawDrinkOther = f.get('drinkOther');

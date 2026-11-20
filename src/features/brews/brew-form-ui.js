@@ -146,27 +146,15 @@ export const createBrewFormUiModule = ({
         resetSca();
     };
 
-    const setTempMode = (m) => {
-        const mode = document.getElementById('tempMode');
-        const btnNum = document.getElementById('btnTempNumeric');
-        const btnProf = document.getElementById('btnTempProfile');
-        const conNum = document.getElementById('tempNumericContainer');
-        const conProf = document.getElementById('tempProfileContainer');
-        if (!mode || !btnNum || !btnProf || !conNum || !conProf) return;
-        mode.value = m;
-        const activeClass = 'px-2 py-0.5 text-[10px] rounded font-bold transition-all bg-white dark:bg-[#1c1917] shadow-sm text-coffee-800 dark:text-white';
-        const inactiveClass = 'px-2 py-0.5 text-[10px] rounded font-bold transition-all text-coffee-500 dark:text-[#a8a29e] hover:text-coffee-700';
-        if (m === 'numeric') {
-            conNum.classList.remove('hidden');
-            conProf.classList.add('hidden');
-            btnNum.className = activeClass;
-            btnProf.className = inactiveClass;
-        } else {
-            conProf.classList.remove('hidden');
-            conNum.classList.add('hidden');
-            btnProf.className = activeClass;
-            btnNum.className = inactiveClass;
-        }
+    // Minus/plus buttons behind the Temp field. An empty field starts from the placeholder value.
+    const stepTemp = (delta) => {
+        const input = document.getElementById('tempNumeric');
+        if (!input) return;
+        const current = parseFloat(input.value);
+        const base = Number.isFinite(current) ? current : 93;
+        const next = Number.isFinite(current) ? base + Number(delta) : base;
+        input.value = String(Math.round(next * 10) / 10);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
     };
 
     const updateCoffeeDetailsTitle = () => {
@@ -308,7 +296,7 @@ export const createBrewFormUiModule = ({
         renderScaWheel,
         addScaToNotes,
         resetSca,
-        setTempMode,
+        stepTemp,
         updateCoffeeDetailsTitle,
         setCoffeeDetailsCollapsed,
         toggleCoffeeDetails,

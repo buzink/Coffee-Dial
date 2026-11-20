@@ -184,6 +184,23 @@
         }
         /* Scale buttons in the brew form: one full-width row at the bottom of Extraction. */
         .brew-scale-actions { grid-column: 1 / -1; }
+        /* Brew graph, capture toggles and event log in the Extraction section span the whole row. */
+        .brew-full-row { grid-column: 1 / -1; }
+        #graphEventLog:empty { display: none; }
+        /* Temp field: native number arrows hidden, minus/plus buttons behind the field instead. */
+        .temp-input { -moz-appearance: textfield; appearance: textfield; }
+        .temp-input::-webkit-inner-spin-button,
+        .temp-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .temp-step-btn { width: 2.5rem; height: 2.375rem; flex-shrink: 0; }
+        /* On narrow screens Extraction is one column, except Time and Flow, which share a row. */
+        @media (max-width: 767px) {
+            #extractionBody { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #extractionBody > * { grid-column: 1 / -1; }
+            #extractionBody > .brew-half-narrow { grid-column: auto; }
+        }
+        @media (min-width: 768px) {
+            #extractionBody .graph-toggle-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
         /* The edit button beside "Select saved bag" must not make that label row taller, so
            the Bag section has the same space under its heading as Extraction and Cupping. */
         #savedBeanEditBtn { margin-top: -0.5rem; margin-bottom: -0.5rem; }

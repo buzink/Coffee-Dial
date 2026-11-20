@@ -1,10 +1,5 @@
 export const createMediaModalsModule = ({
-    dispatchCommand,
-    ensureMediaModalsMounted = null,
-    ensureGraphModalsMounted = null,
-    ensureGraphScaleBindings = null,
-    syncDeviceIndicators = null,
-    promptScaleConnectIfEmpty = null
+    ensureMediaModalsMounted = null
 }) => {
     let lightboxListenersInitialized = false;
     let lightboxItems = [];
@@ -26,41 +21,6 @@ export const createMediaModalsModule = ({
             items: [{ url: 'img/SCA_wheel.png', alt: 'SCA Flavor Wheel' }],
             startIndex: 0
         });
-    };
-
-    const openGraphModal = async () => {
-        if (typeof ensureGraphModalsMounted === 'function') {
-            await ensureGraphModalsMounted();
-        }
-        // Sync device indicator state into the freshly-mounted graph modal DOM
-        if (typeof syncDeviceIndicators === 'function') {
-            await syncDeviceIndicators();
-        }
-        if (typeof ensureGraphScaleBindings === 'function') {
-            await ensureGraphScaleBindings();
-        }
-        const modal = document.getElementById('graphModal');
-        if (!modal) return;
-        modal.classList.remove('hidden');
-        requestAnimationFrame(async () => {
-            try {
-                await dispatchCommand?.('scales.renderGraph', { canvasId: 'graph' });
-            } catch (error) {
-                console.error('Graph modal render command failed:', error);
-            }
-        });
-        // An empty graph with no scale connected cannot show anything: offer the scale connect card on top.
-        if (typeof promptScaleConnectIfEmpty === 'function') {
-            try {
-                await promptScaleConnectIfEmpty();
-            } catch (error) {
-                console.error('Scale connect prompt failed:', error);
-            }
-        }
-    };
-
-    const closeGraphModal = () => {
-        document.getElementById('graphModal')?.classList.add('hidden');
     };
 
     const normalizeLightboxItems = (items = []) =>
@@ -268,8 +228,6 @@ export const createMediaModalsModule = ({
     };
 
     return {
-        openGraphModal,
-        closeGraphModal,
         openScaWheelLightbox,
         openLightbox,
         openLightboxAtUrl,

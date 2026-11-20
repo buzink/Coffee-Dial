@@ -1,5 +1,5 @@
 
-export const createBrewsFormModule = ({ setTempMode, setRating, setNotesMode, getCoffeeScale, getGasItems, fillBeanDetails }) => {
+export const createBrewsFormModule = ({ setRating, setNotesMode, getCoffeeScale, getGasItems, fillBeanDetails }) => {
     let brewGearSelection = new Set();
     let brewGearFilter = '';
     let hasBoundBrewGearUi = false;
@@ -187,7 +187,6 @@ export const createBrewsFormModule = ({ setTempMode, setRating, setNotesMode, ge
                 : null;
             coffeeScale.setCaptureData(graphData);
         }
-        if (coffeeScale?.syncGraphFormFields) coffeeScale.syncGraphFormFields();
         applyBrewGraphStatsToForm(c, coffeeScale);
     };
 
@@ -208,13 +207,8 @@ export const createBrewsFormModule = ({ setTempMode, setRating, setNotesMode, ge
         document.getElementById('improve').value = c.improve || '';
         setSelectedBrewGearIds(c.gearIds || []);
 
-        if (!isNaN(parseFloat(c.temp)) && isFinite(c.temp)) {
-            setTempMode('numeric');
-            document.getElementById('tempNumeric').value = c.temp;
-        } else {
-            setTempMode('profile');
-            document.getElementById('tempProfile').value = c.temp || '';
-        }
+        const isNumericTemp = !isNaN(parseFloat(c.temp)) && isFinite(c.temp);
+        document.getElementById('tempNumeric').value = isNumericTemp ? c.temp : '';
 
         const stdDrinks = [
             'Espresso',
@@ -273,7 +267,6 @@ export const createBrewsFormModule = ({ setTempMode, setRating, setNotesMode, ge
         applyBrewGraphToForm(c);
 
         if (coffeeScale?.setRecipeSteps) coffeeScale.setRecipeSteps(c.recipeSteps || []);
-        if (coffeeScale?.syncGraphFormFields) coffeeScale.syncGraphFormFields();
 
         applyBrewGraphStatsToForm(c, coffeeScale);
     };

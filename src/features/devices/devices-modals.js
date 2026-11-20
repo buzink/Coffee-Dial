@@ -21,14 +21,12 @@ export const closeDeviceTroubleshootModal = () => {
     document.getElementById('deviceTroubleshootModal')?.classList.add('hidden');
 };
 
-export const openConnectDevicesModal = () => {
+export const openConnectDevicesModal = (options = null) => {
     document.getElementById('connectDevicesModal')?.classList.remove('hidden');
     DeviceManager.autoConnectAll();
-    // Opened over the brew graph with nothing connected: start scale 1 right away so the
-    // Bluetooth chooser appears, and return to the graph once it is connected.
-    const graphModal = document.getElementById('graphModal');
-    const graphOpen = !!graphModal && !graphModal.classList.contains('hidden');
-    if (graphOpen && !DeviceManager.hasAnyConnection()) {
+    // Opened for the empty brew graph (repeat with "Jump to graph") with nothing connected: start
+    // scale 1 right away so the Bluetooth chooser appears, and return to the form once it is connected.
+    if (options?.autoConnectScale === true && !DeviceManager.hasAnyConnection()) {
         void connectScaleFromGraph();
     }
 };
@@ -189,29 +187,23 @@ const updateScaleUI = (slot, { weight, status, connected, timerRunning } = {}) =
             connectModalIndicator.classList.toggle('hidden', !connected);
         }
 
-        // Update brew form graph panel indicator (extraction header + graph modal header)
+        // Update the device indicators in the brew form's Extraction header
         const slotToSuffix = { scale: 'Scale1', scale2: 'Scale2', pressure: 'Pressure', temp: 'Temp' };
         const suffix = slotToSuffix[slot];
         if (suffix) {
-            for (const prefix of ['graph', 'graphModal']) {
-                const el = document.getElementById(`${prefix}${suffix}Indicator`);
-                if (el) {
-                    el.classList.toggle('hidden', !connected);
-                    el.classList.toggle('flex', connected);
-                }
+            const el = document.getElementById(`graph${suffix}Indicator`);
+            if (el) {
+                el.classList.toggle('hidden', !connected);
+                el.classList.toggle('flex', connected);
             }
         }
         // Show/hide the wrapper rows and tint plug buttons based on whether any device is connected
         const baseIds = ['Scale1', 'Scale2', 'Pressure', 'Temp'];
-        // anyConn is derived from the extraction-header indicators (prefix 'graph') as the source of truth
         const anyConn = baseIds.some(s => !document.getElementById(`graph${s}Indicator`)?.classList.contains('hidden'));
-        for (const prefix of ['graph', 'graphModal']) {
-            const anyConnected = baseIds.some(s => !document.getElementById(`${prefix}${s}Indicator`)?.classList.contains('hidden'));
-            const wrapper = document.getElementById(`${prefix}DeviceIndicators`);
-            if (wrapper) {
-                wrapper.classList.toggle('hidden', !anyConnected);
-                wrapper.classList.toggle('flex', anyConnected);
-            }
+        const wrapper = document.getElementById('graphDeviceIndicators');
+        if (wrapper) {
+            wrapper.classList.toggle('hidden', !anyConn);
+            wrapper.classList.toggle('flex', anyConn);
         }
         // Tint the plug icon buttons green when any device is connected
         const extractionBtn = document.getElementById('extractionConnectBtn');
@@ -220,13 +212,6 @@ const updateScaleUI = (slot, { weight, status, connected, timerRunning } = {}) =
             extractionBtn.classList.toggle('dark:text-green-500', anyConn);
             extractionBtn.classList.toggle('text-coffee-600', !anyConn);
             extractionBtn.classList.toggle('dark:text-[#a8a29e]', !anyConn);
-        }
-        const graphModalBtn = document.getElementById('graphModalConnectBtn');
-        if (graphModalBtn) {
-            graphModalBtn.classList.toggle('text-green-600', anyConn);
-            graphModalBtn.classList.toggle('dark:text-green-500', anyConn);
-            graphModalBtn.classList.toggle('text-coffee-500', !anyConn);
-            graphModalBtn.classList.toggle('dark:text-[#a8a29e]', !anyConn);
         }
     }
     

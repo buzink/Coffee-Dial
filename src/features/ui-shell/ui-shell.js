@@ -2,7 +2,6 @@ export const createUiShellModule = ({
     persistOnboardingSeen,
     closeModal,
     closeCardGraphModal,
-    closeGraphModal,
     closeCoffeeCard,
     closeStats,
     closeImportExportModal,
@@ -408,7 +407,6 @@ export const createUiShellModule = ({
             closeIfVisible('lightboxOverlay', () => closeLightbox?.(null)) ||
             closeIfVisible('connectScaleModal', () => closeConnectScaleModal?.()) ||
             closeIfVisible('cardGraphModal', () => closeCardGraphModal(null)) ||
-            closeIfVisible('graphModal', () => closeGraphModal()) ||
             closeIfVisible('coffeeCardOverlay', () => closeCoffeeCard(null)) ||
             closeIfVisible('easterEggModal', () => closeEasterEgg(null)) ||
             closeIfVisible('helpModal', () => closeHelp()) ||

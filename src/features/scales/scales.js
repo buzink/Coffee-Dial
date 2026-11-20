@@ -15,15 +15,11 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
   const connectTimerBtn = document.getElementById("connectScaleTimer");
   const connectResetTimerBtn = document.getElementById("connectScaleResetTimer");
   const connectConnectBtn = document.getElementById("connectScaleConnect");
-  const flowEl = document.getElementById("flow");
-  let graphTimeEl = document.getElementById("graphTime");
+  let flowEl = document.getElementById("flow");
   const captureOutputEl = document.getElementById("captureOutput");
   const flowOutputEl = document.getElementById("flowOutput");
   const rawOutputEl = document.getElementById("rawOutput");
   let graphEl = document.getElementById("graph");
-  let graphInputWeightEl = document.getElementById("graphInputWeight");
-  let graphInputRatioEl = document.getElementById("graphInputRatio");
-  let graphInputYieldEl = document.getElementById("graphInputYield");
   let graphFirstDripEl = document.getElementById("graphFirstDrip");
   let graphMaxFlowEl = document.getElementById("graphMaxFlow");
   let graphAvgFlowEl = document.getElementById("graphAvgFlow");
@@ -38,12 +34,10 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
   let liveTimerStartAt = null;
   let liveTimerElapsedMs = 0;
 
+  // The graph and its fields live in the brew form, which may be mounted after initCoffeeScale runs.
   function refreshGraphDomRefs() {
-    graphTimeEl = document.getElementById("graphTime");
+    flowEl = document.getElementById("flow");
     graphEl = document.getElementById("graph");
-    graphInputWeightEl = document.getElementById("graphInputWeight");
-    graphInputRatioEl = document.getElementById("graphInputRatio");
-    graphInputYieldEl = document.getElementById("graphInputYield");
     graphFirstDripEl = document.getElementById("graphFirstDrip");
     graphMaxFlowEl = document.getElementById("graphMaxFlow");
     graphAvgFlowEl = document.getElementById("graphAvgFlow");
@@ -231,6 +225,7 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
   }
 
   function setFlow(value) {
+    if (!flowEl || !flowEl.isConnected) flowEl = document.getElementById("flow");
     if (!flowEl) return;
     if (!Number.isFinite(value)) {
       flowEl.textContent = "--.- g/s";
@@ -1309,13 +1304,6 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
         timeField.dispatchEvent(new Event("input", { bubbles: true }));
       }
     }
-    if (graphTimeEl) {
-      const timeValue = timeField ? timeField.value : nextTimeValue;
-      const nextGraphTime = `${timeValue} s`;
-      if (graphTimeEl.textContent !== nextGraphTime) {
-        graphTimeEl.textContent = nextGraphTime;
-      }
-    }
   }
 
   function startLiveTimer() {
@@ -1355,14 +1343,8 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
       timeField.value = 0;
       timeField.dispatchEvent(new Event("input", { bubbles: true }));
     }
-    if (graphTimeEl) {
-      graphTimeEl.textContent = "0 s";
-    }
     const outField = document.getElementById("inputYield");
-    if (outField) {
-      outField.value = "";
-      if (graphInputYieldEl) graphInputYieldEl.value = "";
-    }
+    if (outField) outField.value = "";
   }
 
   function resetGraphMetrics() {
@@ -1554,10 +1536,7 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
 
   // --- Weigh button IN-field highlight helpers ---
   function getInFieldTargets() {
-    return [
-      document.getElementById('inputWeight'),
-      document.getElementById('graphInputWeight'),
-    ].filter(Boolean);
+    return [document.getElementById('inputWeight')].filter(Boolean);
   }
 
   function setInFieldHover() {
@@ -1661,30 +1640,13 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
   }
 
   function updateTimerIcon() {
-    const timerTargets = [
-      { button: document.getElementById("brewTimerBtn"), label: null },
-      { button: document.getElementById("graphTimerBtn"), label: "span" }
-    ];
-
-    timerTargets.forEach(({ button, label }) => {
-      if (!button) return;
-      const timerIcon = button.querySelector("i");
-      if (!timerIcon) return;
-      if (timerRunning) {
-        timerIcon.classList.remove("fa-play");
-        timerIcon.classList.add("fa-pause");
-        button.title = "Stop timer";
-      } else {
-        timerIcon.classList.remove("fa-pause");
-        timerIcon.classList.add("fa-play");
-        button.title = "Start timer";
-      }
-
-      if (label) {
-        const labelEl = button.querySelector(label);
-        if (labelEl) labelEl.textContent = timerRunning ? "Stop" : "Start";
-      }
-    });
+    const button = document.getElementById("brewTimerBtn");
+    const timerIcon = button?.querySelector("i");
+    if (timerIcon) {
+      timerIcon.classList.toggle("fa-play", !timerRunning);
+      timerIcon.classList.toggle("fa-pause", timerRunning);
+      button.title = timerRunning ? "Stop timer" : "Start timer";
+    }
 
     if (timerRunning) {
       setTimerBlinking(false);
@@ -1692,21 +1654,7 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
   }
 
   function setTimerBlinking(isBlinking) {
-    const timerTargets = [
-      document.getElementById("brewTimerBtn"),
-      document.getElementById("graphTimerBtn")
-    ];
-
-    timerTargets.forEach((button) => {
-      if (!button) return;
-      const timerIcon = button.querySelector("i");
-      if (!timerIcon) return;
-      if (isBlinking) {
-        timerIcon.classList.add("animate-pulse");
-      } else {
-        timerIcon.classList.remove("animate-pulse");
-      }
-    });
+    document.getElementById("brewTimerBtn")?.querySelector("i")?.classList.toggle("animate-pulse", !!isBlinking);
   }
 
   async function triggerAutoStartTimer() {
@@ -1787,30 +1735,24 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
   });
   deviceManager.onStatusChange('scale', (status) => setStatus(status));
 
-  function bindGraphModalControls() {
+  // Toggles, first drip field and canvas sizing of the brew graph in the Extraction section.
+  let graphResizeObserver = null;
+  function bindGraphControls() {
     refreshGraphDomRefs();
 
-    const graphWeighBtn = document.getElementById("graphWeighBtn");
-    if (graphWeighBtn && graphWeighBtn.dataset.scaleBound !== "true") {
-      graphWeighBtn.dataset.scaleBound = "true";
-      graphWeighBtn.addEventListener("pointerdown", () => {
-        const outField = document.getElementById("inputYield");
-        weighClickFromOut = document.activeElement === outField;
+    // The canvas is drawn at its on-screen size: redraw when the form opens, the Extraction
+    // section expands or the window resizes.
+    if (graphEl && graphEl.dataset.scaleBound !== "true" && typeof ResizeObserver === "function") {
+      graphEl.dataset.scaleBound = "true";
+      graphResizeObserver?.disconnect();
+      let lastWidth = 0;
+      graphResizeObserver = new ResizeObserver(() => {
+        const width = graphEl?.clientWidth || 0;
+        if (!width || width === lastWidth) return;
+        lastWidth = width;
+        renderGraph();
       });
-      graphWeighBtn.addEventListener("click", handleWeighClick);
-      graphWeighBtn.addEventListener("mouseenter", () => setInFieldHover());
-    }
-
-    const graphResetScaleBtn = document.getElementById("graphResetScaleBtn");
-    if (graphResetScaleBtn && graphResetScaleBtn.dataset.scaleBound !== "true") {
-      graphResetScaleBtn.dataset.scaleBound = "true";
-      graphResetScaleBtn.addEventListener("click", handleResetScaleClick);
-    }
-
-    const graphTimerBtn = document.getElementById("graphTimerBtn");
-    if (graphTimerBtn && graphTimerBtn.dataset.scaleBound !== "true") {
-      graphTimerBtn.dataset.scaleBound = "true";
-      graphTimerBtn.addEventListener("click", handleTimerIconClick);
+      graphResizeObserver.observe(graphEl);
     }
 
     if (graphAutoStartToggle && graphAutoStartToggle.dataset.scaleBound !== "true") {
@@ -1866,55 +1808,10 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
     }
   }
 
-  // Keep references for event listener binding; re-query at runtime in case
-  // the brew form modal is mounted lazily (after initCoffeeScale runs).
-  let inField = document.getElementById("inputWeight");
-  let outField = document.getElementById("inputYield");
-  let ratioField = document.getElementById("inputRatio");
-  const syncGraphRecipeFields = () => {
-    // Always do a live lookup so stale null refs (brew form mounted after
-    // initCoffeeScale) don't silently prevent the sync.
-    const curInField = document.getElementById("inputWeight");
-    const curOutField = document.getElementById("inputYield");
-    const curRatioField = document.getElementById("inputRatio");
-    // Refresh live listener refs if they were null at init time
-    if (!inField && curInField) {
-      inField = curInField;
-      inField.addEventListener("input", syncGraphRecipeFields);
-    }
-    if (!outField && curOutField) {
-      outField = curOutField;
-      outField.addEventListener("input", syncGraphRecipeFields);
-    }
-    if (!ratioField && curRatioField) {
-      ratioField = curRatioField;
-    }
-    refreshGraphDomRefs();
-    if (graphInputWeightEl && curInField) graphInputWeightEl.value = curInField.value;
-    if (graphInputRatioEl && curRatioField) {
-      const src = curRatioField.querySelector('span:last-child');
-      const dst = graphInputRatioEl.querySelector('span:last-child');
-      if (src && dst) dst.textContent = src.textContent;
-    }
-    if (graphInputYieldEl && curOutField) graphInputYieldEl.value = curOutField.value;
-  };
-  const syncGraphTimeFromForm = () => {
-    refreshGraphDomRefs();
-    if (!graphTimeEl) return;
-    const timeField = document.getElementById("time");
-    const timeValue = timeField ? (timeField.value || 0) : 0;
-    graphTimeEl.textContent = `${timeValue} s`;
-  };
-  const syncGraphFormFields = () => {
-    syncGraphRecipeFields();
-    syncGraphTimeFromForm();
-  };
-  if (inField) inField.addEventListener("input", syncGraphRecipeFields);
-  if (ratioField) ratioField.addEventListener("input", syncGraphRecipeFields);
-  if (outField) outField.addEventListener("input", syncGraphRecipeFields);
-  bindGraphModalControls();
-  syncGraphRecipeFields();
-  syncGraphTimeFromForm();
+  // Keep references for event listener binding; the brew form may be mounted after initCoffeeScale runs.
+  const inField = document.getElementById("inputWeight");
+  const outField = document.getElementById("inputYield");
+  bindGraphControls();
   applyGraphTogglePrefsForMethod();
   if (inField) {
     inField.addEventListener("focus", () => {
@@ -1949,8 +1846,7 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
     getCaptureData,
     setCaptureData,
     resetCaptureData,
-    syncGraphFormFields,
-    bindGraphModalControls,
+    bindGraphControls,
     renderGraphTo,
     applyGraphTogglePrefsForMethod,
     setGraphTogglePrefs,

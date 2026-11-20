@@ -874,7 +874,6 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             persistOnboardingSeen: () => markOnboardingSeen(),
             closeModal: (...args) => closeModal(...args),
             closeCardGraphModal: (...args) => closeCardGraphModal(...args),
-            closeGraphModal: (...args) => closeGraphModal(...args),
             closeCoffeeCard: (...args) => closeCoffeeCard(...args),
             closeStats: (...args) => closeStats(...args),
             closeImportExportModal: (...args) => closeImportExportModal(...args),
@@ -910,7 +909,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
         let graphModalsMountPromise = null;
         const ensureGraphModalsMounted = async () => {
             if (typeof document === 'undefined') return false;
-            if (document.getElementById('graphModal') && document.getElementById('cardGraphModal')) return true;
+            if (document.getElementById('cardGraphModal')) return true;
             if (!graphModalsMountPromise) {
                 graphModalsMountPromise = (async () => {
                     const mountTarget = document.getElementById('graphModalsMount');
@@ -1179,7 +1178,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             renderScaWheel,
             addScaToNotes,
             resetSca,
-            setTempMode,
+            stepTemp,
             updateCoffeeDetailsTitle,
             setCoffeeDetailsCollapsed,
             toggleCoffeeDetails,
@@ -1318,8 +1317,6 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
         const deletePhoto = (...args) => ensureGalleryModule().then((module) => module.deletePhoto(...args));
 
         const {
-            openGraphModal,
-            closeGraphModal,
             openScaWheelLightbox,
             openLightbox,
             closeLightbox,
@@ -1329,25 +1326,25 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             initLightboxListeners
         } = createMediaModalsModule({
             ensureMediaModalsMounted,
-            ensureGraphModalsMounted: (...args) => ensureGraphModalsMounted(...args),
-            syncDeviceIndicators: () => ensureDevicesFeature().then((f) => f.syncAllDeviceIndicators?.()),
-            ensureGraphScaleBindings: async () => {
-                await ensureScalesFeature();
-                coffeeScale?.bindGraphModalControls?.();
-                coffeeScale?.syncGraphFormFields?.();
-                coffeeScale?.applyGraphTogglePrefsForMethod?.();
-            },
-            promptScaleConnectIfEmpty: async () => {
-                await ensureScalesFeature();
-                if (coffeeScale?.getCaptureData?.()) return;
-                if (coffeeScale?.isConnected?.()) return;
-                const { DeviceManager } = await import('../../features/devices/device-manager.js');
-                if (DeviceManager.isConnected('scale') || DeviceManager.isConnected('scale2')) return;
-                await openConnectDevicesModal();
-            },
-            dispatchCommand: (commandName, payload) =>
-                appCommands?.dispatch?.(commandName, payload, { source: 'media.modals' })
         });
+
+        // The brew graph lives in the Extraction section of the brew form. Repeat with "Jump to graph
+        // after repeat" scrolls to it and, when it is empty and no scale is connected, opens Connect
+        // Devices and starts scale 1 (the Repeat click still counts as the user gesture Bluetooth needs).
+        const showBrewGraph = async () => {
+            await ensureScalesFeature();
+            const panel = document.getElementById('brewGraphPanel');
+            if (!panel) return;
+            panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            requestAnimationFrame(() => {
+                void appCommands?.dispatch?.('scales.renderGraph', { canvasId: 'graph' }, { source: 'brews.graph' });
+            });
+            if (coffeeScale?.getCaptureData?.()) return;
+            if (coffeeScale?.isConnected?.()) return;
+            const { DeviceManager } = await import('../../features/devices/device-manager.js');
+            if (DeviceManager.isConnected('scale') || DeviceManager.isConnected('scale2')) return;
+            await openConnectDevicesModal({ autoConnectScale: true });
+        };
 
         // --- Statistics Logic ---
         let statsModulePromise = null;
@@ -1622,7 +1619,6 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             resetFormState
         } = createBrewsCoordinator({
             formDeps: {
-                setTempMode,
                 setRating,
                 setNotesMode,
                 getCoffeeScale: () => coffeeScale,
@@ -1643,7 +1639,6 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 brewsRepo,
                 openAppConfirm,
                 parseNum,
-                setTempMode,
                 setNotesMode,
                 resetSca,
                 setRating,
@@ -1663,7 +1658,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 showToast,
                 getPinnedBrewsPreferences: () => getPinnedBrewsPreferencesState(),
                 openBrewFormModal: dispatchBrewOpenForm,
-                openGraphModal: () => openGraphModal(),
+                showBrewGraph: () => showBrewGraph(),
                 ensureBrewsFormModalMounted: () => ensureBrewsFormModalMounted(),
                 addBeanToLocalState: (bean) => setBeansState([...getBeansState(), bean])
             },
@@ -1874,8 +1869,9 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 .then(() => ensureScalesMounted())
                 .then(() => ensureScalesFeature())
                 .then(() => {
-                    // Re-bind brew form buttons in case scales was initialised before the form was mounted
+                    // Re-bind brew form buttons and graph controls in case scales was initialised before the form was mounted
                     coffeeScale?.bindBrewFormControls?.();
+                    coffeeScale?.bindGraphControls?.();
                 })
                 .then(() => openBrewFormModalImpl(...args));
 
@@ -2017,7 +2013,6 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             closeGasCard,
             closeGasList,
             closeGasMergeModal,
-            closeGraphModal,
             closeHelp,
             closeImportExportModal,
             closeImportModal,
@@ -2134,7 +2129,6 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             openGasMergeModal,
             openGasPhoto,
             openGasQuickFilterValues,
-            openGraphModal,
             openHelp,
             openScaWheelLightbox,
             openImportExportModal,
@@ -2189,7 +2183,7 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             setLabResultCustomGraphRenderMode,
             setNotesMode,
             setRating,
-            setTempMode,
+            stepTemp,
             startLabResultBrewLongPress,
             showBeanForBrew,
             showBeansForCoffeeType,
