@@ -60,6 +60,12 @@
         th.filterable { position: relative; cursor: context-menu; touch-action: manipulation; }
         
         #filterDropdown, #mainMenuDropdown, #aiMenuDropdown, .action-menu { z-index: 50; animation: fadeIn 0.1s ease-out; }
+        /* Main menu: larger items and text (phones turn it into a drawer, see the mobile block). */
+        .app-menu-title { display: none; }
+        #mainMenuDropdown { width: 16rem; }
+        #mainMenuDropdown > button { padding: 0.625rem 1.25rem; font-size: 1rem; gap: 0.75rem; }
+        #mainMenuDropdown > button > div { gap: 0.75rem; }
+        #mainMenuDropdown > button i { width: 1.25rem; font-size: 1.0625rem; }
         #modalOverlay, #statsPage, #imageModalOverlay, #coffeeCardOverlay, #uploadPhotoModal, #galleryModal, #easterEggModal, #preferencesModal, #coffeeScaleModal, #connectScaleModal, #exportModal, #helpModal, #aboutModal, #beansPage, #beanCardOverlay { animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         .chevron-rotate { transition: transform 0.3s ease; }
@@ -703,10 +709,83 @@
                 box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
                 color: #ffffff;
             }
-            #mainMenuDropdown {
+            /* Main menu as a drawer from the left that pushes the whole page to the right.
+               The drawer lives inside the fixed header and sits just left of it
+               (translateX(-100%)); shifting the header slides the drawer into view, and
+               main, the bottom bar and the add button move along by the same amount. */
+            :root { --app-menu-width: min(82vw, 22rem); }
+            .app-header,
+            main,
+            .app-bottom-nav,
+            .app-fab {
+                transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+            }
+            .app-header { transform: translateX(0); }
+            html.main-menu-open,
+            html.main-menu-open body { overflow: hidden; }
+            html.main-menu-open .app-header,
+            html.main-menu-open main,
+            html.main-menu-open .app-bottom-nav,
+            html.main-menu-open .app-fab {
+                transform: translateX(var(--app-menu-width));
+            }
+            body::after {
+                content: '';
+                position: fixed;
+                inset: 0;
+                z-index: 59;
+                background-color: rgba(0, 0, 0, 0.45);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+            html.main-menu-open body::after { opacity: 1; pointer-events: auto; }
+            html.main-menu-open .app-header-title,
+            html.main-menu-open #authContainer,
+            html.main-menu-open #mainMenuBtn { opacity: 0.4; transition: opacity 0.3s ease; }
+            #mainMenuDropdown,
+            #mainMenuDropdown.hidden {
+                display: flex !important; /* stays rendered off screen so it can slide */
+                flex-direction: column;
+                position: fixed;
+                top: 0;
                 left: 0;
                 right: auto;
+                width: var(--app-menu-width);
+                height: 100vh;
+                height: 100dvh;
+                margin: 0;
+                padding: calc(env(safe-area-inset-top, 0px) + 1.25rem) 0.75rem calc(env(safe-area-inset-bottom, 0px) + 1.5rem);
+                overflow-y: auto;
+                transform: translateX(-100%);
+                border-width: 0 1px 0 0;
+                border-radius: 0;
+                box-shadow: none;
+                animation: none;
+                visibility: visible;
+                transition: visibility 0s;
             }
+            #mainMenuDropdown.hidden {
+                visibility: hidden;
+                transition: visibility 0s linear 0.3s;
+            }
+            .app-menu-title {
+                display: block;
+                padding: 0.5rem 1rem 1.25rem;
+                font-size: 1.875rem;
+                font-weight: 700;
+                color: #2b211b;
+            }
+            .dark .app-menu-title { color: #ffffff; }
+            #mainMenuDropdown > button {
+                padding: 0.875rem 1rem;
+                font-size: 1.25rem;
+                border-radius: 0.875rem;
+                gap: 1rem;
+            }
+            #mainMenuDropdown > button > div { gap: 1rem; }
+            #mainMenuDropdown > button i { width: 1.75rem; font-size: 1.25rem; }
+            #mainMenuDropdown > hr { margin: 0.5rem 1rem; }
             #authContainer img {
                 width: 2.75rem;
                 height: 2.75rem;

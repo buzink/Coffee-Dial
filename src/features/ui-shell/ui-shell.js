@@ -35,6 +35,8 @@ export const createUiShellModule = ({
         const dropdown = getMainMenuDropdown();
         if (!dropdown) return;
         dropdown.classList.toggle('hidden', !isOpen);
+        // Phones: the menu is a drawer from the left that pushes the page to the right (app.css).
+        document.documentElement.classList.toggle('main-menu-open', isOpen);
         setMainMenuButtonActive(isOpen);
         if (!isOpen) getMainMenuBtn()?.blur();
     };
