@@ -191,7 +191,17 @@
         .temp-input { -moz-appearance: textfield; appearance: textfield; }
         .temp-input::-webkit-inner-spin-button,
         .temp-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        .temp-step-btn { width: 2.5rem; height: 2.375rem; flex-shrink: 0; }
+        .temp-step-btn { width: 2.75rem; height: 2.75rem; flex-shrink: 0; }
+        /* Brew form fields are 44px high, so they are easy to tap on a phone. */
+        #brewFormModal select,
+        #brewFormModal input:is(.py-2, .py-1\.5),
+        #brewGearControl,
+        .graph-toggle-row { min-height: 2.75rem; }
+        #aiScanBtn { height: 2.75rem; }
+        #flow { min-height: 2.75rem; display: flex; align-items: center; }
+        /* Each rating star is a 44px tap target; the row shifts left so the first star stays in line with the label. */
+        #starContainer { margin-left: -0.5rem; }
+        #starContainer i { width: 2.75rem; height: 2.75rem; display: flex; align-items: center; justify-content: center; }
         /* On narrow screens Extraction is one column, except Time and Flow, which share a row. */
         @media (max-width: 767px) {
             #extractionBody { grid-template-columns: repeat(2, minmax(0, 1fr)); }
