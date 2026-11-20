@@ -370,6 +370,36 @@
         .app-card:has(.app-card-edit:not(.hidden)) .app-card-title-block { display: none; }
         [data-adding] .app-when-editing { display: none; }
         [data-adding] .app-when-adding { display: inline; }
+
+        /* Item cards (brew, bag, coffee, gear) keep the same layout from item to item, so
+           nothing jumps while paging with the arrows: the title always takes two lines (a
+           longer one ends in an ellipsis), subtitle and rating always keep their line, the
+           brew card's stats header keeps room for the graph button, and on desktop the card
+           has one fixed height with its body scrolling inside (mobile is full screen). */
+        /* A little more air between the icon row (back, type, actions) and the title. */
+        .app-card .app-card-title-block { margin-top: 0.5rem; }
+        .app-card .app-card-title-block > div:first-child > h3 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            overflow: hidden;
+            overflow-wrap: anywhere;
+            min-height: calc(2em * 1.25);
+        }
+        .app-card .app-card-title-block > p {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 1rem;
+        }
+        #cardRating { min-height: 1.25rem; }
+        #coffeeTypeCardRating { min-height: 1rem; }
+        #cardStatsSection > :first-child { min-height: 2.75rem; }
+        .app-card [id$="CardView"] > .overflow-y-auto { flex: 1 1 auto; min-height: 0; }
+        @media (min-width: 640px) {
+            .app-card .app-sheet-panel { height: 90vh; }
+        }
         /* Brews, bags, coffees and gear pages: the filter/search bar (.app-table-tools) and the
            list (.app-table-body) used to share one framed box (.app-table-frame).
            Mobile (card rows, below 768px like the tables' own switch): no frame at all; the
