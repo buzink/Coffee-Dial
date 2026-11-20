@@ -1,3 +1,4 @@
+import { bindRowOpen } from '../../core/row-open.js';
 import { formatCoffeeCellHtml, formatCoffeeLabel, formatCoffeeTypeOption } from '../../core/coffee-display.js';
 import {
     BEAN_FIELD_FILTERS,
@@ -738,7 +739,7 @@ export const createBeansTableModule = ({
             const tr = document.createElement('tr');
             tr.setAttribute('data-id', bean.id);
             tr.className = 'bg-white dark:bg-[#292524] border-b border-coffee-50 dark:border-[#34302e] hover:bg-coffee-50 dark:hover:bg-[#1c1917] transition-colors';
-            tr.ondblclick = (e) => openBeanCardViaCommand(bean.id, e);
+            bindRowOpen(tr, (e) => openBeanCardViaCommand(bean.id, e));
             tr.innerHTML = `
                 <td class="px-4 py-3 font-medium text-coffee-900 dark:text-white">${formatCoffeeCellHtml({ ...coffeeDisplay, roaster })}</td>
                 <td class="px-4 py-3 text-center">${getRoastBadge(coffeeDisplay.roastType)}</td>

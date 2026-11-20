@@ -1,3 +1,4 @@
+import { bindRowOpen } from '../../core/row-open.js';
 import { formatCoffeeLabel } from '../../core/coffee-display.js';
 import { createCoffeesVmModule } from './coffees.vm.js';
 import {
@@ -696,7 +697,7 @@ export const createCoffeeTypesTableModule = ({
             const row = document.createElement('tr');
             row.setAttribute('data-id', type.id);
             row.className = 'bg-white dark:bg-[#292524] border-b border-coffee-100 dark:border-[#44403c] last:border-b-0';
-            row.ondblclick = (event) => dispatchCommand('coffees.openCard', { id: type.id, event });
+            bindRowOpen(row, (event) => dispatchCommand('coffees.openCard', { id: type.id, event }));
             row.innerHTML = `
                 <td class="px-4 py-3 text-sm font-medium">${name}</td>
                 <td class="px-4 py-3 text-sm">${farmer}</td>

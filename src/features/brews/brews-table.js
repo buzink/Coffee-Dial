@@ -1,3 +1,4 @@
+import { bindRowOpen } from '../../core/row-open.js';
 import { formatCoffeeLabel, formatCoffeeTypeOption } from '../../core/coffee-display.js';
 import { createBrewsVmModule } from './brews.vm.js';
 import { getBrewGrinderName } from '../../core/brew-fields.js';
@@ -845,7 +846,7 @@ export const createBrewsTableModule = ({
 
         const row = document.createElement('tr');
         row.className = 'bg-white dark:bg-[#292524] hover:bg-coffee-50 dark:hover:bg-[#1c1917] border-b border-coffee-100 dark:border-[#44403c] last:border-b-0 cursor-pointer';
-        row.ondblclick = (e) => openBrewCard(brew.id, e);
+        bindRowOpen(row, (e) => openBrewCard(brew.id, e));
         row.setAttribute('data-id', brew.id);
         row.innerHTML = rowHtml;
         return row;
