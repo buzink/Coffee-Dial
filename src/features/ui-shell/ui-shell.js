@@ -248,6 +248,7 @@ export const createUiShellModule = ({
         if (hasRegisteredGlobalCloseHandler) return;
         hasRegisteredGlobalCloseHandler = true;
         document.addEventListener('click', closeMenus);
+        document.addEventListener('click', delayMenuDialogUntilDrawerClosed, true);
 
         if (hasRegisteredModalGuardHandlers) return;
         hasRegisteredModalGuardHandlers = true;
@@ -381,8 +382,28 @@ export const createUiShellModule = ({
         if (e) e.stopPropagation();
         const dropdown = getMainMenuDropdown();
         if (!dropdown) return;
-        const willOpen = dropdown.classList.contains('hidden');
+        // Menu items call toggleMainMenu(null) after their action: that only ever closes.
+        const willOpen = !!e && dropdown.classList.contains('hidden');
         setMainMenuOpen(willOpen);
+    };
+
+    // Phones: a menu item that opens a dialog (data-menu-dialog) first lets the drawer
+    // slide shut at the same speed it opened, then runs its action; otherwise the
+    // full-screen dialog would cover the drawer at once.
+    const MENU_DRAWER_MS = 300;
+    const delayMenuDialogUntilDrawerClosed = (event) => {
+        const item = event.target.closest?.('#mainMenuDropdown [data-menu-dialog]');
+        if (!item || item.dataset.menuDrawerClosed === 'true') return;
+        if (!document.documentElement.classList.contains('main-menu-open')) return;
+        if (!window.matchMedia('(max-width: 639px)').matches) return;
+        event.preventDefault();
+        event.stopPropagation();
+        setMainMenuOpen(false);
+        window.setTimeout(() => {
+            item.dataset.menuDrawerClosed = 'true';
+            item.click();
+            delete item.dataset.menuDrawerClosed;
+        }, MENU_DRAWER_MS);
     };
 
     const handleEscapeKey = (event) => {
