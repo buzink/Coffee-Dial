@@ -103,6 +103,9 @@
         /* Toggle Switch */
         .toggle-checkbox:checked { right: 0; border-color: #68D391; }
         .toggle-checkbox:checked + .toggle-label { background-color: #68D391; }
+        /* Each switch has a 44x44px tap area: the track gets invisible padding that the negative margin takes back out of the layout. */
+        :has(> .toggle-checkbox) { flex-shrink: 0; }
+        .toggle-label { box-sizing: content-box; padding: 0.75rem 0.125rem; margin: -0.75rem -0.125rem; background-clip: content-box; }
 
         /* AI Loading and Flash Animations */
         .ai-loading-pulse { animation: ai-pulse 1.5s infinite; }
@@ -192,12 +195,27 @@
         .temp-input::-webkit-inner-spin-button,
         .temp-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         .temp-step-btn { width: 2.75rem; height: 2.75rem; flex-shrink: 0; }
-        /* Brew form fields are 44px high, so they are easy to tap on a phone. */
-        #brewFormModal select,
-        #brewFormModal input:is(.py-2, .py-1\.5),
-        #brewGearControl,
+        /* Every input field in the app is at least 44px high, so it is easy to tap on a phone.
+           Bare inputs inside a multi-select box (border-0) leave the height to their box. */
+        select,
+        textarea,
+        input:not([type=checkbox], [type=radio], [type=range], [type=file], [type=hidden], [type=color], .border-0),
+        div:has(> input.border-0),
         .graph-toggle-row { min-height: 2.75rem; }
+        /* A label (or a label row) right above an input field keeps 4px from it. */
+        :is(label, div:has(> label)):not([class*="space-y-"] > *):has(+ :is(input:not([type=checkbox], [type=radio], [type=hidden]), select, textarea, div:has(> input.border-0))) { margin-bottom: 0.25rem; }
+        [class*="space-y-"][class*="space-y-"] > :is(label, div:has(> label)) + :is(input:not([type=checkbox], [type=radio], [type=hidden]), select, textarea) { margin-top: 0.25rem; }
         #aiScanBtn { height: 2.75rem; }
+        /* Cancel/Save rows under edit forms and dialogs: buttons are 44px high. */
+        .justify-end > button.py-1\.5 { min-height: 2.75rem; min-width: 2.75rem; padding-inline: 1rem; }
+        /* Small buttons that keep their look get an invisible tap area of at least 44x44px around them. */
+        #savedBeanEditBtn, #beanEditCoffeeTypeEditBtn, #btnNotesManual, #btnNotesSCA,
+        [data-action-click="openScaWheelLightbox()"], [aria-label="Remove gear"] { position: relative; }
+        #savedBeanEditBtn::after, #beanEditCoffeeTypeEditBtn::after { content: ''; position: absolute; inset: -0.125rem -0.375rem; }
+        #btnNotesManual::after, #btnNotesSCA::after { content: ''; position: absolute; inset: -0.8125rem -0.25rem; }
+        [data-action-click="openScaWheelLightbox()"]::after { content: ''; position: absolute; inset: -0.875rem 0; }
+        /* The x on a chosen gear chip: the tap area reaches back over its own chip, which has no other action. */
+        [aria-label="Remove gear"]::after { content: ''; position: absolute; top: 50%; right: -0.375rem; width: 2.75rem; height: 2.75rem; transform: translateY(-50%); }
         #flow { min-height: 2.75rem; display: flex; align-items: center; }
         /* Each rating star is a 44px tap target; the row shifts left so the first star stays in line with the label. */
         #starContainer { margin-left: -0.5rem; }
