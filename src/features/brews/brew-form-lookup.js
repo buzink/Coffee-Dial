@@ -1,3 +1,4 @@
+import { buildBagOptionsHtml } from './bag-options.js';
 import { formatOriginLabel } from '../../core/origin-regions.js';
 import { isGrinderGear } from '../../core/brew-fields.js';
 import { formatCoffeeLabel } from '../../core/coffee-display.js';
@@ -19,9 +20,12 @@ export const createBrewFormLookupModule = ({
         });
     };
 
-    const updateBeanDropdown = ({ includeAll = false } = {}) => {
+    // While a brew is being edited every bag can be chosen, grouped by Open/Frozen/Finished;
+    // live updates during the edit keep that full list. A new brew only offers open bags.
+    const updateBeanDropdown = ({ includeAll } = {}) => {
         const select = document.getElementById('savedBeanSelect');
         if (!select) return;
+        const showAll = includeAll ?? Boolean(document.getElementById('formContainer')?.classList.contains('editing-mode'));
 
         const formatRoastDate = (value) => {
             if (!value) return '';
@@ -32,40 +36,23 @@ export const createBrewFormLookupModule = ({
             const yy = String(dateObj.getFullYear()).slice(-2);
             return `${dd}-${mm}-${yy}`;
         };
-
-        const currentValue = select.value;
-        select.innerHTML = '<option value="">-- create new bag and coffee --</option>';
-        const getOpenedAtMs = (bean) => {
-            const raw = bean?.openedDate;
-            if (!raw) return Number.NEGATIVE_INFINITY;
-            const dateObj = typeof raw.toDate === 'function' ? raw.toDate() : new Date(raw);
-            const ms = dateObj instanceof Date ? dateObj.getTime() : NaN;
-            return Number.isFinite(ms) ? ms : Number.NEGATIVE_INFINITY;
+        const getLabel = (bean) => {
+            const display = getBeanCoffeeTypeDisplay(bean);
+            const roaster = display.roaster !== '-' ? display.roaster : 'Unknown';
+            const coffee = formatCoffeeLabel(display, '');
+            const farmer = coffee ? ` - ${coffee}` : '';
+            const roastDate = formatRoastDate(bean.openedDate);
+            const roastDateLabel = roastDate ? ` (${roastDate})` : '';
+            return `${roaster}${farmer}${roastDateLabel}`;
         };
 
-        getBeans()
-            .filter((bean) => includeAll || (!bean.archived && !bean.frozen))
-            .sort((a, b) => {
-                const openedDelta = getOpenedAtMs(b) - getOpenedAtMs(a);
-                if (openedDelta !== 0) return openedDelta;
-                const aDisplay = getBeanCoffeeTypeDisplay(a);
-                const bDisplay = getBeanCoffeeTypeDisplay(b);
-                const aLabel = `${aDisplay.roaster || ''}${aDisplay.farmer || ''}`.toLowerCase();
-                const bLabel = `${bDisplay.roaster || ''}${bDisplay.farmer || ''}`.toLowerCase();
-                return aLabel.localeCompare(bLabel);
-            })
-            .forEach((bean) => {
-                const option = document.createElement('option');
-                option.value = bean.id;
-                const display = getBeanCoffeeTypeDisplay(bean);
-                const roaster = display.roaster !== '-' ? display.roaster : 'Unknown';
-                const coffee = formatCoffeeLabel(display, '');
-                const farmer = coffee ? ` - ${coffee}` : '';
-                const roastDate = formatRoastDate(bean.openedDate);
-                const roastDateLabel = roastDate ? ` (${roastDate})` : '';
-                option.text = `${roaster}${farmer}${roastDateLabel}`;
-                select.appendChild(option);
-            });
+        const currentValue = select.value;
+        select.innerHTML = buildBagOptionsHtml({
+            beans: getBeans().filter((bean) => showAll || (!bean.archived && !bean.frozen)),
+            getLabel,
+            emptyLabel: '-- create new bag and coffee --',
+            grouped: showAll
+        });
 
         if (currentValue) {
             const existing = [...select.options].some((opt) => opt.value === currentValue);

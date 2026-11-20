@@ -1,3 +1,4 @@
+import { buildBagOptionsHtml } from './bag-options.js';
 import { createBrewsVmModule } from './brews.vm.js';
 import { getBrewGrinderName } from '../../core/brew-fields.js';
 import { createBrewGrinderGearSyncModule } from './brew-grinder-gear-sync.js';
@@ -237,25 +238,7 @@ export const createBrewsCardActionsModule = ({
     const populateBrewQuickEditBeanOptions = (selectedBeanId = '') => {
         const select = document.getElementById('quickEditBeanId');
         if (!select) return;
-        const getOpenedAtMs = (bean) => {
-            const raw = bean?.openedDate;
-            if (!raw) return Number.NEGATIVE_INFINITY;
-            const dateObj = typeof raw.toDate === 'function' ? raw.toDate() : new Date(raw);
-            const ms = dateObj instanceof Date ? dateObj.getTime() : NaN;
-            return Number.isFinite(ms) ? ms : Number.NEGATIVE_INFINITY;
-        };
-        let options = '<option value="">-- no bag --</option>';
-        const beanOptions = [...getBeans()]
-            .sort((a, b) => {
-                const openedDelta = getOpenedAtMs(b) - getOpenedAtMs(a);
-                if (openedDelta !== 0) return openedDelta;
-                return getBeanLabelForBrew(a).toLowerCase().localeCompare(getBeanLabelForBrew(b).toLowerCase());
-            })
-            .map((bean) => {
-                const selected = bean.id === selectedBeanId ? 'selected' : '';
-                return `<option value="${bean.id}" ${selected}>${getBeanLabelForBrew(bean)}</option>`;
-            });
-        select.innerHTML = options + beanOptions.join('');
+        select.innerHTML = buildBagOptionsHtml({ beans: getBeans(), getLabel: getBeanLabelForBrew, emptyLabel: '-- no bag --' });
         select.value = selectedBeanId || '';
     };
 

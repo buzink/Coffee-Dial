@@ -826,7 +826,15 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             renderPinnedTiles: (...args) => renderPinnedTiles(...args),
             renderTable: (...args) => renderTable(...args),
             updateAutocompleteLists: (...args) => updateAutocompleteLists(...args),
-            updateBeanDropdown: (...args) => updateBeanDropdown(...args),
+            updateBeanDropdown: (...args) => {
+                updateBeanDropdown(...args);
+                // Bags can arrive after a brew card was put in edit mode (stale startup cache,
+                // a bag made on another device); refresh its bag list without losing the choice.
+                const quickEditSelect = document.getElementById('quickEditBeanId');
+                if (quickEditSelect && !document.getElementById('coffeeCardQuickEdit')?.classList.contains('hidden')) {
+                    populateBrewQuickEditBeanOptions(quickEditSelect.value);
+                }
+            },
             renderBeansTable: (...args) => renderBeansTable(...args),
             updateCoffeeTypeSelectors: (...args) => updateCoffeeTypeSelectors(...args),
             renderCoffeeTypesTable: (...args) => renderCoffeeTypesTable(...args),

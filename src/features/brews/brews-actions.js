@@ -1,3 +1,4 @@
+import { buildBagOptionsHtml } from './bag-options.js';
 import { createBrewsVmModule } from './brews.vm.js';
 import { withDetectedDecaf } from '../../core/coffee-decaf.js';
 import { formatCoffeeLabel } from '../../core/coffee-display.js';
@@ -308,7 +309,7 @@ export const createBrewsActionsModule = ({
             }
         }
 
-        updateBeanDropdown();
+        updateBeanDropdown({ includeAll: false });
 
         const shouldUseNewBeanForRepeat = () => {
             if (title !== 'Repeat brew') return false;
@@ -368,7 +369,7 @@ export const createBrewsActionsModule = ({
     const showFriendRepeatInForm = async ({ brew, title }) => {
         await ensureBrewsFormModalMounted?.();
         closeAllActionMenus();
-        updateBeanDropdown();
+        updateBeanDropdown({ includeAll: false });
         setBrewGearScope({ includeAll: false });
         const d = stripBrewGraphFields(brew);
         const clearRepeatOnlyFields = () => {
@@ -427,7 +428,7 @@ export const createBrewsActionsModule = ({
         document.getElementById('submitBtn').innerHTML = '<span>Save brew</span>';
         document.getElementById('submitBtn').className =
             'bg-coffee-700 hover:bg-coffee-800 dark:bg-[#57534e] dark:hover:bg-[#44403c] text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all flex items-center gap-2';
-        updateBeanDropdown();
+        updateBeanDropdown({ includeAll: false });
         setCoffeeTypeFieldsLocked(false);
         const beanSelect = document.getElementById('savedBeanSelect');
         if (beanSelect) beanSelect.value = '';
@@ -748,28 +749,7 @@ export const createBrewsActionsModule = ({
     const populateBrewQuickEditBeanOptions = (selectedBeanId = '') => {
         const select = document.getElementById('quickEditBeanId');
         if (!select) return;
-        const getOpenedAtMs = (bean) => {
-            const raw = bean?.openedDate;
-            if (!raw) return Number.NEGATIVE_INFINITY;
-            const dateObj = typeof raw.toDate === 'function' ? raw.toDate() : new Date(raw);
-            const ms = dateObj instanceof Date ? dateObj.getTime() : NaN;
-            return Number.isFinite(ms) ? ms : Number.NEGATIVE_INFINITY;
-        };
-        const beans = getBeans();
-        let options = '<option value="">-- no bag --</option>';
-        const beanOptions = [...beans]
-            .sort((a, b) => {
-                const openedDelta = getOpenedAtMs(b) - getOpenedAtMs(a);
-                if (openedDelta !== 0) return openedDelta;
-                const aLabel = getBeanLabelForBrew(a).toLowerCase();
-                const bLabel = getBeanLabelForBrew(b).toLowerCase();
-                return aLabel.localeCompare(bLabel);
-            })
-            .map((bean) => {
-                const selected = bean.id === selectedBeanId ? 'selected' : '';
-                return `<option value="${bean.id}" ${selected}>${getBeanLabelForBrew(bean)}</option>`;
-            });
-        select.innerHTML = options + beanOptions.join('');
+        select.innerHTML = buildBagOptionsHtml({ beans: getBeans(), getLabel: getBeanLabelForBrew, emptyLabel: '-- no bag --' });
         select.value = selectedBeanId || '';
     };
 
