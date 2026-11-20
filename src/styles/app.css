@@ -208,6 +208,10 @@
             padding: 0 1rem;
         }
         #cardGraphEmpty.hidden { display: none; }
+        /* Date and arrows are the dialog's last row: on a full-screen phone sheet the body
+           grows, so they sit at the bottom of the screen. */
+        .card-graph-body { flex: 1 0 auto; }
+        .card-graph-footer { flex-shrink: 0; }
         /* The brew's name below the graph always takes two lines, and never more. */
         #cardGraphSubtitle {
             line-height: 1rem;

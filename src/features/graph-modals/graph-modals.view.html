@@ -8,7 +8,7 @@
                     <span>Brew Graph</span>
                 </h3>
             </div>
-            <div class="p-4 bg-coffee-50/50 dark:bg-[#1c1917]">
+            <div class="card-graph-body p-4 bg-coffee-50/50 dark:bg-[#1c1917]">
                 <div class="card-graph-frame bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg p-2">
                     <canvas id="cardGraphCanvas" class="w-full h-52"></canvas>
                     <div id="cardGraphEmpty" class="hidden text-xs text-center text-coffee-400 dark:text-[#78716c]">No graph data for this brew.</div>
@@ -46,16 +46,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center justify-between mt-3 text-xs text-coffee-400 dark:text-[#57534e]">
-                    <span id="cardGraphDate"></span>
-                    <div class="flex justify-end gap-2">
-                        <button id="cardGraphPrevBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Previous" data-action-click="navigateCoffeeCardFromGraph(-1)">
-                            <i class="fa-solid fa-arrow-left"></i>
-                        </button>
-                        <button id="cardGraphNextBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Next" data-action-click="navigateCoffeeCardFromGraph(1)">
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </button>
-                    </div>
+            </div>
+            <div class="card-graph-footer flex items-center justify-between p-4 text-xs text-coffee-400 dark:text-[#57534e]">
+                <span id="cardGraphDate"></span>
+                <div class="flex justify-end gap-2">
+                    <button id="cardGraphPrevBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Previous" data-action-click="navigateCoffeeCardFromGraph(-1)">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <button id="cardGraphNextBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Next" data-action-click="navigateCoffeeCardFromGraph(1)">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
                 </div>
             </div>
         </div>
