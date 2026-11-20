@@ -412,13 +412,16 @@
         }
         .dark .app-fab { color: #ffffff; }
 
-        /* Cards in edit mode show "Edit <type>" with the type's icon instead of the item's
-           name. Adding a new bean, coffee or gear item ([data-adding], see draft-items.js)
-           shows "Add <type>", Discard and "Save <type>" instead. */
-        .app-card-mode-title,
+        /* Cards in edit mode show only the type in the icon row, without the item's name.
+           The only way out is Cancel or Save: no back button, no X, no icon capsule (it
+           stays while adding, for Extract). visibility keeps the type centred.
+           Adding a new bean, coffee or gear item ([data-adding], see draft-items.js)
+           shows Discard and "Save <type>" instead of Cancel and Save. */
         .app-when-adding { display: none; }
-        .app-card:has(.app-card-edit:not(.hidden)) .app-card-mode-title { display: flex; }
         .app-card:has(.app-card-edit:not(.hidden)) .app-card-title-block { display: none; }
+        .app-card:has(.app-card-edit:not(.hidden)) .app-sheet-back,
+        .app-card:has(.app-card-edit:not(.hidden)):not([data-adding]) .app-sheet-actions { visibility: hidden; }
+        .app-card:has(.app-card-edit:not(.hidden)) .app-sheet-close { display: none; }
         [data-adding] .app-when-editing { display: none; }
         [data-adding] .app-when-adding { display: inline; }
 

@@ -10,6 +10,8 @@
 
 const RECENT_CLOSE_MS = 3000;
 
+export const isEditingCard = (overlay) => !!overlay?.querySelector?.('.app-card-edit:not(.hidden)');
+
 export const createCardRouting = ({
     cards,
     getCurrentPageKey,
@@ -104,6 +106,12 @@ export const createCardRouting = ({
 
     // Capture phase: the card panels stop click propagation for their own menus.
     document.addEventListener('click', (event) => {
+        // While a card's edit form is open, Cancel and Save are the only way out: a click
+        // on the dimmed backdrop does not close it.
+        if (event.target?.classList?.contains('app-card') && isEditingCard(event.target)) {
+            event.stopPropagation();
+            return;
+        }
         const button = event.target?.closest?.('[data-card-back], [data-card-close]');
         if (!button) return;
         const card = cardByOverlayId.get(button.closest('.app-card')?.id);

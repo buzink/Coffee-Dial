@@ -418,6 +418,8 @@ export const createUiShellModule = ({
         ) {
             return;
         }
+        // A card's edit form only closes with Cancel or Save.
+        if (document.querySelector('.app-card:not(.hidden) .app-card-edit:not(.hidden)')) return;
 
         const closeIfVisible = (id, closeFn) => {
             const el = document.getElementById(id);

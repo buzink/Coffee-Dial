@@ -29,12 +29,13 @@ export const createBeansCardFormModule = ({
             'beanEditRoastType'
         ];
 
+        // The coffee's own fields can only be filled in for a new coffee; for an existing
+        // coffee they are hidden (they are edited on the coffee itself).
         fieldIds.forEach((id) => {
             const el = document.getElementById(id);
             if (!el) return;
             el.disabled = locked;
-            el.classList.toggle('cursor-not-allowed', locked);
-            el.classList.toggle('opacity-70', locked);
+            el.parentElement?.classList.toggle('hidden', locked);
         });
     };
 
