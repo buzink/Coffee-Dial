@@ -1,61 +1,63 @@
     <!-- Card Graph Modal -->
     <div id="cardGraphModal" class="app-sheet hidden fixed inset-0 z-[10001] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" data-action-click="closeCardGraphModal(event)">
-        <div class="app-sheet-panel bg-white dark:bg-[#292524] rounded-2xl shadow-2xl w-full max-w-lg border border-coffee-200 dark:border-[#44403c] flex flex-col" data-action-click="event.stopPropagation()">
-            <div class="app-sheet-head flex justify-between items-center p-4 border-b border-coffee-100 dark:border-[#44403c]">
-                <button type="button" data-action-click="closeCardGraphModal(event)" class="app-sheet-back" title="Back" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
-                <h3 class="app-sheet-type text-lg font-bold text-coffee-900 dark:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-coffee-700 dark:text-[#d6ccc2]"></i>
-                    <span>Brew Graph</span>
-                </h3>
-            </div>
-            <div class="card-graph-body p-4 bg-coffee-50/50 dark:bg-[#1c1917]">
-                <div class="card-graph-frame bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg p-2">
-                    <canvas id="cardGraphCanvas" class="w-full h-52"></canvas>
-                    <div id="cardGraphEmpty" class="hidden text-xs text-center text-coffee-400 dark:text-[#78716c]">No graph data for this brew.</div>
+        <div class="app-sheet-frame flex flex-col w-full max-w-lg">
+            <div class="app-sheet-panel bg-white dark:bg-[#292524] rounded-2xl shadow-2xl w-full max-w-lg border border-coffee-200 dark:border-[#44403c] flex flex-col" data-action-click="event.stopPropagation()">
+                <div class="app-sheet-head flex justify-between items-center p-4 border-b border-coffee-100 dark:border-[#44403c]">
+                    <button type="button" data-action-click="closeCardGraphModal(event)" class="app-sheet-back" title="Back" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h3 class="app-sheet-type text-lg font-bold text-coffee-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-coffee-700 dark:text-[#d6ccc2]"></i>
+                        <span>Brew Graph</span>
+                    </h3>
                 </div>
-                <div id="cardGraphSubtitle" class="text-xs text-coffee-600 dark:text-[#a8a29e] mt-3">&nbsp;</div>
-                <div class="bg-coffee-50/50 dark:bg-[#201d1b] p-3 rounded-lg border border-coffee-100 dark:border-[#44403c] mt-3">
-                    <div class="grid grid-cols-3 gap-2">
-                        <div>
-                            <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">In (g)</label>
-                            <input type="number" step="any" id="cardGraphInputWeight" readonly tabindex="-1" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-0 cursor-not-allowed" />
+                <div class="card-graph-body p-4 bg-coffee-50/50 dark:bg-[#1c1917]">
+                    <div class="card-graph-frame bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-lg p-2">
+                        <canvas id="cardGraphCanvas" class="w-full h-52"></canvas>
+                        <div id="cardGraphEmpty" class="hidden text-xs text-center text-coffee-400 dark:text-[#78716c]">No graph data for this brew.</div>
+                    </div>
+                    <div id="cardGraphSubtitle" class="text-xs text-coffee-600 dark:text-[#a8a29e] mt-3">&nbsp;</div>
+                    <div class="bg-coffee-50/50 dark:bg-[#201d1b] p-3 rounded-lg border border-coffee-100 dark:border-[#44403c] mt-3">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">In (g)</label>
+                                <input type="number" step="any" id="cardGraphInputWeight" readonly tabindex="-1" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-0 cursor-not-allowed" />
+                            </div>
+                            <div class="relative">
+                                <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Ratio</label>
+                                <div id="cardGraphInputRatio" class="w-full grid grid-cols-3 items-center text-center font-mono text-sm text-coffee-500 dark:text-[#78716c] py-1.5 select-none"><span>1</span><span>:</span><span></span></div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Out (g)</label>
+                                <input type="number" step="any" id="cardGraphInputYield" readonly tabindex="-1" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-0 cursor-not-allowed" />
+                            </div>
                         </div>
-                        <div class="relative">
-                            <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Ratio</label>
-                            <div id="cardGraphInputRatio" class="w-full grid grid-cols-3 items-center text-center font-mono text-sm text-coffee-500 dark:text-[#78716c] py-1.5 select-none"><span>1</span><span>:</span><span></span></div>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Out (g)</label>
-                            <input type="number" step="any" id="cardGraphInputYield" readonly tabindex="-1" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-0 cursor-not-allowed" />
+                    </div>
+                    <div class="bg-coffee-50/50 dark:bg-[#201d1b] p-3 rounded-lg border border-coffee-100 dark:border-[#44403c] mt-3">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">First drip</label>
+                                <input type="number" step="any" id="cardGraphFirstDrip" readonly tabindex="-1" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-0 cursor-not-allowed" />
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Max flow</label>
+                                <input type="number" step="any" id="cardGraphMaxFlow" readonly tabindex="-1" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-0 cursor-not-allowed" />
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Avg flow</label>
+                                <input type="number" step="any" id="cardGraphAvgFlow" readonly tabindex="-1" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-0 cursor-not-allowed" />
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="bg-coffee-50/50 dark:bg-[#201d1b] p-3 rounded-lg border border-coffee-100 dark:border-[#44403c] mt-3">
-                    <div class="grid grid-cols-3 gap-2">
-                        <div>
-                            <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">First drip</label>
-                            <input type="number" step="any" id="cardGraphFirstDrip" readonly tabindex="-1" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-0 cursor-not-allowed" />
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Max flow</label>
-                            <input type="number" step="any" id="cardGraphMaxFlow" readonly tabindex="-1" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-0 cursor-not-allowed" />
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Avg flow</label>
-                            <input type="number" step="any" id="cardGraphAvgFlow" readonly tabindex="-1" class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white focus:ring-0 cursor-not-allowed" />
-                        </div>
+                <div class="card-graph-footer flex items-center justify-between p-4 text-xs text-coffee-400 dark:text-[#57534e]">
+                    <span id="cardGraphDate"></span>
+                    <div class="flex justify-end gap-2">
+                        <button id="cardGraphPrevBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Previous" data-action-click="navigateCoffeeCardFromGraph(-1)">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <button id="cardGraphNextBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Next" data-action-click="navigateCoffeeCardFromGraph(1)">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
                     </div>
-                </div>
-            </div>
-            <div class="card-graph-footer flex items-center justify-between p-4 text-xs text-coffee-400 dark:text-[#57534e]">
-                <span id="cardGraphDate"></span>
-                <div class="flex justify-end gap-2">
-                    <button id="cardGraphPrevBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Previous" data-action-click="navigateCoffeeCardFromGraph(-1)">
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </button>
-                    <button id="cardGraphNextBtn" class="w-11 h-11 rounded-full border border-coffee-200 dark:border-[#44403c] text-coffee-600 dark:text-[#a8a29e] hover:bg-coffee-100 dark:hover:bg-[#34302e] transition-colors flex items-center justify-center" title="Next" data-action-click="navigateCoffeeCardFromGraph(1)">
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
                 </div>
             </div>
         </div>

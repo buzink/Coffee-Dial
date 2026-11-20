@@ -208,10 +208,14 @@
             padding: 0 1rem;
         }
         #cardGraphEmpty.hidden { display: none; }
-        /* Date and arrows are the dialog's last row: on a full-screen phone sheet the body
-           grows, so they sit at the bottom of the screen. */
-        .card-graph-body { flex: 1 0 auto; }
+        /* Built like the brew card: on a phone the sheet fills the screen, the body scrolls on
+           its own and the date and arrows stay pinned to the bottom. */
+        .card-graph-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
         .card-graph-footer { flex-shrink: 0; }
+        /* On desktop the graph sheet is as tall as the brew card's (.app-card, 90vh). */
+        @media (min-width: 640px) {
+            #cardGraphModal .app-sheet-panel { height: 90vh; }
+        }
         /* The brew's name below the graph always takes two lines, and never more. */
         #cardGraphSubtitle {
             line-height: 1rem;
