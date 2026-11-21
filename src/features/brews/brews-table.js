@@ -931,7 +931,7 @@ export const createBrewsTableModule = ({
         const headerDateTime = formatAccordionHeaderDateTime(brew.createdAt);
         const ratingValue = Number(brew.rating);
         const headerRatingHtml = ratingValue > 0
-            ? `<div class="mt-0.5 leading-none">${renderTinyHeaderStars(ratingValue)}</div>`
+            ? `<span class="inline-flex items-center leading-none whitespace-nowrap">${renderTinyHeaderStars(ratingValue)}</span>`
             : '';
         const cardVm = brewsVm.buildCardDisplayViewModel({ brew, coffeeType: typeDisplay, grinderName: getBrewGrinderName(brew, getGasItems()) });
         const graphVm = brewsVm.buildCardGraphData(brew);
@@ -1027,15 +1027,14 @@ export const createBrewsTableModule = ({
         row.className = 'relative bg-white dark:bg-[#292524] border-b border-coffee-100 dark:border-[#44403c] align-top';
         row.setAttribute('data-id', brew.id);
         row.innerHTML = `
-            <td colspan="99" class="relative overflow-visible px-2 py-1.5">
+            <td colspan="99" class="brew-mobile-cell relative overflow-visible px-2 py-1.5">
                 <div class="relative overflow-visible rounded-lg border border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917]">
                     <div role="button" tabindex="0" data-mobile-accordion-header="true" class="w-full text-left px-2 py-2 cursor-pointer">
                         <div class="flex items-start gap-2">
                             <div class="flex-shrink-0">${buildMobilePhotoHtml(brew)}</div>
                             <div class="min-w-0 flex-1">
-                                <div class="text-sm font-semibold text-coffee-900 dark:text-white truncate inline-flex items-center gap-1">${formatCoffeeLabel(typeDisplay)}${typeDisplay.decaf ? '<i class="fa-solid fa-moon text-[10px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>' : ''}</div>
+                                <div class="brew-mobile-title text-sm font-semibold text-coffee-900 dark:text-white">${formatCoffeeLabel(typeDisplay)}${typeDisplay.decaf ? ' <i class="fa-solid fa-moon text-[10px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>' : ''}</div>
                                 <div class="text-xs text-coffee-600 dark:text-[#a8a29e] truncate">${rowDisplay.displayRoaster || '-'}</div>
-                                ${headerRatingHtml}
                             </div>
                             <div class="ml-auto flex-shrink-0 self-start pl-1">
                                 <div data-action-click="event.stopPropagation()" class="relative z-20 flex items-center gap-2">
@@ -1044,8 +1043,9 @@ export const createBrewsTableModule = ({
                             </div>
                         </div>
                         <div class="mt-2 flex items-end justify-between gap-2">
-                            <div class="flex flex-wrap gap-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-1 min-w-0">
                                 ${summaryHtml}
+                                ${headerRatingHtml}
                             </div>
                             <div class="text-[10px] leading-tight text-right text-coffee-500 dark:text-[#a8a29e] font-mono whitespace-nowrap">
                                 <div>${headerDateTime.time}</div>
