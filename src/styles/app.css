@@ -490,6 +490,13 @@
             overflow-wrap: anywhere;
             min-height: calc(2em * 1.25);
         }
+        /* Item cards: the photo sits in the top right of the body (.app-card-top), its top
+           level with the text of the first property's label: 10px text on a 20px line, or on
+           the brew card 12px on a 16px line.
+           The photo hugs the top of its 3:4 box instead of being centred in it. */
+        .app-card .app-card-top > :last-child { margin-top: 0.3rem; }
+        #coffeeCardView .app-card-top > :last-child { margin-top: 0.15rem; }
+        .app-card .app-card-top > :last-child img { object-position: top; }
         .app-card .app-card-title-block > p {
             white-space: nowrap;
             overflow: hidden;

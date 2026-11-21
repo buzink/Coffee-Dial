@@ -66,8 +66,8 @@
             </div>
             <div id="coffeeTypeCardView" class="flex-1 flex flex-col min-h-0">
                 <div class="space-y-4 flex-1 overflow-y-auto ios-scroll p-4">
-                <div class="flex items-start gap-4">
-                    <div class="flex-1 space-y-4">
+                <div class="app-card-top flex items-start gap-4">
+                    <div class="flex-1 min-w-0 space-y-4">
                         <div class="grid grid-cols-2 gap-3 text-sm">
                             <div>
                                 <span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Origin country</span>
@@ -106,7 +106,7 @@
                             <span id="coffeeTypeCardCreated" class="text-xs text-coffee-600 dark:text-[#a8a29e]"></span>
                         </div>
                     </div>
-                    <div class="w-28 sm:w-32">
+                    <div class="shrink-0 w-28 sm:w-32">
                         <div id="coffeeTypeCardImageSection" class="relative w-full aspect-[3/4] bg-coffee-50 dark:bg-[#1c1917] rounded-xl overflow-hidden border border-coffee-100 dark:border-[#44403c] group">
                             <img id="coffeeTypeCardImage" class="absolute inset-0 w-full h-full object-contain hidden cursor-pointer" src="" alt="Coffee Photo" data-action-click="openCoffeeTypePhoto(event)">
                             <div id="coffeeTypeCardImagePlaceholder" class="absolute inset-0 flex flex-col items-center justify-center p-4 text-coffee-400 dark:text-[#57534e]">
