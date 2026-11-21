@@ -122,11 +122,6 @@ export const createGasTableModule = ({
         const capped = normalized.slice(0, 3).join(', ');
         return normalized.length > 3 ? `${capped} ...` : capped;
     };
-    const getCappedHeaderTitle = (value, maxLength = 25) => {
-        const text = (value || '').toString().trim();
-        if (!text) return '-';
-        return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
-    };
     const openGasList = () => {
         document.getElementById('gasPage')?.classList.remove('hidden');
         renderGasTable();
@@ -557,29 +552,15 @@ export const createGasTableModule = ({
                 row.setAttribute('data-id', item.id);
                 row.className = 'relative bg-white dark:bg-[#292524] border-b border-coffee-100 dark:border-[#44403c] align-top';
                 const typeLabel = normalizeGasType(item.type);
-                const methodsLabel = getGasMethodsLabel(item.methods);
                 const methodsHeaderLabel = getHeaderMethodsLabel(item.methods);
-                const cappedTitle = getCappedHeaderTitle(item.name, 25);
-                const detailsHtml = `
-                    <div class="pt-2 space-y-3 text-sm">
-                        <div class="grid grid-cols-2 gap-3">
-                            <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Type</span><span>${typeLabel}</span></div>
-                            <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Methods</span><span>${methodsLabel}</span></div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 text-center">
-                            <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Brews</div><div class="font-mono font-bold text-coffee-700 dark:text-[#d6ccc2]">${brewsCount}</div></div>
-                            <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Purchased</div><div class="font-mono font-bold text-coffee-700 dark:text-[#d6ccc2]">${purchasedDateLabel}</div></div>
-                        </div>
-                    </div>
-                `;
                 row.innerHTML = `
-                    <td colspan="99" class="relative overflow-visible px-2 py-1.5">
+                    <td colspan="99" class="mobile-row-cell relative overflow-visible px-2 py-1.5">
                         <div class="relative overflow-visible rounded-lg border border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917]">
                             <div role="button" tabindex="0" data-mobile-accordion-header="true" class="w-full text-left px-2 py-2 cursor-pointer">
                                 <div class="flex items-start gap-2">
                                     <div class="flex-shrink-0">${buildGasPhotoHtml(item)}</div>
                                     <div class="min-w-0 flex-1">
-                                        <div class="text-sm font-semibold text-coffee-900 dark:text-white truncate">${cappedTitle}</div>
+                                        <div class="mobile-row-title text-sm font-semibold text-coffee-900 dark:text-white">${escapeHtml((item.name || '').toString().trim() || '-')}</div>
                                         <div class="text-xs text-coffee-600 dark:text-[#a8a29e] truncate">${typeLabel}</div>
                                     </div>
                                     <div class="ml-auto flex-shrink-0 self-start pl-1">
@@ -589,32 +570,19 @@ export const createGasTableModule = ({
                                     </div>
                                 </div>
                                 <div class="mt-2 flex items-end justify-between gap-2">
-                                    <div class="flex flex-wrap gap-1 min-w-0">
+                                    <div class="mobile-row-labels flex items-center gap-1 min-w-0">
                                         ${methodsHeaderLabel && methodsHeaderLabel !== '-' ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-coffee-100 dark:bg-[#34302e] text-[10px] text-coffee-700 dark:text-[#d6ccc2]">${methodsHeaderLabel}</span>` : ''}
                                     </div>
                                     <div class="text-[10px] leading-tight text-right text-coffee-500 dark:text-[#a8a29e] font-mono whitespace-nowrap">${purchasedDateLabel}</div>
                                 </div>
                             </div>
-                            <div data-mobile-accordion-panel="true" class="hidden px-3 pb-3 pt-1 border-t border-coffee-100 dark:border-[#34302e]">
-                                ${detailsHtml}
-                            </div>
                         </div>
                     </td>
                 `;
                 const headerBtn = row.querySelector('[data-mobile-accordion-header="true"]');
-                const panel = row.querySelector('[data-mobile-accordion-panel="true"]');
-                let lastTapAt = 0;
                 headerBtn?.addEventListener('click', (event) => {
                     if (event.target && event.target.closest?.('[data-action-click]')) return;
-                    const now = Date.now();
-                    if (now - lastTapAt < 300) {
-                        dispatchCommand('gas.openCard', { id: item.id, event });
-                        lastTapAt = 0;
-                        return;
-                    }
-                    lastTapAt = now;
-                    const willOpen = panel?.classList.contains('hidden');
-                    panel?.classList.toggle('hidden', !willOpen);
+                    dispatchCommand('gas.openCard', { id: item.id, event });
                 });
                 headerBtn?.addEventListener('keydown', (event) => {
                     if (event.key !== 'Enter' && event.key !== ' ') return;

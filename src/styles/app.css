@@ -226,9 +226,9 @@
             line-clamp: 2;
             overflow: hidden;
         }
-        /* Brews table on a phone: the brew's name always takes two lines and never more,
-           so every row is equally high; a longer name ends in an ellipsis. */
-        .brew-mobile-title {
+        /* Brews, bags, coffees and gear tables on a phone: the name always takes two lines
+           and never more, so every row is equally high; a longer name ends in an ellipsis. */
+        .mobile-row-title {
             line-height: 1.25rem;
             height: 2.5rem;
             display: -webkit-box;
@@ -239,7 +239,12 @@
             overflow-wrap: anywhere;
         }
         /* The row's cell never grows past the table's width, whatever its content. */
-        .brew-mobile-cell { width: 100%; max-width: 0; }
+        .mobile-row-cell { width: 100%; max-width: 0; }
+        /* The labels under the name stay on one line, also when there are none, so rows keep
+           one height; a label that does not fit ends in an ellipsis, the stars always show. */
+        .mobile-row-labels { height: 1.5rem; flex-wrap: nowrap; overflow: hidden; }
+        .mobile-row-labels > span { display: block; flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .mobile-row-labels > .mobile-row-stars { display: inline-flex; flex-shrink: 0; }
         /* Temp field: native number arrows hidden, minus/plus buttons behind the field instead. */
         .temp-input { -moz-appearance: textfield; appearance: textfield; }
         .temp-input::-webkit-inner-spin-button,

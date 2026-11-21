@@ -927,113 +927,23 @@ export const createBrewsTableModule = ({
         const summaryHtml = summaryItems.length
             ? summaryItems.map((item) => `<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-coffee-100 dark:bg-[#34302e] text-[10px] text-coffee-700 dark:text-[#d6ccc2]">${item.value}</span>`).join('')
             : '<span class="text-[11px] text-coffee-500 dark:text-[#a8a29e] italic">Tap to view details</span>';
-        const headerFieldSet = new Set(getMobileAccordionHeaderFields());
         const headerDateTime = formatAccordionHeaderDateTime(brew.createdAt);
         const ratingValue = Number(brew.rating);
         const headerRatingHtml = ratingValue > 0
-            ? `<span class="inline-flex items-center leading-none whitespace-nowrap">${renderTinyHeaderStars(ratingValue)}</span>`
+            ? `<span class="mobile-row-stars inline-flex items-center leading-none whitespace-nowrap">${renderTinyHeaderStars(ratingValue)}</span>`
             : '';
-        const cardVm = brewsVm.buildCardDisplayViewModel({ brew, coffeeType: typeDisplay, grinderName: getBrewGrinderName(brew, getGasItems()) });
-        const graphVm = brewsVm.buildCardGraphData(brew);
-        const hasGraph = !!graphVm.hasGraph;
-        const weightVal = parseFloat(brew.weight);
-        const ratioVal = parseFloat(brew.ratio);
-        const outVal = !isNaN(weightVal) && !isNaN(ratioVal) ? (weightVal * ratioVal).toFixed(1) : '';
-        const formatMetric = (value) => {
-            if (value === null || typeof value === 'undefined' || value === '') return '-';
-            const numeric = Number(value);
-            if (!Number.isFinite(numeric)) return '-';
-            return `${numeric}`;
-        };
-        const graphSummaryCardOne = `
-            <div class="bg-coffee-50/50 dark:bg-[#201d1b] p-3 rounded-lg border border-coffee-100 dark:border-[#44403c]">
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">In (g)</label>
-                        <div class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white">${!isNaN(weightVal) ? weightVal : '-'}</div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Ratio 1:X</label>
-                        <div class="w-full text-center font-mono bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white">${!isNaN(ratioVal) ? ratioVal : '-'}</div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Out (g)</label>
-                        <div class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white">${outVal || '-'}</div>
-                    </div>
-                </div>
-            </div>
-        `;
-        const graphSummaryCardTwo = `
-            <div class="bg-coffee-50/50 dark:bg-[#201d1b] p-3 rounded-lg border border-coffee-100 dark:border-[#44403c]">
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">First drip</label>
-                        <div class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white">${formatMetric(brew.firstDrip)}</div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Max flow</label>
-                        <div class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white">${formatMetric(brew.maxFlow)}</div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] mb-1 uppercase text-center">Avg flow</label>
-                        <div class="w-full text-center font-mono bg-white dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded px-2 py-1.5 text-sm text-coffee-900 dark:text-white">${formatMetric(brew.avgFlow)}</div>
-                    </div>
-                </div>
-            </div>
-        `;
-        const bodyTextFields = [
-            { key: 'origin', label: 'Origin', value: cardVm.origin },
-            { key: 'processing', label: 'Process', value: cardVm.processing },
-            { key: 'roastType', label: 'Roast', value: cardVm.roastType },
-            { key: 'drink', label: 'Drink', value: cardVm.drink },
-            { key: 'method', label: 'Method', value: cardVm.method }
-        ]
-            .filter((item) => !headerFieldSet.has(item.key))
-            .filter((item) => (item.value || '').toString().trim() && item.value !== '-');
-        const bodyTextFieldsHtml = bodyTextFields.length
-            ? `<div class="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">${bodyTextFields
-                .map((item) => `<div class="${item.key === 'method' ? 'col-span-2' : ''}"><span class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase mb-0.5">${item.label}</span><span class="font-medium text-coffee-800 dark:text-[#d6ccc2]">${item.value}</span></div>`)
-                .join('')}</div>`
-            : '';
-        const detailsHtml = `
-            <div class="pt-2 space-y-3">
-                ${bodyTextFieldsHtml}
-                <div class="bg-coffee-50 dark:bg-[#1c1917] rounded-xl p-4 border border-coffee-100 dark:border-[#44403c]">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase"><i class="fa-solid fa-flask mr-1"></i> Brew Stats</span>
-                        ${hasGraph
-                            ? `<button data-action-click="openBrewCardGraph('${brew.id}', event)" class="text-coffee-400 hover:text-coffee-700 dark:text-[#78716c] dark:hover:text-white transition-colors" title="View Graph" aria-label="View brew graph"><i class="fa-solid fa-chart-line"></i></button>`
-                            : ''}
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 text-center mb-3">
-                        <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">In</div><div class="font-mono font-bold text-coffee-900 dark:text-white">${cardVm.weightText}</div></div>
-                        <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Ratio</div><div class="font-mono font-bold text-coffee-900 dark:text-white">${cardVm.ratioText}</div></div>
-                        <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Out</div><div class="font-mono font-bold text-coffee-900 dark:text-white">${cardVm.outText}</div></div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 text-center border-t border-coffee-200 dark:border-[#44403c] pt-2">
-                        <div><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase truncate px-1">${cardVm.grinderTitle}</div><div class="font-bold text-coffee-800 dark:text-[#d6ccc2]">${cardVm.grinderValue}</div></div>
-                        <div><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Time</div><div class="font-bold text-coffee-800 dark:text-[#d6ccc2]">${formatTime(brew.time)}</div></div>
-                        <div><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Temp</div><div class="font-bold text-coffee-800 dark:text-[#d6ccc2]">${getTempBadge(brew.temp)}</div></div>
-                    </div>
-                </div>
-                ${graphSummaryCardOne}
-                ${graphSummaryCardTwo}
-                ${cardVm.hasNotes ? `<div><span class="block text-xs font-bold text-coffee-500 dark:text-[#78716c] uppercase mb-1">Notes</span><p class="text-sm text-coffee-800 dark:text-[#d6ccc2] italic bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-lg border border-yellow-100 dark:border-yellow-900/20">${cardVm.notesText}</p></div>` : ''}
-                ${cardVm.hasImprove ? `<div><span class="block text-xs font-bold text-red-500 dark:text-red-400 uppercase mb-1">To Improve</span><p class="text-sm text-coffee-800 dark:text-[#d6ccc2] bg-red-50 dark:bg-red-900/10 p-2 rounded-lg border border-red-100 dark:border-red-900/20">${cardVm.improveText}</p></div>` : ''}
-            </div>
-        `;
 
         const row = document.createElement('tr');
         row.className = 'relative bg-white dark:bg-[#292524] border-b border-coffee-100 dark:border-[#44403c] align-top';
         row.setAttribute('data-id', brew.id);
         row.innerHTML = `
-            <td colspan="99" class="brew-mobile-cell relative overflow-visible px-2 py-1.5">
+            <td colspan="99" class="mobile-row-cell relative overflow-visible px-2 py-1.5">
                 <div class="relative overflow-visible rounded-lg border border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917]">
                     <div role="button" tabindex="0" data-mobile-accordion-header="true" class="w-full text-left px-2 py-2 cursor-pointer">
                         <div class="flex items-start gap-2">
                             <div class="flex-shrink-0">${buildMobilePhotoHtml(brew)}</div>
                             <div class="min-w-0 flex-1">
-                                <div class="brew-mobile-title text-sm font-semibold text-coffee-900 dark:text-white">${formatCoffeeLabel(typeDisplay)}${typeDisplay.decaf ? ' <i class="fa-solid fa-moon text-[10px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>' : ''}</div>
+                                <div class="mobile-row-title text-sm font-semibold text-coffee-900 dark:text-white">${formatCoffeeLabel(typeDisplay)}${typeDisplay.decaf ? ' <i class="fa-solid fa-moon text-[10px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>' : ''}</div>
                                 <div class="text-xs text-coffee-600 dark:text-[#a8a29e] truncate">${rowDisplay.displayRoaster || '-'}</div>
                             </div>
                             <div class="ml-auto flex-shrink-0 self-start pl-1">
@@ -1043,7 +953,7 @@ export const createBrewsTableModule = ({
                             </div>
                         </div>
                         <div class="mt-2 flex items-end justify-between gap-2">
-                            <div class="flex flex-wrap items-center gap-1 min-w-0">
+                            <div class="mobile-row-labels flex items-center gap-1 min-w-0">
                                 ${summaryHtml}
                                 ${headerRatingHtml}
                             </div>
@@ -1053,27 +963,14 @@ export const createBrewsTableModule = ({
                             </div>
                         </div>
                     </div>
-                    <div data-mobile-accordion-panel="true" class="hidden px-3 pb-3 pt-1 border-t border-coffee-100 dark:border-[#34302e]">
-                        ${detailsHtml}
-                    </div>
                 </div>
             </td>
         `;
 
         const headerBtn = row.querySelector('[data-mobile-accordion-header="true"]');
-        const panel = row.querySelector('[data-mobile-accordion-panel="true"]');
-        let lastTapAt = 0;
         headerBtn?.addEventListener('click', (event) => {
             if (event.target && event.target.closest?.('[data-action-click]')) return;
-            const now = Date.now();
-            if (now - lastTapAt < 300) {
-                openBrewCard(brew.id, event);
-                lastTapAt = 0;
-                return;
-            }
-            lastTapAt = now;
-            const willOpen = panel?.classList.contains('hidden');
-            panel?.classList.toggle('hidden', !willOpen);
+            openBrewCard(brew.id, event);
         });
         headerBtn?.addEventListener('keydown', (event) => {
             if (event.key !== 'Enter' && event.key !== ' ') return;

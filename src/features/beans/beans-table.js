@@ -663,35 +663,14 @@ export const createBeansTableModule = ({
                     .filter(Boolean)
                     .map((value) => `<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-coffee-100 dark:bg-[#34302e] text-[10px] text-coffee-700 dark:text-[#d6ccc2]">${value}</span>`)
                     .join('');
-                const detailsHtml = `
-                    <div class="pt-2 space-y-3 text-sm">
-                        <div class="grid grid-cols-2 gap-3">
-                            <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Origin</span><span>${origin}</span></div>
-                            <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Process</span><span>${process}</span></div>
-                            <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Variety</span><span>${coffeeDisplay.variety || '-'}</span></div>
-                            <div><span class="block text-[10px] font-bold text-coffee-500 dark:text-[#78716c] uppercase">Roast</span><span>${coffeeDisplay.roastType || '-'}</span></div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Price</div><div class="font-mono font-bold text-coffee-700 dark:text-[#d6ccc2]">${bean.price ?? '-'}</div></div>
-                            <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Weight</div><div class="font-mono font-bold text-coffee-700 dark:text-[#d6ccc2]">${bean.stock ?? '-'}</div></div>
-                            <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Brews</div><div class="font-mono font-bold text-coffee-700 dark:text-[#d6ccc2]">${brewCount}</div></div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 text-center">
-                            <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Roast date</div><div class="font-mono text-xs font-bold text-coffee-700 dark:text-[#d6ccc2]">${roastDateLabel}</div></div>
-                            <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Opened date</div><div class="font-mono text-xs font-bold text-coffee-700 dark:text-[#d6ccc2]">${openedDateLabel}</div></div>
-                            <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Frozen date</div><div class="font-mono text-xs font-bold text-coffee-700 dark:text-[#d6ccc2]">${frozenDateLabel}</div></div>
-                            <div class="bg-white dark:bg-[#292524] p-2 rounded border border-coffee-100 dark:border-[#44403c]"><div class="text-[10px] text-coffee-400 dark:text-[#57534e] uppercase">Finished date</div><div class="font-mono text-xs font-bold text-coffee-700 dark:text-[#d6ccc2]">${archivedDateLabel}</div></div>
-                        </div>
-                    </div>
-                `;
                 row.innerHTML = `
-                    <td colspan="99" class="relative overflow-visible px-2 py-1.5">
+                    <td colspan="99" class="mobile-row-cell relative overflow-visible px-2 py-1.5">
                         <div class="relative overflow-visible rounded-lg border border-coffee-100 dark:border-[#44403c] bg-coffee-50 dark:bg-[#1c1917]">
                             <div role="button" tabindex="0" data-mobile-accordion-header="true" class="w-full text-left px-2 py-2 cursor-pointer">
                                 <div class="flex items-start gap-2">
                                     <div class="flex-shrink-0">${buildBeanPhotoHtml(coffeeType)}</div>
                                     <div class="min-w-0 flex-1">
-                                        <div class="text-sm font-semibold text-coffee-900 dark:text-white truncate inline-flex items-center gap-1">${farmer}${coffeeDisplay.decaf ? '<i class="fa-solid fa-moon text-[10px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>' : ''}</div>
+                                        <div class="mobile-row-title text-sm font-semibold text-coffee-900 dark:text-white">${farmer}${coffeeDisplay.decaf ? ' <i class="fa-solid fa-moon text-[10px] text-coffee-500 dark:text-[#a8a29e]" title="Decaf"></i>' : ''}</div>
                                         <div class="text-xs text-coffee-600 dark:text-[#a8a29e] truncate">${roaster}</div>
                                     </div>
                                     <div class="ml-auto flex-shrink-0 self-start pl-1">
@@ -701,32 +680,19 @@ export const createBeansTableModule = ({
                                     </div>
                                 </div>
                                 <div class="mt-2 flex items-end justify-between gap-2">
-                                    <div class="flex flex-wrap gap-1 min-w-0">
+                                    <div class="mobile-row-labels flex items-center gap-1 min-w-0">
                                         ${summaryHtml || '<span class="text-[11px] text-coffee-500 dark:text-[#a8a29e] italic">Tap to view details</span>'}
                                     </div>
                                     <div class="text-[10px] leading-tight text-right text-coffee-500 dark:text-[#a8a29e] font-mono whitespace-nowrap">${groupDateLabel}</div>
                                 </div>
                             </div>
-                            <div data-mobile-accordion-panel="true" class="hidden px-3 pb-3 pt-1 border-t border-coffee-100 dark:border-[#34302e]">
-                                ${detailsHtml}
-                            </div>
                         </div>
                     </td>
                 `;
                 const headerBtn = row.querySelector('[data-mobile-accordion-header="true"]');
-                const panel = row.querySelector('[data-mobile-accordion-panel="true"]');
-                let lastTapAt = 0;
                 headerBtn?.addEventListener('click', (event) => {
                     if (event.target && event.target.closest?.('[data-action-click]')) return;
-                    const now = Date.now();
-                    if (now - lastTapAt < 300) {
-                        openBeanCardViaCommand(bean.id, event);
-                        lastTapAt = 0;
-                        return;
-                    }
-                    lastTapAt = now;
-                    const willOpen = panel?.classList.contains('hidden');
-                    panel?.classList.toggle('hidden', !willOpen);
+                    openBeanCardViaCommand(bean.id, event);
                 });
                 headerBtn?.addEventListener('keydown', (event) => {
                     if (event.key !== 'Enter' && event.key !== ' ') return;
