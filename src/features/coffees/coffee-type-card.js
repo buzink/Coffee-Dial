@@ -294,7 +294,7 @@ export const createCoffeeTypeCardModule = ({
 
         document.getElementById('coffeeTypeCardTitle').textContent = cardVm.title;
         document.getElementById('coffeeTypeCardSubtitle').textContent = cardVm.roaster;
-        document.getElementById('coffeeTypeCardRating').innerHTML = cardVm.rating > 0 ? getStarDisplay(cardVm.rating) : '';
+        document.getElementById('coffeeTypeCardRating').innerHTML = getStarDisplay(cardVm.rating);
         document.getElementById('coffeeTypeCardOrigin').textContent = cardVm.origin;
         document.getElementById('coffeeTypeCardOriginMicroRegion').textContent = cardVm.originMicroRegion;
         document.getElementById('coffeeTypeCardOriginMacroRegion').textContent = cardVm.originMacroRegion;

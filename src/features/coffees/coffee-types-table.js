@@ -590,7 +590,7 @@ export const createCoffeeTypesTableModule = ({
             const variety = rowVm.variety;
             const roast = rowVm.roast;
             const rating = rowVm.rating;
-            const ratingHtml = rating > 0 ? getStarDisplay(rating) : '';
+            const ratingHtml = getStarDisplay(rating);
             const createdAt = rowVm.createdAt;
             const decaf = rowVm.decaf;
             const brewsCount = Number(type.brewsCount) || 0;
@@ -639,7 +639,7 @@ export const createCoffeeTypesTableModule = ({
                                 <div class="mt-2 flex items-end justify-between gap-2">
                                     <div class="mobile-row-labels flex items-center gap-1 min-w-0">
                                         ${summaryHtml || '<span class="text-[11px] text-coffee-500 dark:text-[#a8a29e] italic">Tap to view details</span>'}
-                                        ${rating > 0 ? `<span class="mobile-row-stars inline-flex items-center leading-none whitespace-nowrap">${'<i class="fa-solid fa-star text-[7px] text-yellow-400"></i>'.repeat(Math.min(5, Math.round(rating)))}</span>` : ''}
+                                        <span class="mobile-row-stars inline-flex items-center leading-none whitespace-nowrap">${getStarDisplay(rating, 'text-[7px]')}</span>
                                     </div>
                                     <div class="text-[10px] leading-tight text-right text-coffee-500 dark:text-[#a8a29e] font-mono whitespace-nowrap">${createdAt}</div>
                                 </div>

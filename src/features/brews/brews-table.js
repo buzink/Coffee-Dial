@@ -889,15 +889,7 @@ export const createBrewsTableModule = ({
             value: getHeaderFieldValue({ key, brew, typeDisplay, rowDisplay })
         }));
     };
-    const renderTinyHeaderStars = (rating) => {
-        const count = Math.max(0, Math.min(5, Number(rating) || 0));
-        if (!count) return '';
-        let html = '';
-        for (let i = 0; i < count; i += 1) {
-            html += '<i class="fa-solid fa-star text-[7px] text-yellow-400"></i>';
-        }
-        return html;
-    };
+    const renderTinyHeaderStars = (rating) => getStarDisplay(rating, 'text-[7px]');
 
     const buildMobilePhotoHtml = (brew) => {
         const type = getCoffeeTypeForBrew?.(brew) || null;
@@ -928,10 +920,7 @@ export const createBrewsTableModule = ({
             ? summaryItems.map((item) => `<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-coffee-100 dark:bg-[#34302e] text-[10px] text-coffee-700 dark:text-[#d6ccc2]">${item.value}</span>`).join('')
             : '<span class="text-[11px] text-coffee-500 dark:text-[#a8a29e] italic">Tap to view details</span>';
         const headerDateTime = formatAccordionHeaderDateTime(brew.createdAt);
-        const ratingValue = Number(brew.rating);
-        const headerRatingHtml = ratingValue > 0
-            ? `<span class="mobile-row-stars inline-flex items-center leading-none whitespace-nowrap">${renderTinyHeaderStars(ratingValue)}</span>`
-            : '';
+        const headerRatingHtml = `<span class="mobile-row-stars inline-flex items-center leading-none whitespace-nowrap">${renderTinyHeaderStars(brew.rating)}</span>`;
 
         const row = document.createElement('tr');
         row.className = 'relative bg-white dark:bg-[#292524] border-b border-coffee-100 dark:border-[#44403c] align-top';

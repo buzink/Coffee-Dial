@@ -1,7 +1,10 @@
-export const getStarDisplay = (r) => {
-    if (!r) return '-';
+// Always five stars: the rating in yellow, the rest empty, so the scale is visible.
+export const getStarDisplay = (r, sizeClass = 'text-xs') => {
+    const filled = Math.max(0, Math.min(5, Math.round(Number(r) || 0)));
     let html = '';
-    for (let i = 0; i < r; i++) html += '<i class="fa-solid fa-star text-xs text-yellow-400"></i>';
+    for (let i = 0; i < 5; i++) {
+        html += `<i class="fa-solid fa-star ${sizeClass} ${i < filled ? 'text-yellow-400' : 'star-empty'}"></i>`;
+    }
     return html;
 };
 

@@ -245,6 +245,9 @@
         .mobile-row-labels { height: 1.5rem; flex-wrap: nowrap; overflow: hidden; }
         .mobile-row-labels > span { display: block; flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .mobile-row-labels > .mobile-row-stars { display: inline-flex; flex-shrink: 0; }
+        /* Unrated stars: a rating always shows five stars, the empty ones in this muted colour. */
+        .star-empty { color: #d6ccc2; }
+        .dark .star-empty { color: #57534e; }
         /* Temp field: native number arrows hidden, minus/plus buttons behind the field instead. */
         .temp-input { -moz-appearance: textfield; appearance: textfield; }
         .temp-input::-webkit-inner-spin-button,
