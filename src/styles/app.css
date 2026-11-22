@@ -1189,3 +1189,7 @@
         }
     </style>
 
+
+/* Lab results: collapsible "Graph settings" section */
+.lab-graph-settings > summary::-webkit-details-marker { display: none; }
+.lab-graph-settings:not([open]) .lab-graph-settings-icon { transform: rotate(180deg); }

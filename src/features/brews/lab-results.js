@@ -222,7 +222,8 @@ export const createLabResultsModule = ({
         const flowEl = keyEl.querySelector('[data-line-key="flow"]');
         weightEl?.classList.toggle('hidden', !selectedGraphKeys.has('weightGraph'));
         flowEl?.classList.toggle('hidden', !selectedGraphKeys.has('flowGraph'));
-        keyEl.classList.toggle('hidden', !visible);
+        // Keep the row's space when the key is not shown, so the graph does not jump.
+        keyEl.classList.toggle('invisible', !visible);
     };
     const getFirstSelectedKey = (selectedKeys) => {
         for (const key of selectedKeys || []) return key;
@@ -716,11 +717,13 @@ export const createLabResultsModule = ({
         event?.preventDefault?.();
         event?.stopPropagation?.();
         visibleBrews = (getFilteredCoffees() || []).slice(0, 20);
-        selectedGraphKeys = new Set();
+        selectedGraphKeys = new Set(['flowGraph']);
         selectedXFieldKeys = new Set(['brew']);
         selectedYFieldKeys = new Set();
         customGraphRenderMode = 'points';
         selectedBrewIds = new Set(visibleBrews.map((brew) => brew.id));
+        const graphSettings = document.getElementById('labResultsGraphSettings');
+        if (graphSettings) graphSettings.open = false;
         render();
         getModal()?.classList.remove('hidden');
     };
