@@ -2354,9 +2354,19 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
             };
 
             let isApplyingRoute = false;
+            // Pages and overlays like preferences and lab results open asynchronously (lazy
+            // modules). Until they show, their route key stays in the URL.
             let pendingPageKey = '';
             let pendingPageTimer = null;
+            const pendingOpenTimers = new Map();
+            const clearPendingOpen = (routeKey) => {
+                clearTimeout(pendingOpenTimers.get(routeKey));
+                pendingOpenTimers.delete(routeKey);
+            };
             const markPendingPage = (routeKey) => {
+                if (!ROUTE_KEY_SET.has(routeKey)) return;
+                clearPendingOpen(routeKey);
+                pendingOpenTimers.set(routeKey, setTimeout(() => pendingOpenTimers.delete(routeKey), 5000));
                 if (!PAGE_ROUTE_KEY_SET.has(routeKey)) return;
                 pendingPageKey = routeKey;
                 if (pendingPageTimer) clearTimeout(pendingPageTimer);
@@ -2491,7 +2501,11 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                     if (PAGE_ROUTE_KEY_SET.has(key)) return true;
                     const modalId = routeModalIdByKey.get(key);
                     if (!modalId) return false;
-                    return isModalVisible(modalId);
+                    if (isModalVisible(modalId)) {
+                        clearPendingOpen(key);
+                        return true;
+                    }
+                    return pendingOpenTimers.has(key);
                 });
                 if (routeKeysToStateKey(current) !== routeKeysToStateKey(visible)) {
                     setRoute(visible);
@@ -2652,7 +2666,10 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                 }
             });
 
-            const modalObserver = new MutationObserver(() => {
+            // Watch the whole body: preferences and lab results are mounted lazily, after this runs.
+            const routedModalIds = new Set(routeModalIdByKey.values());
+            const modalObserver = new MutationObserver((mutations) => {
+                if (!mutations.some((m) => routedModalIds.has(m.target?.id))) return;
                 syncRouteFromModalVisibility();
             });
 
@@ -2676,13 +2693,10 @@ export const createAppComposition = ({ appCommands = null, appEvents = null } = 
                     setRoute(others);
                 }
             });
-            routeModalIdByKey.forEach((modalId) => {
-                const modalEl = document.getElementById(modalId);
-                if (!modalEl) return;
-                modalObserver.observe(modalEl, {
-                    attributes: true,
-                    attributeFilter: ['class', 'style']
-                });
+            modalObserver.observe(document.body, {
+                attributes: true,
+                attributeFilter: ['class', 'style'],
+                subtree: true
             });
 
             const initialKeys = getActiveRouteKeysFromLocation();
