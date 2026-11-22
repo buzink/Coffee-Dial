@@ -10,7 +10,6 @@ document.addEventListener('change', (event) => {
 
 export const createBrewsFormModule = ({ setRating, setNotesMode, getCoffeeScale, getGasItems, fillBeanDetails }) => {
     let brewGearSelection = new Set();
-    let brewGearFilter = '';
     let hasBoundBrewGearUi = false;
     let includeArchivedGearInForm = false;
 
@@ -27,7 +26,7 @@ export const createBrewsFormModule = ({ setRating, setNotesMode, getCoffeeScale,
         root: document.getElementById('brewGearMultiSelect'),
         control: document.getElementById('brewGearControl'),
         pills: document.getElementById('brewGearPills'),
-        search: document.getElementById('brewGearSearch'),
+        placeholder: document.getElementById('brewGearPlaceholder'),
         dropdown: document.getElementById('brewGearDropdown')
     });
     const getBrewGrinderFieldWrap = () => document.getElementById('brewGrinderFieldWrap');
@@ -43,8 +42,8 @@ export const createBrewsFormModule = ({ setRating, setNotesMode, getCoffeeScale,
     };
 
     const renderBrewGearPills = () => {
-        const { pills, search } = getBrewGearUi();
-        if (!pills || !search) return;
+        const { pills, placeholder } = getBrewGearUi();
+        if (!pills || !placeholder) return;
         const optionMap = new Map(getBrewGearOptions().map((option) => [option.id, option.label]));
         const selectedIds = [...brewGearSelection];
         pills.innerHTML = selectedIds
@@ -53,16 +52,15 @@ export const createBrewsFormModule = ({ setRating, setNotesMode, getCoffeeScale,
                 return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-coffee-100 dark:bg-[#34302e] text-coffee-800 dark:text-[#d6ccc2]">${label}<button type="button" data-brew-gear-remove="${id}" aria-label="Remove gear" title="Remove gear" class="text-coffee-500 dark:text-[#a8a29e] hover:text-red-500">&times;</button></span>`;
             })
             .join('');
-        search.placeholder = selectedIds.length ? '' : 'Search gear...';
+        placeholder.classList.toggle('hidden', selectedIds.length > 0);
     };
 
     const renderBrewGearDropdown = () => {
         const { dropdown } = getBrewGearUi();
         if (!dropdown) return;
-        const q = (brewGearFilter || '').toLowerCase().trim();
-        const options = getBrewGearOptions().filter((option) => option.label.toLowerCase().includes(q));
+        const options = getBrewGearOptions();
         if (!options.length) {
-            dropdown.innerHTML = '<div class="px-3 py-2 text-xs text-coffee-500 dark:text-[#a8a29e]">No matching gear</div>';
+            dropdown.innerHTML = '<div class="px-3 py-2 text-xs text-coffee-500 dark:text-[#a8a29e]">No gear</div>';
             return;
         }
         dropdown.innerHTML = options
@@ -105,34 +103,24 @@ export const createBrewsFormModule = ({ setRating, setNotesMode, getCoffeeScale,
 
     const bindBrewGearUi = () => {
         if (hasBoundBrewGearUi) return;
-        const { root, control, search, dropdown } = getBrewGearUi();
-        if (!root || !control || !search || !dropdown) return;
+        const { root, control, dropdown } = getBrewGearUi();
+        if (!root || !control || !dropdown) return;
         hasBoundBrewGearUi = true;
-
-        control.addEventListener('click', () => {
-            search.focus();
-            openBrewGearDropdown();
-        });
 
         control.addEventListener('click', (event) => {
             const removeBtn = event.target.closest('[data-brew-gear-remove]');
-            if (!removeBtn) return;
-            event.stopPropagation();
-            toggleBrewGearSelection(removeBtn.getAttribute('data-brew-gear-remove'));
-            search.focus();
-        });
-
-        search.addEventListener('focus', () => openBrewGearDropdown());
-        search.addEventListener('input', () => {
-            brewGearFilter = search.value || '';
-            openBrewGearDropdown();
+            if (removeBtn) {
+                toggleBrewGearSelection(removeBtn.getAttribute('data-brew-gear-remove'));
+                return;
+            }
+            if (dropdown.classList.contains('hidden')) openBrewGearDropdown();
+            else closeBrewGearDropdown();
         });
 
         dropdown.addEventListener('click', (event) => {
             const optionBtn = event.target.closest('[data-brew-gear-option]');
             if (!optionBtn) return;
             toggleBrewGearSelection(optionBtn.getAttribute('data-brew-gear-option'));
-            search.focus();
         });
 
         // Use capture so modal-level stopPropagation handlers do not block outside-click close.
@@ -143,16 +131,14 @@ export const createBrewsFormModule = ({ setRating, setNotesMode, getCoffeeScale,
 
     const refreshBrewGearField = () => {
         bindBrewGearUi();
-        const { wrap, search } = getBrewGearUi();
+        const { wrap } = getBrewGearUi();
         const grinderWrap = getBrewGrinderFieldWrap();
         if (grinderWrap) grinderWrap.classList.toggle('hidden', hasActiveGrinderGear());
         if (!wrap) return;
         const hasGear = getBrewGearOptions().length > 0;
         wrap.classList.toggle('hidden', !hasGear);
         if (!hasGear) {
-            brewGearFilter = '';
             setSelectedBrewGearIds([]);
-            if (search) search.value = '';
             closeBrewGearDropdown();
         } else {
             setSelectedBrewGearIds([...brewGearSelection]);
