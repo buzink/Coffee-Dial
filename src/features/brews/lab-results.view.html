@@ -9,6 +9,11 @@
         </div>
         <div class="p-4 overflow-y-auto space-y-4">
             <div class="bg-coffee-50 dark:bg-[#1c1917] border border-coffee-200 dark:border-[#44403c] rounded-xl p-4">
+                <div id="labResultsLineKey" class="hidden mb-2 flex items-center gap-4 text-[11px] text-coffee-600 dark:text-[#a8a29e]" aria-label="Line styles">
+                    <span data-line-key="weight" class="inline-flex items-center gap-1.5"><svg width="22" height="6" aria-hidden="true"><line x1="1" y1="3" x2="21" y2="3" stroke="currentColor" stroke-width="2"/></svg>Weight</span>
+                    <span data-line-key="flow" class="inline-flex items-center gap-1.5"><svg width="22" height="6" aria-hidden="true"><line x1="1" y1="3" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-dasharray="6 3"/></svg>Flow</span>
+                    <span class="text-coffee-400 dark:text-[#78716c]">Colors and numbers match the brews below</span>
+                </div>
                 <div class="h-56 rounded-lg border border-coffee-300 dark:border-[#57534e] bg-white dark:bg-[#292524] relative">
                     <canvas id="labResultsGraphCanvas" class="w-full h-full"></canvas>
                     <div id="labResultsGraphEmpty" class="absolute inset-0 flex items-center justify-center text-coffee-400 dark:text-[#78716c] text-sm font-medium pointer-events-none">

@@ -212,6 +212,18 @@ export const createLabResultsModule = ({
     };
 
     const getSelectedBrews = () => visibleBrews.filter((brew) => selectedBrewIds.has(brew.id));
+    // Weight and flow graphs draw one colored line per selected brew. The brew tiles show that
+    // color and number, so the graph needs no legend and keeps its full height.
+    const showsBrewLines = () => selectedGraphKeys.has('weightGraph') || selectedGraphKeys.has('flowGraph');
+    const renderLineKey = (visible) => {
+        const keyEl = document.getElementById('labResultsLineKey');
+        if (!keyEl) return;
+        const weightEl = keyEl.querySelector('[data-line-key="weight"]');
+        const flowEl = keyEl.querySelector('[data-line-key="flow"]');
+        weightEl?.classList.toggle('hidden', !selectedGraphKeys.has('weightGraph'));
+        flowEl?.classList.toggle('hidden', !selectedGraphKeys.has('flowGraph'));
+        keyEl.classList.toggle('hidden', !visible);
+    };
     const getFirstSelectedKey = (selectedKeys) => {
         for (const key of selectedKeys || []) return key;
         return null;
@@ -390,6 +402,7 @@ export const createLabResultsModule = ({
     };
 
     const setGraphEmptyState = (message) => {
+        renderLineKey(false);
         const emptyEl = document.getElementById('labResultsGraphEmpty');
         if (!emptyEl) return;
         emptyEl.textContent = message;
@@ -484,6 +497,7 @@ export const createLabResultsModule = ({
 
         hideGraphEmptyState();
         destroyLabGraph();
+        renderLineKey(!axisMeta.customMode);
         const isDateOnXAxis = axisMeta.hasAxisSelection && axisMeta.xAxisKey === 'date';
         const isTimeOfDayOnXAxis = axisMeta.hasAxisSelection && axisMeta.xAxisKey === 'timeOfDay';
         const isDateOnSingleYAxis = axisMeta.hasAxisSelection && axisMeta.yAxisKeys.length === 1 && axisMeta.yAxisKeys[0] === 'date';
@@ -548,7 +562,9 @@ export const createLabResultsModule = ({
                           }
                       },
                 plugins: {
-                    legend: { display: true, labels: { boxWidth: 10, boxHeight: 10 } },
+                    // Custom graphs have one line per Y field and keep their legend; brew lines are
+                    // explained by the colored numbers on the brew tiles and the line key above.
+                    legend: { display: axisMeta.customMode, labels: { boxWidth: 10, boxHeight: 10 } },
                     tooltip: {
                         mode: 'nearest',
                         intersect: false,
@@ -649,8 +665,13 @@ export const createLabResultsModule = ({
             return;
         }
 
+        // The graph numbers and colors brews by their position among the selected brews.
+        const selectedIds = showsBrewLines() ? getSelectedBrews().map((item) => item.id) : [];
         container.innerHTML = visibleBrews.map((brew) => {
-            const brewIndex = visibleBrews.findIndex((item) => item.id === brew.id) + 1;
+            const lineIndex = selectedIds.indexOf(brew.id);
+            const lineDot = lineIndex >= 0
+                ? `<span class="lab-brew-line-dot" style="background-color: ${GRAPH_COLORS[lineIndex % GRAPH_COLORS.length]}">${lineIndex + 1}</span>`
+                : '';
             const selected = selectedBrewIds.has(brew.id);
             const typeDisplay = getCoffeeTypeDisplay?.(brew) || {};
             const title = formatCoffeeLabel(typeDisplay, 'Unknown');
@@ -676,7 +697,7 @@ export const createLabResultsModule = ({
                     </div>
                     <div class="mt-1 flex items-end justify-between gap-2">
                         <div class="text-[11px] text-coffee-600 dark:text-[#a8a29e]">${meta}</div>
-                        <div class="text-[10px] font-bold text-coffee-400 dark:text-[#78716c]">${brewIndex}</div>
+                        ${lineDot}
                     </div>
                 </button>
             `;
@@ -747,6 +768,7 @@ export const createLabResultsModule = ({
         renderGraphSelectors();
         renderFieldSelectors();
         renderCustomGraphModeControl();
+        renderBrewTiles();
         void renderCaptureGraph();
     };
 
