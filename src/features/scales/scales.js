@@ -1,3 +1,4 @@
+import { formatBrewTimeInput, parseBrewTimeInput } from '../../core/format.js';
 let coffeeScaleApi = null;
 
 export const getCoffeeScale = () => coffeeScaleApi;
@@ -312,7 +313,7 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
     const recipeSteps = Array.isArray(dataOverride?.recipeSteps) ? dataOverride.recipeSteps : getRecipeSteps();
     if (!Number.isFinite(elapsedSeconds) && !timerRunning) {
       const timeField = document.getElementById("time");
-      const timeValue = timeField ? Number(timeField.value) : NaN;
+      const timeValue = timeField ? parseBrewTimeInput(timeField.value) : NaN;
       elapsedSeconds = Number.isFinite(timeValue) ? timeValue : null;
     }
     const samples = captureData.samples || [];
@@ -1297,7 +1298,7 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
     const now = Date.now();
     const elapsed = liveTimerElapsedMs + (liveTimerStartAt ? (now - liveTimerStartAt) : 0);
     const seconds = formatLiveTime(elapsed);
-    const nextTimeValue = String(seconds);
+    const nextTimeValue = formatBrewTimeInput(seconds);
     if (timeField) {
       if (timeField.value !== nextTimeValue) {
         timeField.value = nextTimeValue;
@@ -1340,7 +1341,7 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
     renderEventLog();
     const timeField = document.getElementById("time");
     if (timeField) {
-      timeField.value = 0;
+      timeField.value = formatBrewTimeInput(0);
       timeField.dispatchEvent(new Event("input", { bubbles: true }));
     }
     const outField = document.getElementById("inputYield");
@@ -1474,7 +1475,7 @@ export function initCoffeeScale({ openScaleModal, onTimerStateChange, onCaptureR
         const outField = document.getElementById("inputYield");
         const timeField = document.getElementById("time");
         const finalWeight = outField ? parseFloat(outField.value) : NaN;
-        const totalSeconds = timeField ? parseFloat(timeField.value) : NaN;
+        const totalSeconds = timeField ? parseBrewTimeInput(timeField.value) : NaN;
         if (graphAvgFlowEl) {
           if (Number.isFinite(finalWeight) && Number.isFinite(totalSeconds) && totalSeconds > 0) {
             const avgFlow = finalWeight / totalSeconds;

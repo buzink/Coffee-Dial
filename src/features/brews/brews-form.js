@@ -1,3 +1,12 @@
+import { formatBrewTimeInput, parseBrewTimeInput } from '../../core/format.js';
+
+// A typed brew time ("185", "3m5s") is shown as m:ss once the field is left.
+document.addEventListener('change', (event) => {
+    const field = event.target;
+    if (!(field instanceof HTMLInputElement) || (field.id !== 'time' && field.id !== 'quickEditTime')) return;
+    const seconds = parseBrewTimeInput(field.value);
+    if (Number.isFinite(seconds)) field.value = formatBrewTimeInput(seconds);
+});
 
 export const createBrewsFormModule = ({ setRating, setNotesMode, getCoffeeScale, getGasItems, fillBeanDetails }) => {
     let brewGearSelection = new Set();
@@ -202,7 +211,7 @@ export const createBrewsFormModule = ({ setRating, setNotesMode, getCoffeeScale,
         if (ratioNumSpan) ratioNumSpan.textContent = ratioNum ? ratioNum.toFixed(2) : '';
         const ratioHidden = document.getElementById('inputRatioHidden'); if (ratioHidden) ratioHidden.value = ratioNum ?? '';
         document.getElementById('inputYield').value = c.weight && c.ratio ? (c.weight * c.ratio).toFixed(1) : '';
-        document.getElementById('time').value = c.time || '';
+        document.getElementById('time').value = formatBrewTimeInput(c.time);
         document.getElementById('notes').value = c.notes || '';
         document.getElementById('improve').value = c.improve || '';
         setSelectedBrewGearIds(c.gearIds || []);

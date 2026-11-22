@@ -15,6 +15,25 @@ export const formatTime = (seconds) => {
     return minutes > 0 ? `${minutes}m ${secs}s` : `${secs}s`;
 };
 
+// Brew time in form fields: shown as m:ss, stored as seconds.
+export const formatBrewTimeInput = (seconds) => {
+    const total = Math.round(Number(seconds));
+    if (seconds === '' || seconds === null || seconds === undefined || !Number.isFinite(total) || total < 0) return '';
+    return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+};
+
+// Accepts "3:05", "3m 5s", "3m", "45s" and plain seconds ("185"). Returns NaN when empty or unreadable.
+export const parseBrewTimeInput = (value) => {
+    const text = String(value ?? '').trim().toLowerCase().replace(',', '.');
+    if (!text) return NaN;
+    const colon = text.match(/^(\d+):(\d{1,2}(?:\.\d+)?)$/);
+    if (colon) return Number(colon[1]) * 60 + Number(colon[2]);
+    const units = text.match(/^(?:(\d+(?:\.\d+)?)\s*m(?:in)?)?\s*(?:(\d+(?:\.\d+)?)\s*s(?:ec)?)?$/);
+    if (units && (units[1] || units[2])) return Number(units[1] || 0) * 60 + Number(units[2] || 0);
+    const plain = Number(text);
+    return Number.isFinite(plain) ? plain : NaN;
+};
+
 export const getRoastBadge = (roast) => {
     if (!roast) return '';
     const map = {
@@ -35,4 +54,10 @@ export const formatBeanOpenedDate = (value) => {
     const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
     const yyyy = dateObj.getFullYear();
     return `${dd}-${mm}-${yyyy}`;
+};
+
+// Brew time from a form field as seconds to save, or null when empty.
+export const parseBrewTime = (value) => {
+    const seconds = parseBrewTimeInput(value);
+    return Number.isFinite(seconds) ? seconds : null;
 };

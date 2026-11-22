@@ -1,3 +1,4 @@
+import { formatBrewTimeInput, parseBrewTime } from '../../core/format.js';
 import { buildBagOptionsHtml } from './bag-options.js';
 import { createBrewsVmModule } from './brews.vm.js';
 import { getBrewGrinderName } from '../../core/brew-fields.js';
@@ -314,7 +315,7 @@ export const createBrewsCardActionsModule = ({
         const outWeight = Number.isFinite(Number(brew.weight)) && Number.isFinite(Number(brew.ratio)) ? (Number(brew.weight) * Number(brew.ratio)).toFixed(1) : '';
         document.getElementById('quickEditYield').value = outWeight;
         document.getElementById('quickEditRatio').value = brew.ratio ?? '';
-        document.getElementById('quickEditTime').value = brew.time ?? '';
+        document.getElementById('quickEditTime').value = formatBrewTimeInput(brew.time);
         document.getElementById('quickEditTemp').value = brew.temp || '';
         document.getElementById('quickEditRating').value = String(parseInt(brew.rating, 10) || 0);
         document.getElementById('quickEditNotes').value = brew.notes || '';
@@ -367,7 +368,7 @@ export const createBrewsCardActionsModule = ({
             grind: parseNum(document.getElementById('quickEditGrind').value),
             weight: weightVal,
             ratio: ratioVal,
-            time: parseNum(document.getElementById('quickEditTime').value),
+            time: parseBrewTime(document.getElementById('quickEditTime').value),
             temp: (document.getElementById('quickEditTemp').value || '').trim() || 'M',
             rating: parseInt(document.getElementById('quickEditRating').value, 10) || 0,
             notes: document.getElementById('quickEditNotes').value || '',
