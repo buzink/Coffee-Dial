@@ -1,3 +1,4 @@
+import { buildGearDropdownHtml, filterGearOptionsForMethod, toGearOption } from './gear-options.js';
 import { formatBrewTimeInput, parseBrewTimeInput } from '../../core/format.js';
 
 // A typed brew time ("185", "3m5s") is shown as m:ss once the field is left.
@@ -17,7 +18,7 @@ export const createBrewsFormModule = ({ setRating, setNotesMode, getCoffeeScale,
         const items = Array.isArray(getGasItems?.()) ? getGasItems() : [];
         return items
             .filter((item) => includeArchivedGearInForm || !item?.archived)
-            .map((item) => ({ id: item.id, label: (item.name || 'Untitled gear').toString().trim() || 'Untitled gear' }))
+            .map(toGearOption)
             .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
     };
 
@@ -58,19 +59,11 @@ export const createBrewsFormModule = ({ setRating, setNotesMode, getCoffeeScale,
     const renderBrewGearDropdown = () => {
         const { dropdown } = getBrewGearUi();
         if (!dropdown) return;
-        const options = getBrewGearOptions();
-        if (!options.length) {
-            dropdown.innerHTML = '<div class="px-3 py-2 text-xs text-coffee-500 dark:text-[#a8a29e]">No gear</div>';
-            return;
-        }
-        dropdown.innerHTML = options
-            .map((option) => {
-                const selected = brewGearSelection.has(option.id);
-                const selectedCls = selected ? 'bg-coffee-100 dark:bg-[#34302e] font-semibold' : '';
-                const icon = selected ? '<i class="fa-solid fa-check text-coffee-700 dark:text-[#d6ccc2]"></i>' : '';
-                return `<button type="button" data-brew-gear-option="${option.id}" class="w-full text-left px-3 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-800 dark:text-[#d6ccc2] flex items-center justify-between ${selectedCls}"><span>${option.label}</span>${icon}</button>`;
-            })
-            .join('');
+        dropdown.innerHTML = buildGearDropdownHtml(
+            filterGearOptionsForMethod(getBrewGearOptions(), document.getElementById('method')?.value, brewGearSelection),
+            brewGearSelection,
+            'data-brew-gear-option'
+        );
     };
 
     const closeBrewGearDropdown = () => {

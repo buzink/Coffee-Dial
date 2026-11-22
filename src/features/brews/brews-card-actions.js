@@ -1,3 +1,4 @@
+import { buildGearDropdownHtml, filterGearOptionsForMethod, toGearOption } from './gear-options.js';
 import { formatBrewTimeInput, parseBrewTime } from '../../core/format.js';
 import { buildBagOptionsHtml } from './bag-options.js';
 import { createBrewsVmModule } from './brews.vm.js';
@@ -53,7 +54,7 @@ export const createBrewsCardActionsModule = ({
     const getQuickEditGearOptions = () => {
         const items = Array.isArray(getGasItems?.()) ? getGasItems() : [];
         return items
-            .map((item) => ({ id: item.id, label: (item.name || 'Untitled gear').toString().trim() || 'Untitled gear' }))
+            .map(toGearOption)
             .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
     };
 
@@ -103,19 +104,11 @@ export const createBrewsCardActionsModule = ({
     const renderQuickEditGearDropdown = () => {
         const { dropdown } = getQuickEditGearUi();
         if (!dropdown) return;
-        const options = getQuickEditGearOptions();
-        if (!options.length) {
-            dropdown.innerHTML = '<div class="px-3 py-2 text-xs text-coffee-500 dark:text-[#a8a29e]">No gear</div>';
-            return;
-        }
-        dropdown.innerHTML = options
-            .map((option) => {
-                const selected = quickEditGearSelection.has(option.id);
-                const selectedCls = selected ? 'bg-coffee-100 dark:bg-[#34302e] font-semibold' : '';
-                const icon = selected ? '<i class="fa-solid fa-check text-coffee-700 dark:text-[#d6ccc2]"></i>' : '';
-                return `<button type="button" data-quick-gear-option="${option.id}" class="w-full text-left px-3 py-2 text-xs hover:bg-coffee-50 dark:hover:bg-[#34302e] text-coffee-800 dark:text-[#d6ccc2] flex items-center justify-between ${selectedCls}"><span>${option.label}</span>${icon}</button>`;
-            })
-            .join('');
+        dropdown.innerHTML = buildGearDropdownHtml(
+            filterGearOptionsForMethod(getQuickEditGearOptions(), document.getElementById('quickEditMethod')?.value, quickEditGearSelection),
+            quickEditGearSelection,
+            'data-quick-gear-option'
+        );
     };
 
     const closeQuickEditGearDropdown = () => {
