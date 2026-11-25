@@ -1,0 +1,101 @@
+name: Deploy MCP server (Cloud Run)
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "cloud/mcp-server/**"
+      - ".github/workflows/deploy-mcp-server.yml"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "cloud/mcp-server/**"
+      - ".github/workflows/deploy-mcp-server.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  SERVICE: coffee-dial-mcp
+  REGION: us-central1
+  RUNTIME_SERVICE_ACCOUNT: coffee-dial-mcp@coffee-dial-buzink.iam.gserviceaccount.com
+  # The public URL of the service. It must match the redirect URI of the Google OAuth client
+  # (<this URL>/oauth/callback). The deploy step below fails if Cloud Run reports another URL.
+  PUBLIC_BASE_URL: https://coffee-dial-mcp-2jblv7qija-uc.a.run.app
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloud/mcp-server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: cloud/mcp-server/package-lock.json
+
+      - name: Setup Java (for the Firestore and Auth emulators)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests against the emulators
+        run: npm test
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Deploy to Cloud Run from source
+        env:
+          PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+        run: |
+          # Secrets come from Secret Manager; the runtime service account reads them.
+          SECRETS="GOOGLE_CLIENT_ID=coffee-dial-mcp-google-client-id:latest,GOOGLE_CLIENT_SECRET=coffee-dial-mcp-google-client-secret:latest"
+          if [ -n "${{ vars.MCP_ALLOWED_EMAIL_SECRET }}" ]; then
+            SECRETS="${SECRETS},ALLOWED_EMAIL=${{ vars.MCP_ALLOWED_EMAIL_SECRET }}:latest"
+          fi
+
+          gcloud run deploy "${SERVICE}" \
+            --source cloud/mcp-server \
+            --project "${PROJECT}" \
+            --region "${REGION}" \
+            --service-account "${RUNTIME_SERVICE_ACCOUNT}" \
+            --allow-unauthenticated \
+            --max-instances 3 \
+            --set-env-vars "PUBLIC_BASE_URL=${PUBLIC_BASE_URL}" \
+            --set-secrets "${SECRETS}"
+
+          ACTUAL_URL=$(gcloud run services describe "${SERVICE}" --project "${PROJECT}" --region "${REGION}" --format='value(status.url)')
+          echo "Service URL: ${ACTUAL_URL}"
+          if [ "${ACTUAL_URL}" != "${PUBLIC_BASE_URL}" ]; then
+            echo "::error::Cloud Run reports ${ACTUAL_URL}, but PUBLIC_BASE_URL is ${PUBLIC_BASE_URL}. Update PUBLIC_BASE_URL and the Google OAuth redirect URI, then deploy again."
+            exit 1
+          fi

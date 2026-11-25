@@ -1,0 +1,24 @@
+{
+  "name": "coffee-dial-mcp-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Remote MCP server for Coffee Dial: reads and writes a signed-in user's coffees, bags, brews and gear in Firestore.",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "firebase emulators:exec --only firestore,auth --project demo-coffee-dial-mcp \"node --test --test-concurrency=1 test/*.test.js\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "firebase-admin": "^13.10.0",
+    "jose": "^6.2.18",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "firebase-tools": "^15.37.0"
+  }
+}
