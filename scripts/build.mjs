@@ -63,6 +63,7 @@ const main = async () => {
         copyIfExists('vendor'),
         copyIfExists('img'),
         copyIfExists('404.html'),
+        copyIfExists('privacy.html'),
         copyIfExists('favicon.ico'),
         copyIfExists('manifest.json'),
         copyIfExists('sw.js'),
