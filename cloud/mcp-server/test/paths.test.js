@@ -42,15 +42,15 @@ describe('path isolation', () => {
 
     const alice = await connectMcp(app.url, aliceToken);
     try {
-      const koffie = await call(alice, 'upsert_koffie', { roaster: 'Alice Roasters', name: 'Blend', apply: true });
-      assert.equal(koffie.isError, false, koffie.text);
-      const zak = await call(alice, 'upsert_zak', { coffeeTypeId: koffie.data.id, stock: 250, apply: true });
-      assert.equal(zak.isError, false, zak.text);
+      const coffee = await call(alice, 'upsert_coffee', { roaster: 'Alice Roasters', name: 'Blend', apply: true });
+      assert.equal(coffee.isError, false, coffee.text);
+      const bag = await call(alice, 'upsert_bag', { coffeeTypeId: coffee.data.id, stock: 250, apply: true });
+      assert.equal(bag.isError, false, bag.text);
       const gear = await call(alice, 'upsert_gear', { name: 'Hand grinder', type: 'grinder', apply: true });
       assert.equal(gear.isError, false, gear.text);
-      const brew = await call(alice, 'upsert_brew', { beanId: zak.data.id, gearIds: [gear.data.id], method: 'V60', weight: 15, apply: true });
+      const brew = await call(alice, 'upsert_brew', { beanId: bag.data.id, gearIds: [gear.data.id], method: 'V60', weight: 15, apply: true });
       assert.equal(brew.isError, false, brew.text);
-      for (const name of ['list_koffies', 'list_zakken', 'list_brews', 'list_gear', 'get_analyse']) {
+      for (const name of ['list_coffees', 'list_bags', 'list_brews', 'list_gear', 'get_analysis']) {
         const r = await call(alice, name, {});
         assert.equal(r.isError, false, `${name}: ${r.text}`);
       }
@@ -73,10 +73,10 @@ describe('path isolation', () => {
     const token = await mintAccess(cfg, { uid: 'alice-uid', email: 'alice@example.com' });
     const client = await connectMcp(app.url, token);
     try {
-      const r = await call(client, 'upsert_koffie', { uid: 'bob-uid', roaster: 'X', apply: true });
+      const r = await call(client, 'upsert_coffee', { uid: 'bob-uid', roaster: 'X', apply: true });
       assert.equal(r.isError, true);
       assert.match(r.text, /Unknown field "uid"/);
-      const coffees = await call(client, 'list_koffies', {});
+      const coffees = await call(client, 'list_coffees', {});
       assert.equal(coffees.data.total, 0);
     } finally {
       await client.close();

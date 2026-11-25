@@ -29,13 +29,13 @@ describe('empty allowlist: every verified account may use the server', () => {
     const token = await mintAccess(openCfg, { uid: 'brand-new-uid', email: 'new@example.com' });
     const client = await connectMcp(openApp.url, token);
     try {
-      for (const name of ['list_koffies', 'list_zakken', 'list_brews', 'list_gear']) {
+      for (const name of ['list_coffees', 'list_bags', 'list_brews', 'list_gear']) {
         const r = await call(client, name, {});
         assert.equal(r.isError, false, r.text);
         assert.equal(r.data.total, 0, `${name} must be empty for a new account`);
       }
-      const analyse = await call(client, 'get_analyse', {});
-      assert.equal(analyse.data.totals.brews, 0);
+      const analysis = await call(client, 'get_analysis', {});
+      assert.equal(analysis.data.totals.brews, 0);
     } finally {
       await client.close();
     }
@@ -46,7 +46,7 @@ describe('empty allowlist: every verified account may use the server', () => {
     await seed(openApp.db, 'bob-uid', 'coffeeTypes', 'b1', { roaster: 'Bob Roasters', name: 'Bob coffee', createdAt: '2026-01-01T00:00:00.000Z' });
     const bob = await connectMcp(openApp.url, await mintAccess(openCfg, { uid: 'bob-uid', email: 'bob@example.com' }));
     try {
-      const r = await call(bob, 'list_koffies', {});
+      const r = await call(bob, 'list_coffees', {});
       assert.deepEqual(r.data.items.map((c) => c.id), ['b1']);
     } finally {
       await bob.close();
@@ -58,7 +58,7 @@ describe('allowlist set: only ALLOWED_EMAIL gets in', () => {
   it('the allowed address works', async () => {
     const client = await connectMcp(lockedApp.url, await mintAccess(lockedCfg, { uid: 'alice-uid', email: 'alice@example.com' }));
     try {
-      const r = await call(client, 'list_koffies', {});
+      const r = await call(client, 'list_coffees', {});
       assert.equal(r.isError, false);
     } finally {
       await client.close();

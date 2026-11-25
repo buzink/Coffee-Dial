@@ -31,7 +31,7 @@ const httpsUrl = z.string().trim().max(500).refine((value) => {
   }
 }, 'must be an https URL').nullable();
 
-export const KOFFIE_SHAPE = {
+export const COFFEE_SHAPE = {
   id: docId.optional(),
   name: nullableText(200).optional(),
   roaster: nullableText(120).optional(),
@@ -49,7 +49,7 @@ export const KOFFIE_SHAPE = {
   apply: applyFlag,
 };
 
-export const ZAK_SHAPE = {
+export const BAG_SHAPE = {
   id: docId.optional(),
   coffeeTypeId: docId.optional(),
   stock: nullableAmount(100000).optional(),
@@ -101,19 +101,19 @@ const BAG_DETAILS = ['coffeeTypeId', 'stock', 'price', 'shopUrl', 'archived', 'f
 const BREW_DETAILS = ['beanId', 'gearIds', 'method', 'grind', 'weight', 'ratio', 'time', 'temp', 'drink', 'notes', 'improve', 'firstDrip', 'maxFlow', 'avgFlow', 'grinder'];
 
 const hintFor = (fields, hint) => Object.fromEntries(fields.map((f) => [f, hint]));
-const COFFEE_HINT = 'Coffee details belong on the coffee: change them with upsert_koffie and link the bag with coffeeTypeId.';
-const BAG_HINT = 'Bag details belong on the bag: change them with upsert_zak.';
+const COFFEE_HINT = 'Coffee details belong on the coffee: change them with upsert_coffee and link the bag with coffeeTypeId.';
+const BAG_HINT = 'Bag details belong on the bag: change them with upsert_bag.';
 const BREW_HINT = 'Brew details belong on the brew: change them with upsert_brew.';
 const GRINDER_HINT = 'A grinder is gear: pass its gear id in gearIds (see list_gear).';
 const BEANS_LEFT_HINT = 'beansLeft is calculated from the brews: set stock on the bag instead.';
 
 export const HINTS = {
-  koffie: {
+  coffee: {
     ...hintFor(BAG_DETAILS, BAG_HINT),
     ...hintFor(BREW_DETAILS, BREW_HINT),
     beansLeft: BEANS_LEFT_HINT,
   },
-  zak: {
+  bag: {
     ...hintFor(COFFEE_DETAILS.filter((f) => f !== 'decaf'), COFFEE_HINT),
     decaf: COFFEE_HINT,
     ...hintFor(BREW_DETAILS, BREW_HINT),

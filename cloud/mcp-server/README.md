@@ -8,20 +8,20 @@ Every user sees only their own data. The Firebase uid of the signed-in account i
 
 | Tool | Kind | What it does |
 | --- | --- | --- |
-| `list_koffies` | read | Coffees (`users/{uid}/coffeeTypes`) |
-| `list_zakken` | read | Bags (`users/{uid}/beans`), with calculated `beansLeft` |
+| `list_coffees` | read | Coffees (`users/{uid}/coffeeTypes`) |
+| `list_bags` | read | Bags (`users/{uid}/beans`), with calculated `beansLeft` |
 | `list_brews` | read | Brews (`users/{uid}/coffees`), newest first; filter by bag or method |
 | `list_gear` | read | Gear (`users/{uid}/gear`) |
-| `get_analyse` | read | Counts and average ratings per method and per bag, computed on the server |
+| `get_analysis` | read | Counts and average ratings per method and per bag, computed on the server |
 | `get_brew_graph` | read, on request | Scale capture of one brew (`users/{uid}/brewGraphs`) |
-| `upsert_koffie` | write | Add or change a coffee |
-| `upsert_zak` | write | Add or change a bag |
+| `upsert_coffee` | write | Add or change a coffee |
+| `upsert_bag` | write | Add or change a bag |
 | `upsert_brew` | write | Add or change a brew |
 | `upsert_gear` | write | Add or change gear |
 
 Every write tool takes `apply` (default `false`). With `false` it only returns the proposed change, with the fields that differ and any side effects. With `true` it writes.
 
-Single source of truth: coffee details live only on the coffee, bag details only on the bag, brew details only on the brew, and a grinder is gear linked by `gearIds`. A write that puts a field on the wrong entity is refused with a hint, for example "Coffee details belong on the coffee: change them with upsert_koffie".
+Single source of truth: coffee details live only on the coffee, bag details only on the bag, brew details only on the brew, and a grinder is gear linked by `gearIds`. A write that puts a field on the wrong entity is refused with a hint, for example "Coffee details belong on the coffee: change them with upsert_coffee".
 
 ## Endpoints
 

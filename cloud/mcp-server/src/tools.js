@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { LimitError, NotFoundError, ValidationError } from './errors.js';
 import { Store } from './store.js';
 import * as entities from './entities.js';
-import { BREW_SHAPE, GEAR_SHAPE, KOFFIE_SHAPE, ZAK_SHAPE } from './validate.js';
+import { BREW_SHAPE, GEAR_SHAPE, COFFEE_SHAPE, BAG_SHAPE } from './validate.js';
 
 const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const WRITE = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
@@ -40,19 +40,19 @@ export function createMcpServer({ cfg, db, uid, log = () => {} }) {
     });
   };
 
-  tool('list_koffies', {
+  tool('list_coffees', {
     title: 'List coffees',
-    description: 'List the signed-in user\'s coffees (koffies): roaster, name, origin, process, roast, rating and tasting notes.',
+    description: 'List the signed-in user\'s coffees (coffees): roaster, name, origin, process, roast, rating and tasting notes.',
     inputSchema: z.object({ limit: listLimit(cfg) }),
     annotations: READ_ONLY,
-  }, (args) => entities.listKoffies(store, args, cfg));
+  }, (args) => entities.listCoffees(store, args, cfg));
 
-  tool('list_zakken', {
+  tool('list_bags', {
     title: 'List bags',
-    description: 'List the user\'s bags (zakken) of coffee: which coffee each bag is, stock, beans left, price and dates.',
+    description: 'List the user\'s bags (bags) of coffee: which coffee each bag is, stock, beans left, price and dates.',
     inputSchema: z.object({ limit: listLimit(cfg), includeArchived: z.boolean().optional() }),
     annotations: READ_ONLY,
-  }, (args) => entities.listZakken(store, args, cfg));
+  }, (args) => entities.listBags(store, args, cfg));
 
   tool('list_brews', {
     title: 'List brews',
@@ -72,12 +72,12 @@ export function createMcpServer({ cfg, db, uid, log = () => {} }) {
     annotations: READ_ONLY,
   }, (args) => entities.listGear(store, args, cfg));
 
-  tool('get_analyse', {
+  tool('get_analysis', {
     title: 'Analysis summary',
     description: 'Counts and average ratings per brew method and per bag, computed on the server. Unrated brews are counted but not averaged.',
     inputSchema: z.object({}),
     annotations: READ_ONLY,
-  }, () => entities.getAnalyse(store));
+  }, () => entities.getAnalysis(store));
 
   tool('get_brew_graph', {
     title: 'Brew graph (scale capture)',
@@ -86,19 +86,19 @@ export function createMcpServer({ cfg, db, uid, log = () => {} }) {
     annotations: READ_ONLY,
   }, (args) => entities.getBrewGraph(store, args, cfg));
 
-  tool('upsert_koffie', {
+  tool('upsert_coffee', {
     title: 'Add or change a coffee',
-    description: `Add a coffee (koffie) or change one by id. Coffee details only: roaster, name, farmer, origin, process, roast, rating, tasting notes. ${APPLY_NOTE}`,
-    inputSchema: z.object(KOFFIE_SHAPE).passthrough(),
+    description: `Add a coffee or change one by id. Coffee details only: roaster, name, farmer, origin, process, roast, rating, tasting notes. ${APPLY_NOTE}`,
+    inputSchema: z.object(COFFEE_SHAPE).passthrough(),
     annotations: WRITE,
-  }, (args) => entities.upsertKoffie(store, cfg, args));
+  }, (args) => entities.upsertCoffee(store, cfg, args));
 
-  tool('upsert_zak', {
+  tool('upsert_bag', {
     title: 'Add or change a bag',
-    description: `Add a bag (zak) of a coffee, or change one by id. Bag details only: coffeeTypeId, stock, price, shop URL, dates, archived and frozen. beansLeft is calculated. ${APPLY_NOTE}`,
-    inputSchema: z.object(ZAK_SHAPE).passthrough(),
+    description: `Add a bag of a coffee, or change one by id. Bag details only: coffeeTypeId, stock, price, shop URL, dates, archived and frozen. beansLeft is calculated. ${APPLY_NOTE}`,
+    inputSchema: z.object(BAG_SHAPE).passthrough(),
     annotations: WRITE,
-  }, (args) => entities.upsertZak(store, cfg, args));
+  }, (args) => entities.upsertBag(store, cfg, args));
 
   tool('upsert_brew', {
     title: 'Add or change a brew',

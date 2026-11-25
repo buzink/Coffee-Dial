@@ -129,7 +129,7 @@ describe('login and tokens', () => {
 
     const client = await connectMcp(app.url, tokens.access_token);
     try {
-      const r = await call(client, 'list_koffies', {});
+      const r = await call(client, 'list_coffees', {});
       assert.equal(r.isError, false, r.text);
       assert.equal(r.data.total, 0, 'an account with no Firebase data gets an empty environment');
     } finally {

@@ -41,9 +41,9 @@ beforeEach(async () => {
   await seedLibrary(app.db);
 });
 
-describe('get_analyse', () => {
+describe('get_analysis', () => {
   it('counts and averages are computed on the server', async () => {
-    const r = await call(client, 'get_analyse', {});
+    const r = await call(client, 'get_analysis', {});
     assert.equal(r.isError, false, r.text);
     const { totals, byMethod, byBag } = r.data;
     assert.equal(totals.coffees, 2);
@@ -80,19 +80,19 @@ describe('list tools', () => {
     assert.equal(all.data.items[3].coffee, 'Roast Lab Ethiopia Yirgacheffe');
   });
 
-  it('list_zakken can hide archived bags and carries the coffee label', async () => {
-    const r = await call(client, 'list_zakken', { includeArchived: false });
+  it('list_bags can hide archived bags and carries the coffee label', async () => {
+    const r = await call(client, 'list_bags', { includeArchived: false });
     assert.equal(r.data.total, 1);
     assert.equal(r.data.items[0].id, 'b1');
     assert.equal(r.data.items[0].coffee, 'Roast Lab Ethiopia Yirgacheffe');
   });
 
-  it('list_gear and list_koffies return compact rows', async () => {
+  it('list_gear and list_coffees return compact rows', async () => {
     const gear = await call(client, 'list_gear', {});
     assert.equal(gear.data.items[0].type, 'grinder');
-    const koffies = await call(client, 'list_koffies', {});
-    assert.equal(koffies.data.total, 2);
-    assert.equal(koffies.data.items[0].imageUrl, undefined, 'no bulky image data in the list');
+    const coffees = await call(client, 'list_coffees', {});
+    assert.equal(coffees.data.total, 2);
+    assert.equal(coffees.data.items[0].imageUrl, undefined, 'no bulky image data in the list');
   });
 });
 

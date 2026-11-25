@@ -4,7 +4,7 @@
 
 import { NotFoundError, ValidationError } from './errors.js';
 import { assertDocSize, consumeWriteQuota } from './limits.js';
-import { BREW_SHAPE, GEAR_SHAPE, HINTS, KOFFIE_SHAPE, parseWriteInput, ZAK_SHAPE } from './validate.js';
+import { BREW_SHAPE, GEAR_SHAPE, HINTS, COFFEE_SHAPE, parseWriteInput, BAG_SHAPE } from './validate.js';
 
 const clamp = (value, max) => Math.min(Math.max(Number(value) || max, 1), max);
 const nn = (value) => (value === undefined ? null : value);
@@ -24,7 +24,7 @@ function page(items, limit, max) {
 
 // ---- output mappers ------------------------------------------------------------------------
 
-const koffieOut = (c) => ({
+const coffeeOut = (c) => ({
   id: c.id,
   name: nn(c.name),
   roaster: nn(c.roaster),
@@ -41,7 +41,7 @@ const koffieOut = (c) => ({
   webshopUrl: nn(c.webshopUrl),
 });
 
-const zakOut = (b, coffees) => ({
+const bagOut = (b, coffees) => ({
   id: b.id,
   coffeeTypeId: nn(b.coffeeTypeId),
   coffee: coffeeLabel(coffees.get(b.coffeeTypeId)),
@@ -101,17 +101,17 @@ const byLabel = (a, b) => coffeeLabel(a).localeCompare(coffeeLabel(b));
 
 // ---- reads ---------------------------------------------------------------------------------
 
-export async function listKoffies(store, { limit } = {}, cfg) {
-  const rows = (await store.listAll('coffeeTypes')).map(koffieOut).sort((a, b) => byLabel(a, b));
+export async function listCoffees(store, { limit } = {}, cfg) {
+  const rows = (await store.listAll('coffeeTypes')).map(coffeeOut).sort((a, b) => byLabel(a, b));
   return page(rows, limit, cfg.listMax);
 }
 
-export async function listZakken(store, { limit, includeArchived = true } = {}, cfg) {
+export async function listBags(store, { limit, includeArchived = true } = {}, cfg) {
   const [beans, coffees] = await Promise.all([store.listAll('beans'), store.listAll('coffeeTypes')]);
   const coffeeMap = byId(coffees);
   const rows = beans
     .filter((b) => includeArchived || !b.archived)
-    .map((b) => zakOut(b, coffeeMap))
+    .map((b) => bagOut(b, coffeeMap))
     .sort((a, b) => String(a.coffee).localeCompare(String(b.coffee)));
   return page(rows, limit, cfg.listMax);
 }
@@ -139,7 +139,7 @@ export async function listGear(store, { limit, includeArchived = true } = {}, cf
 
 // Ratings and counts, computed here so the client only gets the summary. Unrated brews (rating 0)
 // are left out of the averages but counted as brews.
-export async function getAnalyse(store) {
+export async function getAnalysis(store) {
   const [coffees, bags, brews, gear] = await Promise.all(
     ['coffeeTypes', 'beans', 'coffees', 'gear'].map((name) => store.listAll(name)),
   );
@@ -261,8 +261,8 @@ const normalizeText = (data, fields) => {
   for (const f of fields) if (data[f] === null) data[f] = '';
 };
 
-export async function upsertKoffie(store, cfg, args) {
-  const input = parseWriteInput(args, { label: 'coffee (koffie)', shape: KOFFIE_SHAPE, hints: HINTS.koffie });
+export async function upsertCoffee(store, cfg, args) {
+  const input = parseWriteInput(args, { label: 'coffee', shape: COFFEE_SHAPE, hints: HINTS.coffee });
   const textFields = ['name', 'roaster', 'farmer', 'origin', 'originMicroRegion', 'originMacroRegion', 'variety', 'processing', 'roast', 'tasteNotes'];
   return upsert(store, cfg, {
     collection: 'coffeeTypes',
@@ -278,19 +278,19 @@ export async function upsertKoffie(store, cfg, args) {
       }
       return {};
     },
-    render: async (data, id) => koffieOut({ ...data, id }),
+    render: async (data, id) => coffeeOut({ ...data, id }),
   });
 }
 
-export async function upsertZak(store, cfg, args) {
-  const input = parseWriteInput(args, { label: 'bag (zak)', shape: ZAK_SHAPE, hints: HINTS.zak });
+export async function upsertBag(store, cfg, args) {
+  const input = parseWriteInput(args, { label: 'bag', shape: BAG_SHAPE, hints: HINTS.bag });
   return upsert(store, cfg, {
     collection: 'beans',
     id: input.id,
     fields: input,
     apply: input.apply,
     prepare: async (data, { before, ref, store: s, now }) => {
-      if (!filled(data.coffeeTypeId)) throw new ValidationError('A bag needs a coffeeTypeId: create the coffee with upsert_koffie first');
+      if (!filled(data.coffeeTypeId)) throw new ValidationError('A bag needs a coffeeTypeId: create the coffee with upsert_coffee first');
       const coffee = await s.doc('coffeeTypes', data.coffeeTypeId).get();
       if (!coffee.exists) throw new ValidationError(`coffeeTypeId ${data.coffeeTypeId} does not exist`);
       if (!before) withDefaults(data, { archived: false, frozen: false, stock: null, price: null, shopUrl: '' });
@@ -303,7 +303,7 @@ export async function upsertZak(store, cfg, args) {
     },
     render: async (data, id) => {
       const coffees = byId((await store.listAll('coffeeTypes')));
-      return zakOut({ ...data, id }, coffees);
+      return bagOut({ ...data, id }, coffees);
     },
   });
 }
