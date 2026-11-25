@@ -1,0 +1,13 @@
+{
+  "graftReads": 1,
+  "sourceReads": 0,
+  "savedTokens": 419562,
+  "injectedPointers": [],
+  "nudges": 0,
+  "promptAsks": 1,
+  "turnUsedGraft": false,
+  "host": "claude-desktop",
+  "lastBillingUuid": "46a5925e-d845-4975-88d8-16bfb70320ec",
+  "graftTurns": 1,
+  "lastTallyUuid": "46a5925e-d845-4975-88d8-16bfb70320ec"
+}
