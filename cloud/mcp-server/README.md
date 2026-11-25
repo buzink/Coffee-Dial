@@ -99,8 +99,12 @@ If the OAuth consent screen is in *Testing*, add your Google account as a test u
 ```bash
 gcloud secrets create coffee-dial-mcp-google-client-id --project coffee-dial-buzink --replication-policy=automatic
 gcloud secrets create coffee-dial-mcp-google-client-secret --project coffee-dial-buzink --replication-policy=automatic
-printf '%s' 'THE_CLIENT_ID' | gcloud secrets versions add coffee-dial-mcp-google-client-id --project coffee-dial-buzink --data-file=-
-printf '%s' 'THE_CLIENT_SECRET' | gcloud secrets versions add coffee-dial-mcp-google-client-secret --project coffee-dial-buzink --data-file=-
+# Paste the real values when prompted. They are not stored in this repo or in chat.
+read -r "?Google OAuth client ID: " CLIENT_ID && printf '%s' "$CLIENT_ID" | gcloud secrets versions add coffee-dial-mcp-google-client-id --project coffee-dial-buzink --data-file=-
+read -rs "?Google OAuth client secret: " CLIENT_SECRET && echo && printf '%s' "$CLIENT_SECRET" | gcloud secrets versions add coffee-dial-mcp-google-client-secret --project coffee-dial-buzink --data-file=-
+
+# Cloud Run reads secrets when an instance starts. Force a new revision after changing them:
+gcloud run services update coffee-dial-mcp --project coffee-dial-buzink --region us-central1 --update-env-vars SECRETS_REFRESHED=$(date +%s)
 ```
 
 ### 3. Runtime service account and roles
