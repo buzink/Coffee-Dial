@@ -18,8 +18,11 @@ export function loadConfig(env = process.env) {
     resource: `${publicBaseUrl}/mcp`,
     googleClientId: env.GOOGLE_CLIENT_ID || '',
     googleClientSecret: env.GOOGLE_CLIENT_SECRET || '',
-    // Optional allowlist. Empty means every account with a verified Google email may use the server.
-    allowedEmail: (env.ALLOWED_EMAIL || '').trim().toLowerCase(),
+    // Optional allowlist: comma-separated addresses. Empty means every account with a verified Google email may use the server.
+    allowedEmails: (env.ALLOWED_EMAIL || "")
+      .split(",")
+      .map((address) => address.trim().toLowerCase())
+      .filter(Boolean),
     projectId: env.FIRESTORE_PROJECT_ID || env.GOOGLE_CLOUD_PROJECT || 'coffee-dial-buzink',
     // Write limits, per user and per hour (applied writes only; dry runs are free).
     writeLimitPerHour: positiveNumber(env.MCP_WRITE_LIMIT_PER_HOUR, 60),

@@ -13,7 +13,7 @@ app.listen(cfg.port, () => {
   console.log(JSON.stringify({
     event: 'listening',
     port: cfg.port,
-    allowlist: cfg.allowedEmail ? 'on' : 'off',
+    allowlist: cfg.allowedEmails.length ? "on" : "off",
     writeLimitPerHour: cfg.writeLimitPerHour,
   }));
 });

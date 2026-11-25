@@ -7,10 +7,10 @@ import { AuthError } from './errors.js';
 
 export const NOT_ALLOWED_MESSAGE = 'This Google account is not allowed to use this Coffee Dial MCP server.';
 
-// No allowlist configured: every verified account is accepted. Otherwise only ALLOWED_EMAIL.
+// No allowlist configured: every verified account is accepted. Otherwise only the addresses in ALLOWED_EMAIL (comma-separated).
 export function emailAllowed(cfg, email) {
-  if (!cfg.allowedEmail) return true;
-  return String(email || '').trim().toLowerCase() === cfg.allowedEmail;
+  if (cfg.allowedEmails.length === 0) return true;
+  return cfg.allowedEmails.includes(String(email || "").trim().toLowerCase());
 }
 
 export async function authenticate(req, { cfg, key }) {

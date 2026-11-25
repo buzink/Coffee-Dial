@@ -52,9 +52,9 @@ The app stores data under the **Firebase Auth uid**, which is not the Google acc
 
 The lookups need the `roles/firebaseauth.viewer` role on the runtime service account.
 
-## Optional allowlist (`ALLOWED_EMAIL`)
+## Optional allowlist (`ALLOWED_EMAIL`, comma-separated)
 
-- **Set**: only the account with that email can sign in. Other accounts get a clear message at login, and a 403 on `/mcp` with the same message.
+- **Set**: only the accounts with those emails can sign in. Other accounts get a clear message at login, and a 403 on `/mcp` with the same message.
 - **Empty or unset**: every account with a verified Google email can sign in, and sees only its own data. Write limits (below) then matter more.
 
 The address is read from the environment, which Cloud Run fills from Secret Manager (`--set-secrets`). It is never hardcoded or logged. Set the GitHub repository variable `MCP_ALLOWED_EMAIL_SECRET` to the name of a Secret Manager secret that holds the address to turn it on in the deploy.

@@ -176,6 +176,20 @@ describe('login and tokens', () => {
     assert.equal(callback.headers.get('location'), null);
   });
 
+  it('with ALLOWED_EMAIL set to several addresses, each listed one gets in', async () => {
+    const multi = testConfig({ ALLOWED_EMAIL: 'alice@example.com, bob@example.com' });
+    assert.deepEqual(multi.allowedEmails, ['alice@example.com', 'bob@example.com']);
+    const multiApp = await startApp(multi);
+    try {
+      const { client_id: clientId } = await (await register(multiApp.url)).json();
+      const authz = await authorize(multiApp.url, clientId, pkce().challenge);
+      const callback = await googleLeg(multiApp.url, authz, 'bob');
+      assert.equal(callback.status, 302, 'bob is on the list');
+    } finally {
+      await multiApp.close();
+    }
+  });
+
   it('with ALLOWED_EMAIL set, another account is refused at login with a clear message', async () => {
     const { client_id: clientId } = await (await register(locked.url)).json();
     const authz = await authorize(locked.url, clientId, pkce().challenge);
