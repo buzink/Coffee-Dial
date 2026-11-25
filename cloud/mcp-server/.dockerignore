@@ -1,0 +1,7 @@
+node_modules
+test
+firebase.json
+firebase-debug.log
+Dockerfile
+.dockerignore
+README.md
